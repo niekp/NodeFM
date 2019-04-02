@@ -10,14 +10,7 @@ block body
 	.container-fluid
 		.row
 			.col-sm-3.col-md-2.sidebar
-				block nav
-					- var active = "index"
-
-				ul.nav.nav-sidebar
-					li(class=(active === "index" ? "active" : undefined))
-						a(href='/') Recent tracks 
-					li(class=(active === "artists" ? "active" : undefined))
-						a(href='/artists') Top artists
+				include nav.pug
 					
 			.col-sm-9.col-sm-offset-3.col-md-10.col-md-offset-2.main
 				block content

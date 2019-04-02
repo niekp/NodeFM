@@ -30,6 +30,13 @@ app.get('/artists', function (req, res) {
 	});
 });
 
+app.get('/albums', function (req, res) {
+	getTopAlbums().then(function (tracks) {
+		res.render('top-albums', { title: 'Top 10 albums', tracks: tracks })
+	});
+});
+
+
 // Start server
 app.listen(port, () => console.log(`Server started on port ${port}`))
 
@@ -46,6 +53,15 @@ function getTopArtists(limit = 10, offset = 0) {
 	select artist, count(*) as scrobbles
 	from Scrobble
 	group by Artist
+	order by Scrobbles desc
+	limit ${offset},${limit}`);
+}
+
+function getTopAlbums(limit = 10, offset = 0) {
+	return executeQuery(`
+	select artist, album, count(*) as scrobbles
+	from Scrobble
+	group by Artist, Album
 	order by Scrobbles desc
 	limit ${offset},${limit}`);
 }
