@@ -1,0 +1,10 @@
+html
+  head
+    title= 'Last.fm'
+  body    
+    h1 Top tracks
+
+    ul
+    each val in tracks
+        li #{val.artist} - #{val.track}
+        
