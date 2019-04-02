@@ -1,12 +1,15 @@
 extends masterpage-list
 
+block nav
+  - var active = "artists"
+
 append table-content
     thead
         tr
             th Artist
-            th Track
+            th Scrobbles
     tbody
         each val in tracks
             tr
                 td #{val.artist}
-                td #{val.track}
+                td #{val.scrobbles}
