@@ -1,10 +1,17 @@
-html
-  head
-    title= 'Last.fm'
-  body    
-    h1 Top tracks
+extends masterpage
 
-    ul
-    each val in tracks
-        li #{val.artist} - #{val.track}
-        
+append body
+    .container.container-fluid
+        h1 Top tracks
+
+        .table-responsive
+            table.table.table-striped
+                thead
+                    tr
+                        th Artist
+                        th Track
+                tbody
+                    each val in tracks
+                        tr
+                            td #{val.artist}
+                            td #{val.track}
