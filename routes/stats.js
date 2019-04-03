@@ -4,19 +4,19 @@ var stats = require('../models/stats.js')
 
 router.get('/', function (req, res) {
 	stats.getRecentTracks().then(function (tracks) {
-		res.render('recent-tracks', { title: 'Recent tracks', tracks: tracks })
+		res.render('stats/recent-tracks', { title: 'Recent tracks', tracks: tracks })
 	});
 });
 
 router.get('/artists', function (req, res) {
 	stats.getTopArtists().then(function (tracks) {
-		res.render('top-artists', { title: 'Top 10 artists', tracks: tracks })
+		res.render('stats/top-artists', { title: 'Top 10 artists', tracks: tracks })
 	});
 });
 
 router.get('/albums', function (req, res) {
 	stats.getTopAlbums().then(function (tracks) {
-		res.render('top-albums', { title: 'Top 10 albums', tracks: tracks })
+		res.render('stats/top-albums', { title: 'Top 10 albums', tracks: tracks })
 	});
 });
 

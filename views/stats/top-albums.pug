@@ -1,15 +1,17 @@
-extends layout-list
+extends ../masterpage/layout-list
 
 block nav
-  - var active = "artists"
+  - var active = "albums"
 
 append table-content
     thead
         tr
             th Artist
+            th Album
             th Scrobbles
     tbody
         each val in tracks
             tr
                 td #{val.artist}
+                td #{val.album}
                 td #{val.scrobbles}
