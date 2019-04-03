@@ -1,30 +1,44 @@
-var config = require('config');
-var sqlite3 = require('sqlite3');
+const config = require('config');
+const sqlite3 = require('sqlite3');
+const fs = require('fs')
 
 var database = (function () {
 
-    let database_path = config.get('sqlite');
-	let database = new sqlite3.Database(database_path, (err) => {
-		if (err) {
-			console.error(err.message);
+	let database_path = config.get('sqlite');
+	let database;
+
+	try {
+		if (fs.existsSync(database_path)) {
+			database = new sqlite3.Database(database_path, (error) => {
+				if (error) {
+					throw error;
+				}
+			});
 		}
-    });
+	} catch(error) {
+		console.error(error);
+	}
 
-    this.executeQuery = function(query) {
-        return new Promise((resolve, reject) => {
-            database.serialize(() => {
-                database.all(query, (err, result) => {
-                    if (err) {
-                        reject(err);
-                    }
+	this.executeQuery = function(query) {
+		return new Promise((resolve, reject) => {
+			
+			if (!database || !database.open) {
+				reject('Database closed or not found');
+			}
 
-                    resolve(result);
-                });
-            });
-        });
-    }
+			database.serialize(() => {
+				database.all(query, (error, result) => {
+					if (error) {
+						reject(error);
+					}
+
+					resolve(result);
+				});
+			});
+		});
+	}
   
-    return this;
+	return this;
   
 })();
 

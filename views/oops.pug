@@ -1,0 +1,8 @@
+extends masterpage/layout
+
+append content
+    h1 Oops!
+    p Something went wrong :(
+    
+    if process.env.NODE_ENV === 'development'
+        pre #{error}
