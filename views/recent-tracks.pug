@@ -1,15 +1,15 @@
 extends layout-list
 
 block nav
-  - var active = "artists"
+  - var active = "recent"
 
 append table-content
     thead
         tr
             th Artist
-            th Scrobbles
+            th Track
     tbody
         each val in tracks
             tr
                 td #{val.artist}
-                td #{val.scrobbles}
+                td #{val.track}

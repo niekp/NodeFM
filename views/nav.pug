@@ -3,8 +3,10 @@ block nav
 
 ul.nav.nav-sidebar
     li(class=(active === "index" ? "active" : undefined))
-        a(href='/') Recent tracks 
+        a(href='/') Home 
+    li(class=(active === "recent" ? "active" : undefined))
+        a(href='/stats') Recent tracks 
     li(class=(active === "artists" ? "active" : undefined))
-        a(href='/artists') Top artists
+        a(href='/stats/artists') Top artists
     li(class=(active === "albums" ? "active" : undefined))
-        a(href='/albums') Top albums
+        a(href='/stats/albums') Top albums
