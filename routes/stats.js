@@ -11,7 +11,7 @@ router.get('/', function (req, res, next) {
 	});
 });
 
-router.get('/artists', function (req, res) {
+router.get('/artists', function (req, res, next) {
 	stats.getTopArtists().then(function (tracks) {
 		res.render('stats/top-artists', { title: 'Top 10 artists', tracks: tracks })
 	}).catch(function (error) {
@@ -19,7 +19,7 @@ router.get('/artists', function (req, res) {
 	});
 });
 
-router.get('/albums', function (req, res) {
+router.get('/albums', function (req, res, next) {
 	stats.getTopAlbums().then(function (tracks) {
 		res.render('stats/top-albums', { title: 'Top 10 albums', tracks: tracks })
 	}).catch(function (error) {
