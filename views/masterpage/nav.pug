@@ -2,17 +2,16 @@
 block nav
   - var active = (menu ? menu : "index")
 
-ul.nav.nav-sidebar
-    li(class=(active === "index" ? "active" : undefined))
-        a(href='/') Home 
-    li(class=(active === "recent" ? "active" : undefined))
-        a(href='/stats') Recent tracks 
-    li(class=(active === "top-artists" ? "active" : undefined))
-        a(href='/stats/artists') Top artists
-    li(class=(active === "top-albums" ? "active" : undefined))
-        a(href='/stats/albums') Top albums
-    li(class=(active === "artist-discoveries" ? "active" : undefined))
-        a(href='/stats/artist-discoveries') Top artist discoveries
-    li(class=(active === "album-discoveries" ? "active" : undefined))
-        a(href='/stats/album-discoveries') Top album discoveries
-        
+if loggedIn
+    ul.nav.nav-sidebar
+        li(class=(active === "recent" ? "active" : undefined))
+            a(href='/stats') Recent tracks 
+        li(class=(active === "top-artists" ? "active" : undefined))
+            a(href='/stats/artists') Top artists
+        li(class=(active === "top-albums" ? "active" : undefined))
+            a(href='/stats/albums') Top albums
+        li(class=(active === "artist-discoveries" ? "active" : undefined))
+            a(href='/stats/artist-discoveries') Top artist discoveries
+        li(class=(active === "album-discoveries" ? "active" : undefined))
+            a(href='/stats/album-discoveries') Top album discoveries
+            

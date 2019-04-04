@@ -7,6 +7,10 @@ var helmet = require('helmet')
 
 var indexRouter = require('./routes/index');
 var statsRouter = require('./routes/stats');
+var settingsRouter = require('./routes/settings');
+
+var db = require('./db.js');
+var user = require('./models/user.js');
 
 var app = express();
 
@@ -20,6 +24,26 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Inject local variables and connect the DB
+function injectLocal(req, res, next){
+
+  user.injectLocalVariables(req, res);
+  
+  // Connect to the DB if it's closed.
+  let username = user.getUsername(req);
+  if (username && !db.isConnected(username)) {
+    db.connect(username).then(function() {
+      next();
+    });
+
+  } else {
+    next();
+  }
+};
+
+app.get('/*', injectLocal);
+app.use('/settings', settingsRouter);
 
 app.use('/', indexRouter);
 app.use('/stats', statsRouter);

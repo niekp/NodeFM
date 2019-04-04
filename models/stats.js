@@ -2,28 +2,29 @@ var database = require('../db.js')
 
 module.exports = {
     
-    getRecentTracks: function(limit = 10, offset = 0) {
+    getRecentTracks: function(res, limit = 10, offset = 0) {
         return database.executeQuery(`
         SELECT A.name as artist, T.name as track 
         FROM Scrobble as S 
         INNER JOIN Artist as A on A.id = S.artist_id
         INNER JOIN Track as T on T.id = S.track_id
         ORDER BY utc 
-        DESC LIMIT ${offset},${limit}
-        `);
+        DESC LIMIT ${offset},${limit}`,
+        res.locals.username);
     },
 
-    getTopArtists: function(limit = 10, offset = 0) {
+    getTopArtists: function(res, limit = 10, offset = 0) {
         return database.executeQuery(`
         SELECT a.name as artist, count(*) as scrobbles
         FROM Scrobble as S
         INNER JOIN Artist as A on A.id = S.artist_id
         GROUP by s.artist_id
         ORDER by count(*) desc
-        LIMIT ${offset},${limit}`);
+        LIMIT ${offset},${limit}`,
+        res.locals.username);
     },
     
-    getTopAlbums: function(limit = 10, offset = 0) {
+    getTopAlbums: function(res, limit = 10, offset = 0) {
         return database.executeQuery(`
         SELECT A.name as artist, B.name as album, count(*) as scrobbles
         FROM Scrobble as S
@@ -31,10 +32,11 @@ module.exports = {
         INNER JOIN Album as B on B.id = S.album_id
         GROUP by S.artist_id, S.album_id
         ORDER by count(*) desc
-        LIMIT ${offset},${limit}`);
+        LIMIT ${offset},${limit}`,
+        res.locals.username);
     },
 
-    getTopArtistDiscoveries: function(limit = 10, offset = 0) {
+    getTopArtistDiscoveries: function(res, limit = 10, offset = 0) {
         return database.executeQuery(`
         SELECT A.name as artist, count(*) as scrobbles
         FROM Scrobble as S
@@ -45,10 +47,11 @@ module.exports = {
         )
         GROUP by s.artist_id
         ORDER by count(*) desc
-        LIMIT ${offset},${limit}`);
+        LIMIT ${offset},${limit}`,
+        res.locals.username);
     },
 
-    getTopAlbumDiscoveries: function(limit = 10, offset = 0) {
+    getTopAlbumDiscoveries: function(res, limit = 10, offset = 0) {
         return database.executeQuery(`
         SELECT A.name as artist, B.name as album, count(*) as scrobbles
         FROM Scrobble as S
@@ -60,7 +63,8 @@ module.exports = {
         )
         GROUP by s.artist_id, s.album_id
         ORDER by count(*) desc
-        LIMIT ${offset},${limit}`);
+        LIMIT ${offset},${limit}`,
+        res.locals.username);
     },
 
 }

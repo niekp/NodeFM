@@ -1,4 +1,4 @@
 {
   "import_script": "/path/to/cron.sh",
-  "sqlite": "/path/to/user.db"
+  "database_folder": "/path/to/folder/"
 }

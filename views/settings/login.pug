@@ -1,0 +1,16 @@
+extends ../masterpage/layout
+
+append content
+	// login::content
+	.main.container
+		if (success === false)
+			p.alert.alert-danger Username not registered on this server.
+		if (success === true)		
+			p.alert.alert-success Successfully logged in!
+		
+		form(method='POST' action='')
+			div.form-group
+				label(for='username') Username:
+				input#username.form-control(type='text', placeholder='Last.fm username' name='username' value=(username ? username : ''))
+
+			button.btn.btn-primary(type='submit') Login
