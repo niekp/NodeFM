@@ -13,16 +13,9 @@ append table-content
 				td #{artist.artist}
 				td(class=(topResult ? "progress-td" : undefined))
 					if topResult
-						.progress
-							- var percentage = Math.round(artist.scrobbles/topResult.scrobbles*100)
-							.progress-bar(
-								class="w-" + percentage,
-								role="progressbar",
-								aria-valuenow=percentage,
-								aria-valuemin="0" ,
-								aria-valuemax="100",
-								style="width:" + percentage + "%"
-							)
-								| #{artist.scrobbles}
+						- var value = artist.scrobbles
+						- var total = topResult.scrobbles
+						include ../shared/progress
+
 					else
 						| #{artist.scrobbles}
