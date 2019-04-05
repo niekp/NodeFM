@@ -16,6 +16,10 @@ var database = (function () {
 	
 	let database = [];
 
+	this.getDatabasePath = function(username) {
+		return database_folder + username + '.db';
+	}
+
 	/**
 	 * Check if the DB of this user is connected
      * @param {string} username
@@ -36,7 +40,7 @@ var database = (function () {
 	 */
 	this.connect = function(username) {
 		return new Promise((resolve, reject) => {
-			let database_path = database_folder + username + '.db';
+			let database_path = this.getDatabasePath(username);
 
 			try {
 				if (fs.existsSync(database_path)) {

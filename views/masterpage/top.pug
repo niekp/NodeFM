@@ -13,8 +13,7 @@
 
     ul.nav.navbar-nav.navbar-right
         li
-            a(href='/settings/login') 
-                if loggedIn
-                    | Set username
-                else    
-                    | Login
+            if loggedIn
+                a(href='/settings') Settings
+            else    
+                a(href='/settings/login') Login

@@ -1,0 +1,13 @@
+extends ../masterpage/layout
+
+append content
+	// settings::content
+	p Logged in as #{username}
+	a.btn.btn-primary(href="/settings/login") change
+	
+	p #[br] #[br]
+
+	p You can download the `sqlite` database to run your own queries against. 
+		| I recommend #[a(href="https://dbeaver.io/") DBeaver] as sqlite3 manager
+	a.btn.btn-primary(href="/settings/download") download
+	
