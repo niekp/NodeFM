@@ -39,7 +39,7 @@ router.get('/artists', function (req, res, next) {
 });
 
 router.get('/albums', function (req, res, next) {
-	stats.getTopArtists(req, res).then(function (data) {
+	stats.getTopAlbums(req, res).then(function (data) {
 		res.render('stats/top-albums', { 
 			menu: 'top-albums', 
 			title: 'Top 10 albums', 
