@@ -1,3 +1,4 @@
+// Dependencies
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
@@ -6,20 +7,26 @@ var logger = require('morgan');
 var helmet = require('helmet');
 var config = require('config');
 
+// Setup express
+var app = express();
+
+// Needed for app setup
+var db = require('./db.js');
+var user = require('./models/user.js');
+
+// Routers
 var indexRouter = require('./routes/index');
 var statsRouter = require('./routes/stats');
 var settingsRouter = require('./routes/settings');
 
-var db = require('./db.js');
-var user = require('./models/user.js');
-
-var app = express();
-
-// view engine setup
+// Setup view engine pug
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
+// Load helmet (some protection stuff)
 app.use(helmet());
+
+// Setup express settings
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -32,6 +39,7 @@ app.locals.moment.locale(config.has('locale') ? config.get('locale') : 'en_GB');
 
 // Inject local variables and connect the DB
 function injectLocal(req, res, next){
+
   user.injectLocalVariables(req, res);
   
   // Connect to the DB if it's closed.
@@ -46,18 +54,20 @@ function injectLocal(req, res, next){
   }
 };
 
+// First inject variables
 app.get('/*', injectLocal);
-app.use('/settings', settingsRouter);
 
+// Setup routes
 app.use('/', indexRouter);
+app.use('/settings', settingsRouter);
 app.use('/stats', statsRouter);
 
-// catch 404 and forward to error handler
+// If no route is found create a 404
 app.use(function(req, res, next) {
   next(createError(404));
 });
 
-// error handler
+// Setup error handler
 app.use(function(err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;

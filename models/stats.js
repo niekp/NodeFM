@@ -12,7 +12,7 @@ module.exports = {
 	 * @param {string} from_where - The FROM .. WHERE ... part of the query. This is seperated so it can be reused for the COUNT query
 	 * @param {string} order_by - The ORDER BY ... part of the query. This is seperated because it's not needed in the count
 	 * @param {string} select_count - If COUNT(*) from_where is not sufficient or not efficient enought pass a complete count query. Note: Define the count `AS count`
-	 * @returns {Promise}
+	 * @returns {Promise} - and in the resolve an object { results: {query result}, pagination: {pagination} }
 	 */
 	handleStatsRequest(req, res, select, from_where, order_by, select_count = null) {
 		// Setup the pagination
@@ -64,8 +64,9 @@ module.exports = {
 
 	/**
 	 * @param {Request} req 
-	 * @param {Response} res 
+	 * @param {Response} res
 	 * @returns {Promise}
+	 * @see handleStatsRequest
 	 */
 	getRecentTracks: function(req, res) {
 		return this.handleStatsRequest(
@@ -82,7 +83,8 @@ module.exports = {
 	/**
 	 * @param {Request} req
 	 * @param {Response} res 
-	 * @returns {Promise}	 * 
+	 * @returns {Promise}
+	 * @see handleStatsRequest
 	 */
 	getTopArtists: function(req, res) {
 		return this.handleStatsRequest(
@@ -100,6 +102,7 @@ module.exports = {
 	 * @param {Request} req 
 	 * @param {Response} res
 	 * @returns {Promise}
+	 * @see handleStatsRequest
 	 */
 	getTopAlbums: function(req, res) {
 		return this.handleStatsRequest(
@@ -121,6 +124,7 @@ module.exports = {
 	 * @param {Request} req 
 	 * @param {Response} res
 	 * @returns {Promise}
+	 * @see handleStatsRequest
 	 */
 	getTopArtistDiscoveries: function(req, res) {
 		return this.handleStatsRequest(
@@ -151,6 +155,7 @@ module.exports = {
 	 * @param {Request} req
 	 * @param {Response} res
 	 * @returns {Promise}
+	 * @see handleStatsRequest
 	 */
 	getTopAlbumDiscoveries: function(req, res) {
 		return this.handleStatsRequest(

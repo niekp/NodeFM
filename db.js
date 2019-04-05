@@ -5,7 +5,7 @@ const fs = require('fs')
 var database = (function () {
 
 	let database_folder = './';
-	
+
 	if (config.has('database_folder')) {
 		database_folder = config.get('database_folder');
 		if (database_folder.substr(0, database_folder -1) !== '/') {
@@ -32,7 +32,7 @@ var database = (function () {
 	/**
 	 * Connect to the DB of a user
      * @param {string} username 
-	 * @returns {Promise}
+	 * @returns {Promise} - resolve on connect, rectect on error
 	 */
 	this.connect = function(username) {
 		return new Promise((resolve, reject) => {
@@ -58,7 +58,7 @@ var database = (function () {
 	 * Execute a query on the DB of a user and return all the results
      * @param {string} query 
      * @param {string} username
-	 * @returns {array}
+	 * @returns {Promise} - and in the resolve {Array} result
 	 */
 	this.executeQuery = function(query, username) {
 		return new Promise((resolve, reject) => {
