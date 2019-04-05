@@ -18,7 +18,8 @@ router.get('/', function (req, res, next) {
 			menu: 'recent', 
 			title: 'Recent tracks', 
 			tracks: data.results,
-			pagination: data.pagination 
+			pagination: data.pagination
+			
 		});
 	}).catch(function (error) {
 		next(createError(500, error));
@@ -30,8 +31,9 @@ router.get('/artists', function (req, res, next) {
 		res.render('stats/top-artists', { 
 			menu: 'top-artists', 
 			title: 'Top 10 artists', 
-			tracks: data.results,
-			pagination: data.pagination 
+			artists: data.results,
+			pagination: data.pagination,
+			topResult: data.topResult
 		});
 	}).catch(function (error) {
 		next(createError(500, error));
@@ -43,8 +45,9 @@ router.get('/albums', function (req, res, next) {
 		res.render('stats/top-albums', { 
 			menu: 'top-albums', 
 			title: 'Top 10 albums', 
-			tracks: data.results,
-			pagination: data.pagination 
+			albums: data.results,
+			pagination: data.pagination,
+			topResult: data.topResult
 		});
 	}).catch(function (error) {
 		next(createError(500, error));
@@ -56,8 +59,9 @@ router.get('/artist-discoveries', function (req, res, next) {
 		res.render('stats/top-artists', { 
 			menu: 'artist-discoveries', 
 			title: 'Top artist discoveries in the past 180 days', 
-			tracks: data.results,
-			pagination: data.pagination 
+			artists: data.results,
+			pagination: data.pagination,
+			topResult: data.topResult
 		});
 	}).catch(function (error) {
 		next(createError(500, error));
@@ -69,8 +73,9 @@ router.get('/album-discoveries', function (req, res, next) {
 		res.render('stats/top-albums', { 
 			menu: 'album-discoveries', 
 			title: 'Top album discoveries in the past 180 days', 
-			tracks: data.results,
-			pagination: data.pagination 
+			albums: data.results,
+			pagination: data.pagination,
+			topResult: data.topResult
 		});
 	}).catch(function (error) {
 		next(createError(500, error));

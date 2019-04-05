@@ -12,7 +12,7 @@ module.exports = {
 	 * @param {string} from_where - The FROM .. WHERE ... part of the query. This is seperated so it can be reused for the COUNT query
 	 * @param {string} order_by - The ORDER BY ... part of the query. This is seperated because it's not needed in the count
 	 * @param {string} select_count - If COUNT(*) from_where is not sufficient or not efficient enought pass a complete count query. Note: Define the count `AS count`
-	 * @returns {Promise} - and in the resolve an object { results: {query result}, pagination: {pagination} }
+	 * @returns {Promise} - and in the resolve an object { results: {query result}, pagination: {pagination}, topResult: {top result without pagination} }
 	 */
 	handleStatsRequest(req, res, select, from_where, order_by, select_count = null) {
 		// Setup the pagination
@@ -35,9 +35,17 @@ module.exports = {
 			LIMIT ${pagination.offset},${pagination.limit}`,
 			res.locals.username);
 			
+		// Get the #1 result, without the limit/offset. Used to show a percentage bar
+		var topResult = database.executeQuery(`
+			${select}
+			${from_where}
+			${order_by}
+			LIMIT 0, 1`,
+			res.locals.username);
+
 		// Wait for the queries and build the response	
 		return new Promise((resolve, reject) => {
-			data = { results: null, pagination: pagination }
+			data = { results: null, pagination: pagination, topResult: null }
 
 				// Add the results to the pagination and recalculate
 			count.then(function(value) {
@@ -54,8 +62,14 @@ module.exports = {
 				reject(error);
 			});
 
+			topResult.then(function(value) {
+				data.topResult = value[0];
+			}).catch(function(error) {
+				reject(error);
+			});
+
 			// Wait for all and return.
-			Promise.all([count, results]).then(function(values) {
+			Promise.all([count, results, topResult]).then(function(values) {
 				resolve(data);
 			});
 		});
@@ -179,6 +193,5 @@ module.exports = {
 			)`
 		);
 	},
-
 }
 

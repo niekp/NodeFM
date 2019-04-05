@@ -1,16 +1,30 @@
 extends ../masterpage/layout-list
 
 append table-content
-    // top-albums::table-content
+	// top-albums::table-content
 
-    thead
-        tr
-            th Artist
-            th Album
-            th Scrobbles
-    tbody
-        each val in tracks
-            tr
-                td #{val.artist}
-                td #{val.album}
-                td #{val.scrobbles}
+	thead
+		tr
+			th Artist
+			th Album
+			th Scrobbles
+	tbody
+		each album in albums
+			tr
+				td #{album.artist}
+				td #{album.album}
+				td
+					if topResult
+						.progress
+							- var percentage = Math.round(album.scrobbles/topResult.scrobbles*100)
+							.progress-bar(
+								class="w-" + percentage,
+								role="progressbar",
+								aria-valuenow=percentage,
+								aria-valuemin="0" ,
+								aria-valuemax="100",
+								style="width:" + percentage + "%"
+							)
+								| #{album.scrobbles}
+					else
+						| #{album.scrobbles}
