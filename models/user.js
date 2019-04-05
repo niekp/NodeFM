@@ -10,12 +10,19 @@ if (database_folder.substr(0, database_folder -1) !== '/') {
 
 module.exports = {
     
-    // Replace weird characters
+    /**
+     * Replace weird characters
+     * @param {string} user 
+     * @returns {string}
+     */
     sanitizeUsername: function(user) {
         return user.replace(/[\W_]+/g, '').toLowerCase();
     },
 
-    // Get the username from the cookie
+    /**
+     * Get the username from the cookie
+     * @param {Request} req 
+     */
     getUsername: function(req) {
         if (req.cookies)
             return req.cookies['username'];
@@ -23,7 +30,11 @@ module.exports = {
         return '';
     },
 
-    // Inject local variables. Used for displaying the menu and stuff.
+    /**
+     * Inject local variables. Used for displaying the menu and stuff.
+     * @param {Request} req 
+     * @param {Response} res 
+     */
     injectLocalVariables: function(req, res) {
         let username = this.getUsername(req);
         
@@ -31,7 +42,11 @@ module.exports = {
         res.locals.username = username;
     },
 
-    // Check if the user is registered
+    /**
+     * Check if a user is allowed to login
+     * @param {string} user 
+     * @returns {bool}
+     */
     checkLogin: function(user)  {
         user = this.sanitizeUsername(user);
 

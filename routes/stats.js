@@ -13,40 +13,65 @@ router.get('/*', function (req, res, next) {
 });
 
 router.get('/', function (req, res, next) {
-	stats.getRecentTracks(res).then(function (tracks) {
-		res.render('stats/recent-tracks', { menu: 'recent', title: 'Recent tracks', tracks: tracks })
+	stats.getRecentTracks(req, res).then(function (data) {
+		res.render('stats/recent-tracks', { 
+			menu: 'recent', 
+			title: 'Recent tracks', 
+			tracks: data.results,
+			pagination: data.pagination 
+		});
 	}).catch(function (error) {
 		next(createError(500, error));
 	});
 });
 
 router.get('/artists', function (req, res, next) {
-	stats.getTopArtists(res).then(function (tracks) {
-		res.render('stats/top-artists', { menu: 'top-artists', title: 'Top 10 artists', tracks: tracks })
+	stats.getTopArtists(req, res).then(function (data) {
+		res.render('stats/top-artists', { 
+			menu: 'top-artists', 
+			title: 'Top 10 artists', 
+			tracks: data.results,
+			pagination: data.pagination 
+		});
 	}).catch(function (error) {
 		next(createError(500, error));
 	});
 });
 
 router.get('/albums', function (req, res, next) {
-	stats.getTopAlbums(res).then(function (tracks) {
-		res.render('stats/top-albums', { menu: 'top-albums', title: 'Top 10 albums', tracks: tracks })
+	stats.getTopArtists(req, res).then(function (data) {
+		res.render('stats/top-albums', { 
+			menu: 'top-albums', 
+			title: 'Top 10 albums', 
+			tracks: data.results,
+			pagination: data.pagination 
+		});
 	}).catch(function (error) {
 		next(createError(500, error));
 	});
 });
 
 router.get('/artist-discoveries', function (req, res, next) {
-	stats.getTopArtistDiscoveries(res).then(function (tracks) {
-		res.render('stats/top-artists', { menu: 'artist-discoveries', title: 'Top artist discoveries in the past 180 days', tracks: tracks })
+	stats.getTopArtistDiscoveries(req, res).then(function (data) {
+		res.render('stats/top-artists', { 
+			menu: 'artist-discoveries', 
+			title: 'Top artist discoveries in the past 180 days', 
+			tracks: data.results,
+			pagination: data.pagination 
+		});
 	}).catch(function (error) {
 		next(createError(500, error));
 	});
 });
 
 router.get('/album-discoveries', function (req, res, next) {
-	stats.getTopAlbumDiscoveries(res).then(function (tracks) {
-		res.render('stats/top-albums', { menu: 'album-discoveries', title: 'Top album discoveries in the past 180 days', tracks: tracks })
+	stats.getTopAlbumDiscoveries(req, res).then(function (data) {
+		res.render('stats/top-albums', { 
+			menu: 'album-discoveries', 
+			title: 'Top album discoveries in the past 180 days', 
+			tracks: data.results,
+			pagination: data.pagination 
+		});
 	}).catch(function (error) {
 		next(createError(500, error));
 	});

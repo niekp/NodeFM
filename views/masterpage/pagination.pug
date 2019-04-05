@@ -1,0 +1,14 @@
+// pagination::root
+nav(aria-label="Page navigation example")
+  ul.pagination
+    if pagination.previous
+        li.page-item
+            a.page-link(href='?limit=' + pagination.limit + '&page=' + pagination.previous) <
+
+    each page in pagination.pages
+        li(class=(pagination.current === page ? "active" : undefined)).page-item
+            a.page-link(href='?limit=' + pagination.limit + '&page=' + page) #{page}
+
+    if pagination.next
+        li.page-item
+            a.page-link(href='?limit=' + pagination.limit + '&page=' + pagination.next) >

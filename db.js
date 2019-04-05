@@ -11,6 +11,11 @@ var database = (function () {
 
 	let database = [];
 
+	/**
+	 * Check if the DB of this user is connected
+     * @param {string} username
+	 * @returns {bool}
+	 */
 	this.isConnected = function(username) {
 		if (!database[username] || !database[username].open) {
 			return false;
@@ -19,6 +24,11 @@ var database = (function () {
 		return true;
 	}
 
+	/**
+	 * Connect to the DB of a user
+     * @param {string} username 
+	 * @returns {Promise}
+	 */
 	this.connect = function(username) {
 		return new Promise((resolve, reject) => {
 			let database_path = database_folder + username + '.db';
@@ -39,6 +49,12 @@ var database = (function () {
 		});
 	}
 	
+	/**
+	 * Execute a query on the DB of a user and return all the results
+     * @param {string} query 
+     * @param {string} username
+	 * @returns {array}
+	 */
 	this.executeQuery = function(query, username) {
 		return new Promise((resolve, reject) => {
 			if (!this.isConnected(username)) {
