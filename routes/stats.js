@@ -30,7 +30,7 @@ router.get('/artists', function (req, res, next) {
 	stats.getTopArtists(req, res).then(function (data) {
 		res.render('stats/top-artists', { 
 			menu: 'top-artists', 
-			title: 'Top 10 artists', 
+			title: 'Top artists', 
 			artists: data.results,
 			pagination: data.pagination,
 			topResult: data.topResult
@@ -44,7 +44,7 @@ router.get('/albums', function (req, res, next) {
 	stats.getTopAlbums(req, res).then(function (data) {
 		res.render('stats/top-albums', { 
 			menu: 'top-albums', 
-			title: 'Top 10 albums', 
+			title: 'Top albums', 
 			albums: data.results,
 			pagination: data.pagination,
 			topResult: data.topResult
