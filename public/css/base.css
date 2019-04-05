@@ -107,6 +107,10 @@ body {
 /*
 * Progress bar
 */
+td.progress-td {
+  width: 30%
+}
+
 .progress {
   margin-bottom: 0;
 }

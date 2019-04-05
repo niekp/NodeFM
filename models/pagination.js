@@ -1,20 +1,20 @@
 module.exports = {
     recordCount: 0,
-    limit: 10,
+    limit: 20,
     offset: 0,
     pages: [],
     totalPages: 0,
     current: 1,
     next: null,
     previous: null,
-    range: 5,
+    range: 9,
 
     /**
      * Reset the default parameters
      */
     resetDefault: function () {
         this.recordCount = 0;
-        this.limit = 10;
+        this.limit = 20;
         this.offset = 0;
         this.pages = [];
         this.totalPages = 0;

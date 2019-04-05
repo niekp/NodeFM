@@ -13,7 +13,7 @@ append table-content
 			tr
 				td #{album.artist}
 				td #{album.album}
-				td
+				td(class=(topResult ? "progress-td" : undefined))
 					if topResult
 						.progress
 							- var percentage = Math.round(album.scrobbles/topResult.scrobbles*100)
