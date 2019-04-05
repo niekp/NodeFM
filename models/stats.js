@@ -74,7 +74,7 @@ module.exports = {
 			`FROM Scrobble as S 
 			INNER JOIN Artist as A on A.id = S.artist_id
 			INNER JOIN Track as T on T.id = S.track_id`,
-			'ORDER BY utc',
+			'ORDER BY utc DESC',
 			'SELECT COUNT(*) AS count FROM scrobble'
 		);
 	},
