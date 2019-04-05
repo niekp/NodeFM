@@ -20,7 +20,7 @@ router.post('/login', function (req, res, next) {
 	user.injectLocalVariables(req, res);
 	
 	if (validlogin) {
-		res.redirect('/stats');
+		res.redirect('/');
 		
 	} else {
 		// Render the login page
