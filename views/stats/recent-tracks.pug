@@ -1,15 +1,20 @@
 extends ../masterpage/layout-list
 
+append before-table
+	if datefilter
+		// recent-tracks::before-table
+		include ../shared/date-filter
+
 append table-content
-    // recent-tracks::table-content
-    
-    thead
-        tr
-            th Artist
-            th Track
-    tbody
-        each val in tracks
-            tr
-                td #{val.artist}
-                td #{val.track}
-                td #{moment(val.utc, 'X').format('L LT')}
+	// recent-tracks::table-content
+	
+	thead
+		tr
+			th Artist
+			th Track
+	tbody
+		each val in tracks
+			tr
+				td #{val.artist}
+				td #{val.track}
+				td #{moment(val.utc, 'X').format('L LT')}

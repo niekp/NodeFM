@@ -41,6 +41,9 @@ app.locals.moment.locale(config.has('locale') ? config.get('locale') : 'en_GB');
 function injectLocal(req, res, next){
 
   user.injectLocalVariables(req, res);
+
+  if (req.query.filter)
+    res.locals.filter = req.query.filter;
   
   // Connect to the DB if it's closed.
   let username = user.getUsername(req);

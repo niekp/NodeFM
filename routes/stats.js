@@ -18,8 +18,8 @@ router.get('/', function (req, res, next) {
 			menu: 'recent', 
 			title: 'Recent tracks', 
 			tracks: data.results,
-			pagination: data.pagination
-			
+			pagination: data.pagination,
+			datefilter: true
 		});
 	}).catch(function (error) {
 		next(createError(500, error));
@@ -33,7 +33,8 @@ router.get('/artists', function (req, res, next) {
 			title: 'Top artists', 
 			artists: data.results,
 			pagination: data.pagination,
-			topResult: data.topResult
+			topResult: data.topResult,
+			datefilter: true
 		});
 	}).catch(function (error) {
 		next(createError(500, error));
@@ -47,7 +48,8 @@ router.get('/albums', function (req, res, next) {
 			title: 'Top albums', 
 			albums: data.results,
 			pagination: data.pagination,
-			topResult: data.topResult
+			topResult: data.topResult,
+			datefilter: true
 		});
 	}).catch(function (error) {
 		next(createError(500, error));

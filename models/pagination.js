@@ -8,6 +8,7 @@ module.exports = {
     next: null,
     previous: null,
     range: 9,
+    filter: null,
 
     /**
      * Reset the default parameters
@@ -37,6 +38,8 @@ module.exports = {
         // Optionally set the limit. Else the default is used
         if (req.query.limit)
             this.limit = parseInt(req.query.limit);
+
+        this.filter = req.query.filter;
 
         // Calculate the pagecount
         if (this.recordCount > 0 && this.limit > 0)
@@ -76,7 +79,14 @@ module.exports = {
         for (var i = rangeStart; i <= rangeEnd; i++) {
             this.pages.push(i);
         }
+    },
 
+    getUrl: function(page) {
+        let filterString = '';
+        if (this.filter)
+            filterString = '&' + Object.keys(this.filter).map(key => "filter[" + key + "]" + '=' + this.filter[key]).join('&');
+
+        return '?limit=' + this.limit + '&page=' + page + filterString
     }
 
 }

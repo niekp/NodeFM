@@ -1,5 +1,10 @@
 extends ../masterpage/layout-list
 
+append before-table
+	if datefilter
+		// top-albums::before-table
+		include ../shared/date-filter
+
 append table-content
 	// top-albums::table-content
 

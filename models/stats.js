@@ -1,81 +1,129 @@
 var database = require('../db.js')
 var pagination = require('./pagination.js')
 
-module.exports = {
+
+/**
+ * Execute an select query and a count query. Return the result and a pagination object.
+ * 
+ * @param {Request} req 
+ * @param {Response} res 
+ * @param {string} select - The SELECT ... part of the query
+ * @param {string} from_where - The FROM .. WHERE ... part of the query. This is seperated so it can be reused for the COUNT query
+ * @param {string} order_by - The ORDER BY ... part of the query. This is seperated because it's not needed in the count
+ * @param {string} select_count - If COUNT(*) from_where is not sufficient or not efficient enought pass a complete count query. Note: Define the count `AS count`
+ * @returns {Promise} - and in the resolve an object { results: {query result}, pagination: {pagination}, topResult: {top result without pagination} }
+ */
+function handleStatsRequest(req, res, select, from_where, group_by, order_by, select_count = null, utc_filter = null) {
+	// Setup the pagination
+	pagination.resetDefault();
+	pagination.calculate(req);
 	
-	/**
-	 * Execute an select query and a count query. Return the result and a pagination object.
-	 * 
-	 * @param {Request} req 
-	 * @param {Response} res 
-	 * @param {string} select - The SELECT ... part of the query
-	 * @param {string} from_where - The FROM .. WHERE ... part of the query. This is seperated so it can be reused for the COUNT query
-	 * @param {string} order_by - The ORDER BY ... part of the query. This is seperated because it's not needed in the count
-	 * @param {string} select_count - If COUNT(*) from_where is not sufficient or not efficient enought pass a complete count query. Note: Define the count `AS count`
-	 * @returns {Promise} - and in the resolve an object { results: {query result}, pagination: {pagination}, topResult: {top result without pagination} }
-	 */
-	handleStatsRequest(req, res, select, from_where, order_by, select_count = null) {
-		// Setup the pagination
-		pagination.resetDefault();
-		pagination.calculate(req);
-		
-		// Build the default count query of no custom query has been given.
-		if (!select_count) {
-			select_count = `SELECT COUNT(*) AS count ${from_where}`;
+	// Build the default count query of no custom query has been given.
+	if (!select_count) {
+		select_count = `SELECT COUNT(*) AS count ${from_where}`;
+	}
+
+	// Check wether to apply the date-filter
+	if (utc_filter !== false && req.query.filter && (req.query.filter['start-date'] || req.query.filter['end-date'])) {		
+		// Setup the default UTC filter if no filter is given
+		if (utc_filter === null) {
+			utc_filter = 'WHERE S.utc >= ${start-date} AND S.utc <= ${end-date}';
+			if (from_where.toLowerCase().indexOf('where') >= 0)
+				utc_filter.replace('WHERE ', ' AND ');
 		}
+		
+		// Prepare the filter query
+		utc_filter = prepareUtcWhere(req, res, utc_filter);
 
-		// Execute the count query
-		var count = database.executeQuery(select_count, res.locals.username);
+		// Append the utc_filter to the select query. Replace the S. out of it because the queries are a lot simpler.
+		// This is really not a safe way to do it.. but it works for now ;D
+		select_count += ' ' + (utc_filter.replace(/S\./g, ''));
+	} else {
+		utc_filter = '';
+	}
 
-		// Execute the select query
-		var results = database.executeQuery(`
-			${select}
-			${from_where}
-			${order_by}
-			LIMIT ${pagination.offset},${pagination.limit}`,
-			res.locals.username);
-			
-		// Get the #1 result, without the limit/offset. Used to show a percentage bar
-		var topResult = database.executeQuery(`
-			${select}
-			${from_where}
-			${order_by}
-			LIMIT 0, 1`,
-			res.locals.username);
 
-		// Wait for the queries and build the response	
-		return new Promise((resolve, reject) => {
-			data = { results: null, pagination: pagination, topResult: null }
+	// Execute the count query
+	var count = database.executeQuery(select_count, res.locals.username);
 
-				// Add the results to the pagination and recalculate
-			count.then(function(value) {
-				data.pagination.recordCount = value[0].count;
-				data.pagination.calculate(req);
-			}).catch(function(error) {
-				reject(error);
-			});
+	// Execute the select query
+	var results = database.executeQuery(`
+		${select}
+		${from_where}
+		${utc_filter}
+		${group_by}
+		${order_by}
+		LIMIT ${pagination.offset},${pagination.limit}`,
+		res.locals.username);
+		
+	// Get the #1 result, without the limit/offset. Used to show a percentage bar
+	var topResult = database.executeQuery(`
+		${select}
+		${from_where}
+		${utc_filter}
+		${group_by}
+		${order_by}
+		LIMIT 0, 1`,
+		res.locals.username);
 
-			// Add the query results to the response.
-			results.then(function(value) {
-				data.results = value;
-			}).catch(function(error) {
-				reject(error);
-			});
+	// Wait for the queries and build the response	
+	return new Promise((resolve, reject) => {
+		data = { results: null, pagination: pagination, topResult: null }
 
-			topResult.then(function(value) {
-				data.topResult = value[0];
-			}).catch(function(error) {
-				reject(error);
-			});
-
-			// Wait for all and return.
-			Promise.all([count, results, topResult]).then(function(values) {
-				resolve(data);
-			});
+			// Add the results to the pagination and recalculate
+		count.then(function(value) {
+			data.pagination.recordCount = value[0].count;
+			data.pagination.calculate(req);
+		}).catch(function(error) {
+			reject(error);
 		});
 
-	},
+		// Add the query results to the response.
+		results.then(function(value) {
+			data.results = value;
+		}).catch(function(error) {
+			reject(error);
+		});
 
+		topResult.then(function(value) {
+			data.topResult = value[0];
+		}).catch(function(error) {
+			reject(error);
+		});
+
+		// Wait for all and return.
+		Promise.all([count, results, topResult]).then(function(values) {
+			resolve(data);
+		});
+	});
+
+}
+
+/**
+ * Prepare a 'where utc >= ${start-date} and utc <= ${end-date} with the values from the filter
+ * @param {Request} req 
+ * @param {Response} res 
+ * @param {string} where 
+ * @returns {string}
+ */
+function prepareUtcWhere(req, res, where) {
+	let startdate = req.app.locals.moment('01-01-1990', "MM-DD-YYYY").format('X');
+	let enddate = req.app.locals.moment().format('X');
+
+	if (req.query.filter && req.query.filter['start-date']) {
+		startdate = req.app.locals.moment(req.query.filter['start-date'], "DD-MM-YYYY").format('X');
+	}
+	if (req.query.filter && req.query.filter['end-date']) {
+		enddate = req.app.locals.moment(req.query.filter['end-date'] + ' 23:59:59', "DD-MM-YYYY HH:mm:ss").format('X');
+	}
+
+	where = where.replace('${start-date}', startdate);
+	where = where.replace('${end-date}', enddate);
+
+	return where
+}
+
+module.exports = {
 	/**
 	 * @param {Request} req 
 	 * @param {Response} res
@@ -83,12 +131,13 @@ module.exports = {
 	 * @see handleStatsRequest
 	 */
 	getRecentTracks: function(req, res) {
-		return this.handleStatsRequest(
+		return handleStatsRequest(
 			req, res, 
 			'SELECT A.name as artist, T.name as track, S.utc', 
 			`FROM Scrobble as S 
 			INNER JOIN Artist as A on A.id = S.artist_id
 			INNER JOIN Track as T on T.id = S.track_id`,
+			'',
 			'ORDER BY utc DESC',
 			'SELECT COUNT(*) AS count FROM scrobble'
 		);
@@ -101,12 +150,12 @@ module.exports = {
 	 * @see handleStatsRequest
 	 */
 	getTopArtists: function(req, res) {
-		return this.handleStatsRequest(
+		return handleStatsRequest(
 			req, res, 
 			'SELECT a.name as artist, count(*) as scrobbles', 
 			`FROM Scrobble as S
-			INNER JOIN Artist as A on A.id = S.artist_id
-			GROUP by s.artist_id`,
+			INNER JOIN Artist as A on A.id = S.artist_id`,
+			'GROUP by s.artist_id',
 			'ORDER by count(*) desc',
 			'SELECT COUNT(DISTINCT(artist_id)) AS count FROM scrobble'
 		);
@@ -119,15 +168,15 @@ module.exports = {
 	 * @see handleStatsRequest
 	 */
 	getTopAlbums: function(req, res) {
-		return this.handleStatsRequest(
+		return handleStatsRequest(
 			req, res, 
 			'SELECT A.name as artist, B.name as album, count(*) as scrobbles', 
 			`FROM Scrobble as S
 			INNER JOIN Artist as A on A.id = S.artist_id
-			INNER JOIN Album as B on B.id = S.album_id
-			GROUP by S.artist_id, S.album_id`,
+			INNER JOIN Album as B on B.id = S.album_id`,
+			'GROUP by S.artist_id, S.album_id',
 			'ORDER by count(*) desc',
-			'SELECT COUNT(DISTINCT(album_id)) AS count FROM scrobble'
+			'SELECT COUNT(DISTINCT(album_id)) AS count FROM scrobble'			
 		);
 	},
 
@@ -141,7 +190,7 @@ module.exports = {
 	 * @see handleStatsRequest
 	 */
 	getTopArtistDiscoveries: function(req, res) {
-		return this.handleStatsRequest(
+		return handleStatsRequest(
 			req, res, 
 			'SELECT A.name as artist, count(*) as scrobbles', 
 			`FROM Scrobble as S
@@ -149,8 +198,8 @@ module.exports = {
 			WHERE utc >= strftime('%s', datetime('now', '-180 day'))
 			AND S.artist_id not in (
 				select distinct(artist_id) from Scrobble where utc < strftime('%s', datetime('now', '-180 day'))
-			)
-			GROUP by S.artist_id`,
+			)`,
+			'GROUP by S.artist_id',
 			'ORDER by count(*) desc',
 
 			`SELECT COUNT(DISTINCT(artist_id)) AS count 
@@ -158,7 +207,8 @@ module.exports = {
 			WHERE utc >= strftime('%s', datetime('now', '-180 day'))
 			AND artist_id NOT IN (
 				SELECT DISTINCT(artist_id) FROM Scrobble WHERE utc < strftime('%s', datetime('now', '-180 day'))
-			)`
+			)`, 
+			false // disable date filter for now
 		);
 	},
 
@@ -172,7 +222,7 @@ module.exports = {
 	 * @see handleStatsRequest
 	 */
 	getTopAlbumDiscoveries: function(req, res) {
-		return this.handleStatsRequest(
+		return handleStatsRequest(
 			req, res, 
 			'SELECT A.name as artist, B.name as album, count(*) as scrobbles', 
 			`FROM Scrobble as S
@@ -181,8 +231,8 @@ module.exports = {
 			WHERE utc >= strftime('%s', datetime('now', '-180 day'))
 			and (s.artist_id || '-' || s.album_id) not in (
 				select distinct(artist_id || '-' || album_id) as record from Scrobble where utc < strftime('%s', datetime('now', '-180 days'))
-			)
-			GROUP by s.artist_id, s.album_id`,
+			)`,
+			'GROUP by s.artist_id, s.album_id',
 			'ORDER by count(*) desc',
 
 			`SELECT COUNT(DISTINCT(artist_id)) AS count 
@@ -190,7 +240,8 @@ module.exports = {
 			WHERE utc >= strftime('%s', datetime('now', '-180 day'))
 			AND (artist_id || '-' || album_id) not in (
 				SELECT DISTINCT(artist_id || '-' || album_id) AS record FROM Scrobble WHERE utc < strftime('%s', datetime('now', '-180 days'))
-			)`
+			)`,
+			false // disable date filter for now 
 		);
 	},
 }

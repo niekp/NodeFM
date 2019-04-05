@@ -1,0 +1,41 @@
+append styles
+	link(rel='stylesheet', href='https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/css/bootstrap-datepicker.min.css')
+
+block date-filter
+	form(method='get')
+		.input-group.date
+			#datepicker.input-daterange.input-group
+				input#start-date.input-sm.form-control(
+					type='text'
+					name='filter[start-date]'
+					placeholder='date from' 
+					value=(filter && filter['start-date']) ? filter['start-date'] : ''
+				)
+				
+				span.input-group-addon to
+
+				input#end-date.input-sm.form-control(
+					type='text'
+					name='filter[end-date]'
+					placeholder='date to' 
+					value=(filter && filter['end-date']) ? filter['end-date'] : moment().format('L')
+				)
+
+				span.input-group-btn
+					button.btn.btn-default.btn-sm(type='submit', style='margin-left:8px;') filter
+
+append scripts
+
+	script(type='text/javascript', src='https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/js/bootstrap-datepicker.min.js')
+	script(type='text/javascript', src='https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/locales/bootstrap-datepicker.' + moment.locale() + '.min.js')
+
+	script(type='text/javascript').
+		(function($){
+
+			$(document).ready(function() {
+				$('.input-group.date input').datepicker({
+					language: '#{moment.locale()}'
+				});
+			})
+
+		})(jQuery);

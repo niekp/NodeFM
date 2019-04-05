@@ -1,0 +1,65 @@
+//- bootstrap.jade
+//- bootstrap mixins
+
+
+//- Including Icon mixins
+include ../../node_modules/jade-bootstrap/components/icons
+//- Including Alert mixins
+include ../../node_modules/jade-bootstrap/components/alerts
+//- Including Tooltip mixins
+include ../../node_modules/jade-bootstrap/components/tooltips
+//- Including Accordion mixins
+include ../../node_modules/jade-bootstrap/components/accordion
+//- Including Carousel mixins
+include ../../node_modules/jade-bootstrap/components/carousel
+//- Including Table mixins
+include ../../node_modules/jade-bootstrap/components/tables
+//- Including Navbar mixins
+include ../../node_modules/jade-bootstrap/components/navbar
+//- Including Toggle Button mixins
+include ../../node_modules/jade-bootstrap/components/toggle
+//- Including Nav mixins
+include ../../node_modules/jade-bootstrap/components/navs
+//- Including Label mixins
+include ../../node_modules/jade-bootstrap/components/labels
+//- Including Panel mixins
+include ../../node_modules/jade-bootstrap/components/panels
+//- Including Tab mixins
+include ../../node_modules/jade-bootstrap/components/tabs
+//- Including Dropdown mixins
+include ../../node_modules/jade-bootstrap/components/dropdowns
+//- Including Form control mixins
+include ../../node_modules/jade-bootstrap/components/forms
+//- Including Modal dialog mixins
+include ../../node_modules/jade-bootstrap/components/modal
+//- Including List group mixins
+include ../../node_modules/jade-bootstrap/components/list-groups
+//- Including Progress bar mixins
+include ../../node_modules/jade-bootstrap/components/progress-bars
+//- Including Button mixins
+include ../../node_modules/jade-bootstrap/components/buttons
+//- Including Image mixins
+include ../../node_modules/jade-bootstrap/components/images
+//- Including Bootswatch theme mixins
+include ../../node_modules/jade-bootstrap/components/bootswatch
+
+doctype html
+html(lang="en")
+	head
+		meta(charset="UTF-8")
+		meta(http-equiv="X-UA-Compatible", content="IE=edge")
+		meta(name="viewport",content="width=device-width, initial-scale=1")
+		meta(name="description",content="")
+		meta(name="author",content="")
+		link(rel="icon",href="../../favicon.ico")
+		title= title
+		block styles
+			link(rel="stylesheet",href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css")
+		block scripts-head
+			script(src='https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js', type='text/javascript')
+
+	body(data-spy="scroll",data-target=".scrollspy")
+		block body
+			
+		block scripts
+			script(src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js")
