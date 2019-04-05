@@ -50,7 +50,7 @@ module.exports = {
 			// Add the query results to the response.
 			results.then(function(value) {
 				data.results = value;
-			}).catch(function() {
+			}).catch(function(error) {
 				reject(error);
 			});
 
@@ -70,7 +70,7 @@ module.exports = {
 	getRecentTracks: function(req, res) {
 		return this.handleStatsRequest(
 			req, res, 
-			'SELECT A.name as artist, T.name as track', 
+			'SELECT A.name as artist, T.name as track, S.utc', 
 			`FROM Scrobble as S 
 			INNER JOIN Artist as A on A.id = S.artist_id
 			INNER JOIN Track as T on T.id = S.track_id`,

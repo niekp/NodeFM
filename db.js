@@ -4,11 +4,16 @@ const fs = require('fs')
 
 var database = (function () {
 
-	let database_folder = config.get('database_folder');
-	if (database_folder.substr(0, database_folder -1) !== '/') {
-		database_folder += '/';
-	}
+	let database_folder = './';
+	
+	if (config.has('database_folder')) {
+		database_folder = config.get('database_folder');
+		if (database_folder.substr(0, database_folder -1) !== '/') {
+			database_folder += '/';
+		}
 
+	}
+	
 	let database = [];
 
 	/**

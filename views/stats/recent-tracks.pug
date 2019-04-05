@@ -12,3 +12,4 @@ append table-content
             tr
                 td #{val.artist}
                 td #{val.track}
+                td #{moment(val.utc, 'X').format('L LT')}

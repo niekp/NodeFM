@@ -1,4 +1,4 @@
 {
-  "import_script": "/path/to/cron.sh",
-  "database_folder": "/path/to/folder/"
+  "database_folder": "/path/to/folder/",
+  "locale": "en_GB"
 }

@@ -3,7 +3,8 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-var helmet = require('helmet')
+var helmet = require('helmet');
+var config = require('config');
 
 var indexRouter = require('./routes/index');
 var statsRouter = require('./routes/stats');
@@ -25,9 +26,12 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Add moment and set it's locale
+app.locals.moment = require('moment');
+app.locals.moment.locale(config.has('locale') ? config.get('locale') : 'en_GB');
+
 // Inject local variables and connect the DB
 function injectLocal(req, res, next){
-
   user.injectLocalVariables(req, res);
   
   // Connect to the DB if it's closed.
