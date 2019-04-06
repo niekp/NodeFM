@@ -29,9 +29,11 @@ function handleStatsRequest(req, res, select, from_where, group_by, order_by, se
 		if (utc_filter === null) {
 			utc_filter = 'WHERE S.utc >= ${start-date} AND S.utc <= ${end-date}';
 			if (from_where.toLowerCase().indexOf('where') >= 0)
-				utc_filter.replace('WHERE ', ' AND ');
+				utc_filter = utc_filter.replace('WHERE ', ' AND ');
+			if (from_where.toLowerCase().indexOf('S.') < 0)
+				utc_filter = utc_filter.replace(/S\./g, '');
 		}
-		
+
 		// Prepare the filter query
 		utc_filter = prepareUtcWhere(req, res, utc_filter);
 
@@ -116,9 +118,8 @@ function prepareUtcWhere(req, res, where) {
 	if (req.query.filter && req.query.filter['end-date']) {
 		enddate = req.app.locals.moment(req.query.filter['end-date'] + ' 23:59:59', "DD-MM-YYYY HH:mm:ss").format('X');
 	}
-
-	where = where.replace('${start-date}', startdate);
-	where = where.replace('${end-date}', enddate);
+	where = where.replace(/\$\{start\-date\}/g, startdate);
+	where = where.replace(/\$\{end\-date\}/g, enddate);
 
 	return where
 }
@@ -190,25 +191,26 @@ module.exports = {
 	 * @see handleStatsRequest
 	 */
 	getTopArtistDiscoveries: function(req, res) {
+		if (!req.query.filter) {
+			req.query.filter = [];
+			req.query.filter['start-date'] = req.app.locals.moment().subtract(180, 'days').format('L')
+			res.locals.filter = req.query.filter;
+		}
+
 		return handleStatsRequest(
 			req, res, 
 			'SELECT A.name as artist, count(*) as scrobbles', 
 			`FROM Scrobble as S
-			INNER JOIN Artist as A on A.id = S.artist_id
-			WHERE utc >= strftime('%s', datetime('now', '-180 day'))
-			AND S.artist_id not in (
-				select distinct(artist_id) from Scrobble where utc < strftime('%s', datetime('now', '-180 day'))
-			)`,
+			INNER JOIN Artist as A on A.id = S.artist_id`,
 			'GROUP by S.artist_id',
 			'ORDER by count(*) desc',
 
-			`SELECT COUNT(DISTINCT(artist_id)) AS count 
-			FROM scrobble 
-			WHERE utc >= strftime('%s', datetime('now', '-180 day'))
-			AND artist_id NOT IN (
-				SELECT DISTINCT(artist_id) FROM Scrobble WHERE utc < strftime('%s', datetime('now', '-180 day'))
-			)`, 
-			false // disable date filter for now
+			'SELECT COUNT(DISTINCT(artist_id)) AS count FROM scrobble', 
+
+			'WHERE utc >= ${start-date} AND utc <= ${end-date} '+
+			'AND S.artist_id  not in ('+
+				'SELECT DISTINCT(artist_id) AS record FROM Scrobble WHERE utc < ${start-date}'+
+			')'
 		);
 	},
 
@@ -222,27 +224,59 @@ module.exports = {
 	 * @see handleStatsRequest
 	 */
 	getTopAlbumDiscoveries: function(req, res) {
+		if (!req.query.filter) {
+			req.query.filter = [];
+			req.query.filter['start-date'] = req.app.locals.moment().subtract(180, 'days').format('L')
+			res.locals.filter = req.query.filter;
+		}
+		
 		return handleStatsRequest(
 			req, res, 
 			'SELECT A.name as artist, B.name as album, count(*) as scrobbles', 
 			`FROM Scrobble as S
 			INNER JOIN Artist as A on A.id = S.artist_id
-			INNER JOIN Album as B on B.id = S.album_id
-			WHERE utc >= strftime('%s', datetime('now', '-180 day'))
-			and (s.artist_id || '-' || s.album_id) not in (
-				select distinct(artist_id || '-' || album_id) as record from Scrobble where utc < strftime('%s', datetime('now', '-180 days'))
-			)`,
+			INNER JOIN Album as B on B.id = S.album_id`,
 			'GROUP by s.artist_id, s.album_id',
 			'ORDER by count(*) desc',
 
 			`SELECT COUNT(DISTINCT(artist_id)) AS count 
-			FROM scrobble 
-			WHERE utc >= strftime('%s', datetime('now', '-180 day'))
-			AND (artist_id || '-' || album_id) not in (
-				SELECT DISTINCT(artist_id || '-' || album_id) AS record FROM Scrobble WHERE utc < strftime('%s', datetime('now', '-180 days'))
-			)`,
-			false // disable date filter for now 
+			FROM scrobble`,
+			'WHERE utc >= ${start-date} AND utc <= ${end-date} '+
+			'AND (S.artist_id || \'-\' || S.album_id) not in ('+
+				'SELECT DISTINCT(artist_id || \'-\' || album_id) AS record FROM Scrobble WHERE utc < ${start-date}'+
+			')'
 		);
 	},
+
+	getScrobblesPerHour: function(req, res) {
+		// Manually set the limit
+		pagination.setLimit(24);
+
+		return new Promise((resolve, reject) => {
+			handleStatsRequest(
+				req, res,
+				`SELECT STRFTIME('%H', DATETIME(utc, 'unixepoch')) AS \`hour\`, COUNT(*) AS scrobbles`,
+				'FROM Scrobble',
+				'GROUP BY `hour`',
+				`ORDER BY STRFTIME('%H', DATETIME(utc, 'unixepoch'))`,
+				`SELECT COUNT(DISTINCT(STRFTIME('%H', DATETIME(utc, 'unixepoch')))) 'count' FROM Scrobble`
+			).then(function (data) {
+				// Fix the top result
+				data.results.forEach(function(record) {
+					if (record.scrobbles > data.topResult.scrobbles) {
+						data.topResult = record;
+					}
+				});
+
+				// Remove the pagination
+				data.pagination = null;
+
+				resolve(data);
+
+			}).catch(function(error) {reject(error)});
+
+		});
+
+	}
 }
 

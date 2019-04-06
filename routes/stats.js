@@ -60,10 +60,11 @@ router.get('/artist-discoveries', function (req, res, next) {
 	stats.getTopArtistDiscoveries(req, res).then(function (data) {
 		res.render('stats/top-artists', { 
 			menu: 'artist-discoveries', 
-			title: 'Top artist discoveries in the past 180 days', 
+			title: 'Top artist discoveries', 
 			artists: data.results,
 			pagination: data.pagination,
-			topResult: data.topResult
+			topResult: data.topResult,
+			datefilter: true
 		});
 	}).catch(function (error) {
 		next(createError(500, error));
@@ -74,10 +75,27 @@ router.get('/album-discoveries', function (req, res, next) {
 	stats.getTopAlbumDiscoveries(req, res).then(function (data) {
 		res.render('stats/top-albums', { 
 			menu: 'album-discoveries', 
-			title: 'Top album discoveries in the past 180 days', 
+			title: 'Top album discoveries', 
 			albums: data.results,
 			pagination: data.pagination,
-			topResult: data.topResult
+			topResult: data.topResult,
+			datefilter: true
+		});
+	}).catch(function (error) {
+		next(createError(500, error));
+	});
+});
+
+
+router.get('/scrobbles-per-hour', function (req, res, next) {
+	stats.getScrobblesPerHour(req, res).then(function (data) {
+		res.render('stats/scrobbles-per-hour', { 
+			menu: 'scrobbles-per-hour', 
+			title: 'Scrobbles per hour', 
+			hours: data.results,
+			pagination: data.pagination,
+			topResult: data.topResult,
+			datefilter: true
 		});
 	}).catch(function (error) {
 		next(createError(500, error));

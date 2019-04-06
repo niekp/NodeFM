@@ -1,0 +1,26 @@
+extends ../masterpage/layout-list
+
+append before-table
+	if datefilter
+		// scrobbles-per-hour
+		include ../shared/date-filter
+
+append table-content
+	// scrobbles-per-hour::table-content
+	
+	thead
+		tr
+			th Hour
+			th Scrobbles
+	tbody
+		each hour in hours
+			tr
+				td #{hour.hour}
+				td(class=(topResult ? "progress-td" : undefined))
+					if topResult
+						- var value = hour.scrobbles
+						- var total = topResult.scrobbles
+						include ../shared/progress
+						
+					else
+						| #{hour.scrobbles}

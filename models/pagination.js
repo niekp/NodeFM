@@ -1,3 +1,5 @@
+var limitLocked = false;
+
 module.exports = {
     recordCount: 0,
     limit: 20,
@@ -7,21 +9,35 @@ module.exports = {
     current: 1,
     next: null,
     previous: null,
-    range: 9,
+    range: 6,
     filter: null,
 
     /**
      * Reset the default parameters
      */
-    resetDefault: function () {
+    resetDefault: function() {
         this.recordCount = 0;
-        this.limit = 20;
         this.offset = 0;
         this.pages = [];
         this.totalPages = 0;
         this.current = 1;
         this.next = null;
         this.previous = null;
+
+        if (!limitLocked)
+            this.limit = 20;
+        else
+            limitLocked = false;
+
+    },
+
+    /**
+     * Set the limit for the next query. It gets unlocked the next by the next reset.
+     * @param {int} limit 
+     */
+    setLimit: function(limit) {
+        this.limit = limit;
+        limitLocked = true;
     },
 
     /**
