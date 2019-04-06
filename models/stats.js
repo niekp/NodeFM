@@ -113,11 +113,11 @@ function setDefaultDate(req, res, startdate = null, enddate = null) {
 		req.query.filter = [];
 	}
 
-	if (startdate && !req.query.filter['start-date']) {
+	if (startdate && req.query.filter['start-date'] === undefined) {
 		req.query.filter['start-date'] = startdate
 		res.locals.filter = req.query.filter;
 	}
-	if (enddate && !req.query.filter['enddate-date']) {
+	if (enddate && req.query.filter['enddate-date'] === undefined) {
 		req.query.filter['start-date'] = startdate
 		res.locals.filter = req.query.filter;
 	}
@@ -229,6 +229,8 @@ module.exports = {
 
 			'SELECT COUNT(DISTINCT(artist_id)) AS count FROM scrobble', 
 
+			// TODO: instead of filtering out all artist listened to before, only filter them if they have more then 10 scrobbles.
+			// Otherwise artists that you've encountered once in a playlist but only later discovered are excluded
 			'WHERE utc >= ${start-date} AND utc <= ${end-date} '+
 			'AND S.artist_id  not in ('+
 				'SELECT DISTINCT(artist_id) AS record FROM Scrobble WHERE utc < ${start-date}'+

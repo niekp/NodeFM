@@ -120,3 +120,7 @@ td.progress-td {
   padding-left: 5px;
   min-width: 35px; /* Otherwise the scrobble count isn't visible */
 }
+
+form.datefilter, form.datefilter .input-group.date {
+  margin-bottom: 15px;
+}

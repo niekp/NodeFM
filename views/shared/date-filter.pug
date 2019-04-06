@@ -2,7 +2,7 @@ append styles
 	link(rel='stylesheet', href='https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/css/bootstrap-datepicker.min.css')
 
 block date-filter
-	form(method='get')
+	form.datefilter(method='get')
 		.input-group.date
 			#datepicker.input-daterange.input-group
 				input#start-date.input-sm.form-control(
@@ -22,14 +22,25 @@ block date-filter
 				)
 
 				span.input-group-btn
-					button.btn.btn-default.btn-sm(type='submit', style='margin-left:8px;') filter
+					button.btn.btn-primary.btn-sm(type='submit') filter
+
+		div.btn-group
+			button.btn.btn-default.btn-sm(type='button' data-datefilter='1 week') 1 week
+			button.btn.btn-default.btn-sm(type='button' data-datefilter='1 month') 1 month
+			button.btn.btn-default.btn-sm(type='button' data-datefilter='6 months') 6 months
+			button.btn.btn-default.btn-sm(type='button' data-datefilter='1 year') 1 year
+			button.btn.btn-default.btn-sm(type='button' data-datefilter='empty') all time
 
 append scripts
 
 	script(type='text/javascript', src='https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/js/bootstrap-datepicker.min.js')
 	script(type='text/javascript', src='https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/locales/bootstrap-datepicker.' + moment.locale() + '.min.js')
+	script(type='text/javascript', src='../js/date-filter.js')
+	script(type='text/javascript', src='../vendor/js/moment-with-locales.js')
 
 	script(type='text/javascript').
+		moment.locale('#{moment.locale()}');
+
 		(function($){
 
 			$(document).ready(function() {
