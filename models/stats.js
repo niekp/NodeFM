@@ -102,6 +102,28 @@ function handleStatsRequest(req, res, select, from_where, group_by, order_by, se
 }
 
 /**
+ * Set de default date of the filter if none is given
+ * @param {Request} req 
+ * @param {Response} res
+ * @param {?string} startdate | as L format
+ * @param {?string} enddate | as L format
+ */
+function setDefaultDate(req, res, startdate = null, enddate = null) {
+	if (!req.query.filter) {
+		req.query.filter = [];
+	}
+
+	if (startdate && !req.query.filter['start-date']) {
+		req.query.filter['start-date'] = startdate
+		res.locals.filter = req.query.filter;
+	}
+	if (enddate && !req.query.filter['enddate-date']) {
+		req.query.filter['start-date'] = startdate
+		res.locals.filter = req.query.filter;
+	}
+}
+
+/**
  * Prepare a 'where utc >= ${start-date} and utc <= ${end-date} with the values from the filter
  * @param {Request} req 
  * @param {Response} res 
@@ -151,6 +173,8 @@ module.exports = {
 	 * @see handleStatsRequest
 	 */
 	getTopArtists: function(req, res) {
+		setDefaultDate(req, res, req.app.locals.moment().subtract(1, 'month').format('L'));
+
 		return handleStatsRequest(
 			req, res, 
 			'SELECT a.name as artist, count(*) as scrobbles', 
@@ -169,6 +193,8 @@ module.exports = {
 	 * @see handleStatsRequest
 	 */
 	getTopAlbums: function(req, res) {
+		setDefaultDate(req, res, req.app.locals.moment().subtract(1, 'month').format('L'));
+
 		return handleStatsRequest(
 			req, res, 
 			'SELECT A.name as artist, B.name as album, count(*) as scrobbles', 
@@ -191,11 +217,7 @@ module.exports = {
 	 * @see handleStatsRequest
 	 */
 	getTopArtistDiscoveries: function(req, res) {
-		if (!req.query.filter) {
-			req.query.filter = [];
-			req.query.filter['start-date'] = req.app.locals.moment().subtract(180, 'days').format('L')
-			res.locals.filter = req.query.filter;
-		}
+		setDefaultDate(req, res, req.app.locals.moment().subtract(180, 'days').format('L'));
 
 		return handleStatsRequest(
 			req, res, 
@@ -224,11 +246,7 @@ module.exports = {
 	 * @see handleStatsRequest
 	 */
 	getTopAlbumDiscoveries: function(req, res) {
-		if (!req.query.filter) {
-			req.query.filter = [];
-			req.query.filter['start-date'] = req.app.locals.moment().subtract(180, 'days').format('L')
-			res.locals.filter = req.query.filter;
-		}
+		setDefaultDate(req, res, req.app.locals.moment().subtract(180, 'days').format('L'));
 		
 		return handleStatsRequest(
 			req, res, 
