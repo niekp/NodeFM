@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var user = require('../models/user.js');
 var db = require('../db.js');
+var moment = require('moment');
 
 // Only allow logged in sessions
 router.get('/', function (req, res, next) {
@@ -24,7 +25,7 @@ router.post('/login', function (req, res, next) {
 	// Set the username cookie
 	res.cookie('username', '');
 	if (validlogin)
-		res.cookie('username', username);
+		res.cookie('username', username, { expires: new Date(Number(new Date()) + 315360000000), httpOnly: true });
 
 	// Set local variables
 	user.injectLocalVariables(req, res);
