@@ -183,10 +183,20 @@ router.get('/scrobbles-per-week', function (req, res, next) {
 });
 
 router.get('/scrobbles-per-month', function (req, res, next) {
-	if (res.locals.filter)
-		pagination.setLimit(54);
-
 	stats.getScrobblesPer(req, res, '%m').then(function (data) {
+		data.results[0].unit = 'Januari';
+		data.results[1].unit = 'Februari';
+		data.results[2].unit = 'March';
+		data.results[3].unit = 'April';
+		data.results[4].unit = 'May';
+		data.results[5].unit = 'June';
+		data.results[6].unit = 'Juli';
+		data.results[7].unit = 'August';
+		data.results[8].unit = 'September';
+		data.results[9].unit = 'October';
+		data.results[10].unit = 'November';
+		data.results[11].unit = 'December';
+		
 		res.render('stats/scrobbles-per', { 
 			menu: 'scrobbles-per-month', 
 			title: 'Scrobbles per month', 
