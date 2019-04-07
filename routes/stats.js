@@ -135,11 +135,39 @@ router.get('/scrobbles-per-hour', function (req, res, next) {
 	});
 });
 
-router.get('/scrobbles-per-week', function (req, res, next) {
-	if (res.locals.filter)
-		pagination.setLimit(54);
+router.get('/scrobbles-per-day', function (req, res, next) {
+	stats.getScrobblesPer(req, res, '%w').then(function (data) {
+		data.results[0].unit = 'Sunday';
+		data.results[1].unit = 'Monday';
+		data.results[2].unit = 'Tuesday';
+		data.results[3].unit = 'Wednesday';
+		data.results[4].unit = 'Thursday';
+		data.results[5].unit = 'Friday';
+		data.results[6].unit = 'Saturday';
+		
+		res.render('stats/scrobbles-per', { 
+			menu: 'scrobbles-per-day', 
+			title: 'Scrobbles per day', 
+			results: data.results,
+			topResult: data.topResult,
+			formatLabel: 'Day',
+			datefilter: true
+		});
+	}).catch(function (error) {
+		next(createError(500, error));
+	});
+});
 
-	stats.getScrobblesPer(req, res, '%Y-%W', 'DESC').then(function (data) {
+router.get('/scrobbles-per-week', function (req, res, next) {
+	pagination.setLimit(54);
+
+	stats.getScrobblesPer(req, res, '%W').then(function (data) {
+		if (data.results[52]) {
+			data.results[0].scrobbles += data.results[52].scrobbles;
+			data.results.pop();
+		}
+		console.log(data.results)
+
 		res.render('stats/scrobbles-per', { 
 			menu: 'scrobbles-per-week', 
 			title: 'Scrobbles per week', 
@@ -158,7 +186,7 @@ router.get('/scrobbles-per-month', function (req, res, next) {
 	if (res.locals.filter)
 		pagination.setLimit(54);
 
-	stats.getScrobblesPer(req, res, '%Y-%m', 'DESC').then(function (data) {
+	stats.getScrobblesPer(req, res, '%m', 'DESC').then(function (data) {
 		res.render('stats/scrobbles-per', { 
 			menu: 'scrobbles-per-month', 
 			title: 'Scrobbles per month', 
