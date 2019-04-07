@@ -1,5 +1,11 @@
 extends ../masterpage/layout-list
 
+prepend content
+	if active.substr(0, 4) === 'top-'
+		include ../navigation/tab-top
+	if active.indexOf('discoveries') >= 0
+		include ../navigation/tab-discoveries
+
 append before-table
 	if datefilter
 		// top-albums::before-table

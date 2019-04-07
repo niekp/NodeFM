@@ -1,5 +1,8 @@
 extends ../masterpage/layout-list
 
+prepend content
+	include ../navigation/tab-scrobbles-per
+
 append before-table
 	if datefilter
 		// scrobbles-per-hour
