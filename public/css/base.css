@@ -29,10 +29,12 @@ body {
   * Sidebar
   */
 
-/* Hide for mobile, show later */
-.sidebar {
-  /*display: none;*/
+@media (max-width: 768px) {
+  .sidebar {
+    overflow-x: hidden; /** The menu is 1px to wide so keep it in bounds.. */
+  }
 }
+
 @media (min-width: 768px) {
   .sidebar {
     position: fixed;
