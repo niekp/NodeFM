@@ -124,3 +124,7 @@ td.progress-td {
 form.datefilter, form.datefilter .input-group.date {
   margin-bottom: 15px;
 }
+
+.table-responsive table td {
+  max-width: 300px;
+}

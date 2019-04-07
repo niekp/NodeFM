@@ -1,4 +1,4 @@
-// nav::root
+// navbar-side::root
 block nav
   - var active = (menu ? menu : "index")
 
@@ -11,5 +11,5 @@ if loggedIn
         li(class=(active.indexOf('discoveries') >= 0 ? "active" : undefined))
             a(href='/stats/artist-discoveries') Top discoveries
         li(class=(active.substr(0, 13) === "scrobbles-per" ? "active" : undefined))
-            a(href='/stats/scrobbles-per-hour') Scrobbles per hour
+            a(href='/stats/scrobbles-per-hour') Scrobbles per
         

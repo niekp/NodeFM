@@ -21,5 +21,5 @@ block body
 
 				block pagination
 					// layout::pagination
-					if pagination
+					if pagination && pagination.pages.length > 1
 						include ../shared/pagination

@@ -1,0 +1,36 @@
+extends ../masterpage/layout-list
+
+prepend content
+	if active.substr(0, 4) === 'top-'
+		include ../navigation/tab-top
+	if active.indexOf('discoveries') >= 0
+		include ../navigation/tab-discoveries
+
+append before-table
+	if datefilter
+		// top-albums::before-table
+		include ../shared/date-filter
+
+append table-content
+	// top-albums::table-content
+
+	thead
+		tr
+			th Artist
+			th Album
+			th Track
+			th Scrobbles
+	tbody
+		each album in albums
+			tr
+				td #{album.artist}
+				td #{album.album}
+				td #{album.track}
+				td(class=(topResult ? "progress-td" : undefined))
+					if topResult
+						- var value = album.scrobbles
+						- var total = topResult.scrobbles
+						include ../shared/progress
+						
+					else
+						| #{album.scrobbles}

@@ -57,6 +57,21 @@ router.get('/albums', function (req, res, next) {
 	});
 });
 
+router.get('/tracks', function (req, res, next) {
+	stats.getTopTracks(req, res).then(function (data) {
+		res.render('stats/top-tracks', { 
+			menu: 'top-tracks', 
+			title: 'Top tracks', 
+			albums: data.results,
+			pagination: data.pagination,
+			topResult: data.topResult,
+			datefilter: true
+		});
+	}).catch(function (error) {
+		next(createError(500, error));
+	});
+});
+
 router.get('/artist-discoveries', function (req, res, next) {
 	stats.getTopArtistDiscoveries(req, res).then(function (data) {
 		res.render('stats/top-artists', { 
@@ -136,6 +151,22 @@ router.get('/scrobbles-per-month', function (req, res, next) {
 			topResult: data.topResult,
 			pagination: data.pagination,
 			formatLabel: 'Month',
+			datefilter: true
+		});
+	}).catch(function (error) {
+		next(createError(500, error));
+	});
+});
+
+router.get('/scrobbles-per-year', function (req, res, next) {
+	stats.getScrobblesPer(req, res, '%Y', 'DESC').then(function (data) {
+		res.render('stats/scrobbles-per', { 
+			menu: 'scrobbles-per-year', 
+			title: 'Scrobbles per year', 
+			results: data.results,
+			topResult: data.topResult,
+			pagination: data.pagination,
+			formatLabel: 'Year',
 			datefilter: true
 		});
 	}).catch(function (error) {

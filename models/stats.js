@@ -207,6 +207,22 @@ module.exports = {
 		);
 	},
 
+	getTopTracks: function(req, res) {
+		setDefaultDate(req, res, req.app.locals.moment().subtract(1, 'month').format('L'));
+
+		return handleStatsRequest(
+			req, res, 
+			'SELECT A.name as artist, B.name as album, T.name as track, count(*) as scrobbles', 
+			`FROM Scrobble as S
+			INNER JOIN Artist as A on A.id = S.artist_id
+			INNER JOIN Album as B on B.id = S.album_id
+			INNER JOIN Track as T on T.id = S.track_id`,
+			'GROUP by S.artist_id, S.album_id, S.track_id',
+			'ORDER by count(*) desc',
+			'SELECT COUNT(DISTINCT(album_id)) AS count FROM scrobble'			
+		);
+	},
+
 	/**
 	 * Get the top artists listened in the past 180 days and not listened before that.
 	 * So you get the discoveries of the past 180 days.
