@@ -186,7 +186,7 @@ router.get('/scrobbles-per-month', function (req, res, next) {
 	if (res.locals.filter)
 		pagination.setLimit(54);
 
-	stats.getScrobblesPer(req, res, '%m', 'DESC').then(function (data) {
+	stats.getScrobblesPer(req, res, '%m').then(function (data) {
 		res.render('stats/scrobbles-per', { 
 			menu: 'scrobbles-per-month', 
 			title: 'Scrobbles per month', 
