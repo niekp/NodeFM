@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var stats = require('../models/stats.js')
 var createError = require('http-errors');
+var pagination = require('../models/pagination.js')
 
 // Only allow logged in sessions
 router.get('/*', function (req, res, next) {
@@ -88,18 +89,59 @@ router.get('/album-discoveries', function (req, res, next) {
 
 
 router.get('/scrobbles-per-hour', function (req, res, next) {
-	stats.getScrobblesPerHour(req, res).then(function (data) {
-		res.render('stats/scrobbles-per-hour', { 
+	pagination.setLimit(24);
+
+	stats.getScrobblesPer(req, res, '%H').then(function (data) {
+		res.render('stats/scrobbles-per', { 
 			menu: 'scrobbles-per-hour', 
 			title: 'Scrobbles per hour', 
-			hours: data.results,
-			pagination: data.pagination,
+			results: data.results,
 			topResult: data.topResult,
+			formatLabel: 'Hour',
 			datefilter: true
 		});
 	}).catch(function (error) {
 		next(createError(500, error));
 	});
 });
+
+router.get('/scrobbles-per-week', function (req, res, next) {
+	if (res.locals.filter)
+		pagination.setLimit(54);
+
+	stats.getScrobblesPer(req, res, '%Y-%W', 'DESC').then(function (data) {
+		res.render('stats/scrobbles-per', { 
+			menu: 'scrobbles-per-week', 
+			title: 'Scrobbles per week', 
+			results: data.results,
+			topResult: data.topResult,
+			pagination: data.pagination,
+			formatLabel: 'Week',
+			datefilter: true
+		});
+	}).catch(function (error) {
+		next(createError(500, error));
+	});
+});
+
+router.get('/scrobbles-per-month', function (req, res, next) {
+	if (res.locals.filter)
+		pagination.setLimit(54);
+
+	stats.getScrobblesPer(req, res, '%Y-%m', 'DESC').then(function (data) {
+		res.render('stats/scrobbles-per', { 
+			menu: 'scrobbles-per-month', 
+			title: 'Scrobbles per month', 
+			results: data.results,
+			topResult: data.topResult,
+			pagination: data.pagination,
+			formatLabel: 'Month',
+			datefilter: true
+		});
+	}).catch(function (error) {
+		next(createError(500, error));
+	});
+});
+
 
 module.exports = router;

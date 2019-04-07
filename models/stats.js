@@ -268,18 +268,15 @@ module.exports = {
 		);
 	},
 
-	getScrobblesPerHour: function(req, res) {
-		// Manually set the limit
-		pagination.setLimit(24);
-
+	getScrobblesPer: function(req, res, format, orderDirection = 'ASC') {
 		return new Promise((resolve, reject) => {
 			handleStatsRequest(
 				req, res,
-				`SELECT STRFTIME('%H', DATETIME(utc, 'unixepoch')) AS \`hour\`, COUNT(*) AS scrobbles`,
+				`SELECT STRFTIME('${format}', DATETIME(utc, 'unixepoch')) AS \`unit\`, COUNT(*) AS scrobbles`,
 				'FROM Scrobble',
-				'GROUP BY `hour`',
-				`ORDER BY STRFTIME('%H', DATETIME(utc, 'unixepoch'))`,
-				`SELECT COUNT(DISTINCT(STRFTIME('%H', DATETIME(utc, 'unixepoch')))) 'count' FROM Scrobble`
+				'GROUP BY `unit`',
+				`ORDER BY STRFTIME('${format}', DATETIME(utc, 'unixepoch')) ${orderDirection}`,
+				`SELECT COUNT(DISTINCT(STRFTIME('${format}', DATETIME(utc, 'unixepoch')))) 'count' FROM Scrobble`
 			).then(function (data) {
 				// Fix the top result
 				data.results.forEach(function(record) {
@@ -288,11 +285,7 @@ module.exports = {
 					}
 				});
 
-				// Remove the pagination
-				data.pagination = null;
-
 				resolve(data);
-
 			}).catch(function(error) {reject(error)});
 
 		});

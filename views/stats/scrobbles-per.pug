@@ -10,17 +10,17 @@ append table-content
 	
 	thead
 		tr
-			th Hour
+			th #{formatLabel}
 			th Scrobbles
 	tbody
-		each hour in hours
+		each result in results
 			tr
-				td #{hour.hour}
+				td #{result.unit}
 				td(class=(topResult ? "progress-td" : undefined))
 					if topResult
-						- var value = hour.scrobbles
+						- var value = result.scrobbles
 						- var total = topResult.scrobbles
 						include ../shared/progress
 						
 					else
-						| #{hour.scrobbles}
+						| #{result.scrobbles}

@@ -19,4 +19,8 @@ if loggedIn
     ul.nav.nav-sidebar
         li(class=(active === "scrobbles-per-hour" ? "active" : undefined))
             a(href='/stats/scrobbles-per-hour') Scrobbles per hour
-            
+        li(class=(active === "scrobbles-per-week" ? "active" : undefined))
+            a(href='/stats/scrobbles-per-week') Scrobbles per week
+        li(class=(active === "scrobbles-per-month" ? "active" : undefined))
+            a(href='/stats/scrobbles-per-month') Scrobbles per month
+        
