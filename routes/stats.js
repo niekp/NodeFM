@@ -62,7 +62,7 @@ router.get('/tracks', function (req, res, next) {
 		res.render('stats/top-tracks', { 
 			menu: 'top-tracks', 
 			title: 'Top tracks', 
-			albums: data.results,
+			tracks: data.results,
 			pagination: data.pagination,
 			topResult: data.topResult,
 			datefilter: true
@@ -93,6 +93,21 @@ router.get('/album-discoveries', function (req, res, next) {
 			menu: 'album-discoveries', 
 			title: 'Top album discoveries', 
 			albums: data.results,
+			pagination: data.pagination,
+			topResult: data.topResult,
+			datefilter: true
+		});
+	}).catch(function (error) {
+		next(createError(500, error));
+	});
+});
+
+router.get('/track-discoveries', function (req, res, next) {
+	stats.getTopTrackDiscoveries(req, res).then(function (data) {
+		res.render('stats/top-tracks', { 
+			menu: 'track-discoveries', 
+			title: 'Top track discoveries', 
+			tracks: data.results,
 			pagination: data.pagination,
 			topResult: data.topResult,
 			datefilter: true

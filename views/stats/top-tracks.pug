@@ -8,11 +8,11 @@ prepend content
 
 append before-table
 	if datefilter
-		// top-albums::before-table
+		// top-tracks::before-table
 		include ../shared/date-filter
 
 append table-content
-	// top-albums::table-content
+	// top-tracks::table-content
 
 	thead
 		tr
@@ -21,16 +21,16 @@ append table-content
 			th Track
 			th Scrobbles
 	tbody
-		each album in albums
+		each track in tracks
 			tr
-				td #{album.artist}
-				td #{album.album}
-				td #{album.track}
+				td #{track.artist}
+				td #{track.album}
+				td #{track.track}
 				td(class=(topResult ? "progress-td" : undefined))
 					if topResult
-						- var value = album.scrobbles
+						- var value = track.scrobbles
 						- var total = topResult.scrobbles
 						include ../shared/progress
 						
 					else
-						| #{album.scrobbles}
+						| #{track.scrobbles}

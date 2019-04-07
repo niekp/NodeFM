@@ -284,6 +284,45 @@ module.exports = {
 		);
 	},
 
+	/**
+	 * Get the top tracks listened in the past 180 days and not listened before that.
+	 * So you get the discoveries of the past 180 days.
+	 * 
+	 * @param {Request} req
+	 * @param {Response} res
+	 * @returns {Promise}
+	 * @see handleStatsRequest
+	 */
+	getTopTrackDiscoveries: function(req, res) {
+		setDefaultDate(req, res, req.app.locals.moment().subtract(180, 'days').format('L'));
+		
+		return handleStatsRequest(
+			req, res, 
+			'SELECT A.name as artist, B.name as album, T.name as track, count(*) as scrobbles', 
+			`FROM Scrobble as S
+			INNER JOIN Artist as A on A.id = S.artist_id
+			INNER JOIN Album as B on B.id = S.album_id
+			INNER JOIN Track as T on T.id = S.track_id`,
+			'GROUP by s.artist_id, s.album_id, S.track_id',
+			'ORDER by count(*) desc',
+
+			`SELECT COUNT(DISTINCT(artist_id)) AS count 
+			FROM scrobble`,
+			'WHERE utc >= ${start-date} AND utc <= ${end-date} '+
+			'AND (S.artist_id || \'-\' || S.album_id|| \'-\' || S.track_id) not in ('+
+				'SELECT DISTINCT(artist_id || \'-\' || album_id|| \'-\' || track_id) AS record FROM Scrobble WHERE utc < ${start-date}'+
+			')'
+		);
+	},
+
+	/**
+	 * Top scrobbles per hour, month, ... whatever you put into format
+	 * 
+	 * @param {Request} req 
+	 * @param {Response} res 
+	 * @param {string} format - sqlite strftime format like %H, %Y
+	 * @param {*} orderDirection - ASC or DESC
+	 */
 	getScrobblesPer: function(req, res, format, orderDirection = 'ASC') {
 		return new Promise((resolve, reject) => {
 			handleStatsRequest(
