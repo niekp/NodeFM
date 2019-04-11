@@ -60,7 +60,7 @@ function injectLocal(req, res, next){
 // First inject variables
 app.get('/*', injectLocal);
 
-// Setup routes
+// Setup the routes
 app.use('/', indexRouter);
 app.use('/settings', settingsRouter);
 app.use('/stats', statsRouter);
