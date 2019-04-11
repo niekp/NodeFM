@@ -2,6 +2,7 @@ extends ../masterpage/layout-list
 
 append before-table
 	if datefilter
+		small Artists that you've listened to in the filtered period but haven't since.
 		// blasts-from-the-past::before-table
 		- var hideSuggestions = true
 		include ../shared/date-filter
