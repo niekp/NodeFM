@@ -227,5 +227,20 @@ router.get('/scrobbles-per-year', function (req, res, next) {
 	});
 });
 
+router.get('/blasts-from-the-past', function (req, res, next) {
+	stats.getBlastsFromThePast(req, res).then(function (data) {
+		res.render('stats/blasts-from-the-past', { 
+			menu: 'blasts-from-the-past', 
+			title: 'Blasts from the past', 
+			artists: data.results,
+			topResult: data.topResult,
+			pagination: data.pagination,
+			datefilter: true
+		});
+	}).catch(function (error) {
+		next(createError(500, error));
+	});
+});
+
 
 module.exports = router;

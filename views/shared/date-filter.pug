@@ -24,12 +24,13 @@ block date-filter
 				span.input-group-btn
 					button.btn.btn-primary.btn-sm(type='submit') filter
 
-		div.btn-group
-			button.btn.btn-default.btn-sm(type='button' data-datefilter='1 week') 1 week
-			button.btn.btn-default.btn-sm(type='button' data-datefilter='1 month') 1 month
-			button.btn.btn-default.btn-sm(type='button' data-datefilter='6 months') 6 months
-			button.btn.btn-default.btn-sm(type='button' data-datefilter='1 year') 1 year
-			button.btn.btn-default.btn-sm(type='button' data-datefilter='empty') all time
+		if !hideSuggestions
+			div.btn-group
+				button.btn.btn-default.btn-sm(type='button' data-datefilter='1 week') 1 week
+				button.btn.btn-default.btn-sm(type='button' data-datefilter='1 month') 1 month
+				button.btn.btn-default.btn-sm(type='button' data-datefilter='6 months') 6 months
+				button.btn.btn-default.btn-sm(type='button' data-datefilter='1 year') 1 year
+				button.btn.btn-default.btn-sm(type='button' data-datefilter='empty') all time
 
 append scripts
 

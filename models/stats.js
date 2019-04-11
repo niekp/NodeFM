@@ -117,8 +117,8 @@ function setDefaultDate(req, res, startdate = null, enddate = null) {
 		req.query.filter['start-date'] = startdate
 		res.locals.filter = req.query.filter;
 	}
-	if (enddate && req.query.filter['enddate-date'] === undefined) {
-		req.query.filter['start-date'] = startdate
+	if (enddate && req.query.filter['end-date'] === undefined) {
+		req.query.filter['end-date'] = enddate
 		res.locals.filter = req.query.filter;
 	}
 }
@@ -140,9 +140,17 @@ function prepareUtcWhere(req, res, where) {
 	if (req.query.filter && req.query.filter['end-date']) {
 		enddate = req.app.locals.moment(req.query.filter['end-date'] + ' 23:59:59', "DD-MM-YYYY HH:mm:ss").format('X');
 	}
+
+	if (startdate && parseInt(enddate) < parseInt(startdate)) {
+		console.log('set enddate', parseInt(enddate), '<', parseInt(startdate), (parseInt(enddate) < parseInt(startdate)))
+		enddate = startdate;
+		req.query.filter['end-date'] = req.app.locals.moment(enddate, 'X').format('L');
+		res.locals.filter = req.query.filter;
+	}
+	631148400
+	1523483999
 	where = where.replace(/\$\{start\-date\}/g, startdate);
 	where = where.replace(/\$\{end\-date\}/g, enddate);
-
 	return where
 }
 
@@ -180,7 +188,7 @@ module.exports = {
 			'SELECT a.name as artist, count(*) as scrobbles', 
 			`FROM Scrobble as S
 			INNER JOIN Artist as A on A.id = S.artist_id`,
-			'GROUP by s.artist_id',
+			'GROUP by A.name',
 			'ORDER by count(*) desc',
 			'SELECT COUNT(DISTINCT(artist_id)) AS count FROM scrobble'
 		);
@@ -201,12 +209,18 @@ module.exports = {
 			`FROM Scrobble as S
 			INNER JOIN Artist as A on A.id = S.artist_id
 			INNER JOIN Album as B on B.id = S.album_id`,
-			'GROUP by S.artist_id, S.album_id',
+			'GROUP by A.name, B.name',
 			'ORDER by count(*) desc',
 			'SELECT COUNT(DISTINCT(album_id)) AS count FROM scrobble'			
 		);
 	},
 
+	/**
+	 * @param {Request} req 
+	 * @param {Response} res 
+	 * @returns {Promise}
+	 * @see handleStatsRequest
+	 */
 	getTopTracks: function(req, res) {
 		setDefaultDate(req, res, req.app.locals.moment().subtract(1, 'month').format('L'));
 
@@ -344,7 +358,40 @@ module.exports = {
 			}).catch(function(error) {reject(error)});
 
 		});
+	},
 
-	}
+	/**
+	 * Get the top artists that haven't got any scrobbles since the end-date. 
+	 * @param {Request} req 
+	 * @param {Response} res 
+	 * @returns {Promise}
+	 * @see handleStatsRequest
+	 */
+	getBlastsFromThePast: function(req, res) {
+		setDefaultDate(req, res, 
+			null,
+			req.app.locals.moment().subtract(1, 'year').format('L'));
+
+		let where = prepareUtcWhere(req, res, 'WHERE S.utc >= ${start-date} AND utc <= ${end-date}');
+
+		return handleStatsRequest(
+			req, res, 
+			'SELECT A.name as artist, count(*) as scrobbles, (SELECT utc FROM Scrobble as S2 WHERE S2.artist_id = S.artist_id ORDER BY utc DESC LIMIT 0, 1) AS lastscrobble', 
+			`FROM Scrobble as S
+			INNER JOIN Artist as A on A.id = S.artist_id
+			${where}`,
+			'GROUP by S.artist_id',
+			'ORDER by count(*) desc',
+
+			'SELECT COUNT(DISTINCT(artist_id)) AS count FROM scrobble AS S INNER JOIN Artist as A on A.id = s.artist_id', 
+
+			'AND '+
+			' A.name NOT IN ('+
+				'SELECT DISTINCT(A.name) AS record FROM Scrobble AS S '+
+				'INNER JOIN Artist as A on A.id = S.artist_id '+
+				'WHERE utc > ${end-date}'+
+			')'
+		);
+	},
 }
 

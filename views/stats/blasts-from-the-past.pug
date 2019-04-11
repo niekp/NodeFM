@@ -1,0 +1,29 @@
+extends ../masterpage/layout-list
+
+append before-table
+	if datefilter
+		// blasts-from-the-past::before-table
+		- var hideSuggestions = true
+		include ../shared/date-filter
+
+append table-content
+	// blasts-from-the-past::table-content
+
+	thead
+		tr
+			th Artist
+			th Last scrobble
+			th Scrobbles
+	tbody
+		each artist in artists
+			tr
+				td #{artist.artist}
+				td #{moment(artist.lastscrobble, 'X').format('L LT')}
+				td(class=(topResult ? "progress-td" : undefined))
+					if topResult
+						- var value = artist.scrobbles
+						- var total = topResult.scrobbles
+						include ../shared/progress
+
+					else
+						| #{artist.scrobbles}
