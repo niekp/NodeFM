@@ -19,6 +19,7 @@ module.exports = {
 
     getExpires: function(duration) {
         let seconds;
+        
         switch (duration) {
             case 'half-hour':
                 seconds = 60 * 30;
@@ -41,6 +42,10 @@ module.exports = {
     },
 
     getCacheName: function(req, res) {
+        if (req && req.app.get('env') === 'development') {
+            return 'dev:' + new Date().getTime();
+        }
+
         return res.locals.username + '/' + req.url + '/' + JSON.stringify(req.params) + '/' + JSON.stringify(req.query);
     },
 

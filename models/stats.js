@@ -147,8 +147,7 @@ function prepareUtcWhere(req, res, where) {
 		req.query.filter['end-date'] = req.app.locals.moment(enddate, 'X').format('L');
 		res.locals.filter = req.query.filter;
 	}
-	631148400
-	1523483999
+
 	where = where.replace(/\$\{start\-date\}/g, startdate);
 	where = where.replace(/\$\{end\-date\}/g, enddate);
 	return where
