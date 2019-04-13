@@ -15,10 +15,22 @@ const migrationsFolder = path.join(__dirname, '../migrations');
 // Don't run these files as migration
 const blacklist = ['helper.js'];
 
+/**
+ * Set the success status of a migration.
+ * @param {string} user 
+ * @param {string} migration_file 
+ * @param {string} status 
+ */
 function setStatus(user, migration_file, status) {
     database.executeQuery(`INSERT INTO Migration (name, status, utc) VALUES('${migration_file}', '${status}', CURRENT_TIMESTAMP)`, user);
 }
 
+/**
+ * Check if a specific migration already has been run for a user.
+ * @param {string} user 
+ * @param {string} migration_file 
+ * @return {Promise} boolean
+ */
 function hasMigrationRun(user, migration_file) {
     return new Promise((resolve, reject) => {
         database.executeQuery(`SELECT name FROM Migration WHERE name = '${migration_file}' AND status = 'SUCCESS'`, user).then(function (data) {

@@ -1,5 +1,19 @@
 var helper = require('./helper.js');
 
+// As far as i know interfaces aren't a thing in JS. So for future migrations.
+
+/*
+function ClassName(user) {
+    this.run = function();
+}
+
+module.exports = ClassName
+*/
+
+/**
+ * Add the migration table so future migrations can be automaticly run.
+ * @param {string} user 
+ */
 function Migration(user) {
     migration_helper = new helper(user);
 
