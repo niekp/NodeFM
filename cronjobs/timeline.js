@@ -21,7 +21,6 @@ function getLastRun(username) {
             if (!data.length) {
                 resolve(157770000); // The minimum. The api is a bit buggy so it contains some 1970 timestamps.
             } else {
-                console.log(data[0].utc)
                 resolve(data[0].utc);
             }
 
