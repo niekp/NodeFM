@@ -13,7 +13,7 @@ var pagination = require('./pagination.js')
  * @param {string} select_count - If COUNT(*) from_where is not sufficient or not efficient enought pass a complete count query. Note: Define the count `AS count`
  * @returns {Promise} - and in the resolve an object { results: {query result}, pagination: {pagination}, topResult: {top result without pagination} }
  */
-function handleStatsRequest(req, res, select, from_where, group_by, order_by, select_count = null, utc_filter = null) {
+function handleStatsRequest(req, res, select, from_where, group_by, order_by, select_count = null, utc_filter = null, top_query_order = null) {
 	// Setup the pagination
 	pagination.resetDefault();
 	pagination.calculate(req);
@@ -46,10 +46,10 @@ function handleStatsRequest(req, res, select, from_where, group_by, order_by, se
 
 
 	// Execute the count query
-	var count = database.executeQuery(select_count, res.locals.username);
+	let count = database.executeQuery(select_count, res.locals.username);
 
 	// Execute the select query
-	var results = database.executeQuery(`
+	let results = database.executeQuery(`
 		${select}
 		${from_where}
 		${utc_filter}
@@ -58,13 +58,17 @@ function handleStatsRequest(req, res, select, from_where, group_by, order_by, se
 		LIMIT ${pagination.offset},${pagination.limit}`,
 		res.locals.username);
 		
+	if (!top_query_order) {
+		top_query_order = order_by;
+	}
+
 	// Get the #1 result, without the limit/offset. Used to show a percentage bar
-	var topResult = database.executeQuery(`
+	let topResult = database.executeQuery(`
 		${select}
 		${from_where}
 		${utc_filter}
 		${group_by}
-		${order_by}
+		${top_query_order}
 		LIMIT 0, 1`,
 		res.locals.username);
 
@@ -392,5 +396,26 @@ module.exports = {
 			')'
 		);
 	},
+	
+	/**
+	 * Get the top artists per period.
+	 * Based on data filled with /cronjobs/timeline.js
+	 * @param {Request} req 
+	 * @param {Response} res 
+	 * @returns {Promise}
+	 * @see handleStatsRequest
+	 */
+	getTimeline: function(req, res) {
+		return handleStatsRequest(
+			req, res, 
+			'SELECT period, artist, scrobbles', 
+			`FROM ArtistTimeline`,
+			'',
+			'ORDER BY period DESC',
+			'SELECT COUNT(*) AS count FROM ArtistTimeline', null, 
+			'ORDER BY scrobbles DESC'
+		);
+	},
+
 }
 

@@ -1,0 +1,23 @@
+extends ../masterpage/layout-list
+
+append table-content
+	// top-artists::table-content
+
+	thead
+		tr
+			th Period
+			th Artist
+			th Scrobbles
+	tbody
+		each artist in artists
+			tr
+				td #{artist.period}
+				td #{artist.artist}
+				td(class=(topResult ? "progress-td" : undefined))
+					if topResult
+						- var value = artist.scrobbles
+						- var total = topResult.scrobbles
+						include ../shared/progress
+
+					else
+						| #{artist.scrobbles}

@@ -203,7 +203,6 @@ router.get('/scrobbles-per-week',
 				data.results[0].scrobbles += data.results[52].scrobbles;
 				data.results.pop();
 			}
-			console.log(data.results)
 
 			res.render('stats/scrobbles-per', { 
 				menu: 'scrobbles-per-week', 
@@ -285,6 +284,24 @@ router.get('/blasts-from-the-past',
 				topResult: data.topResult,
 				pagination: data.pagination,
 				datefilter: true
+			});
+		}).catch(function (error) {
+			next(createError(500, error));
+		});
+	}
+);
+
+router.get('/timeline', 
+	function (req, res, next) {cache_helper.setCacheName(req, res, next);}, 
+	cache.route(cache_helper.getExpires('day')), 
+	function (req, res, next) {
+		stats.getTimeline(req, res).then(function (data) {
+			res.render('stats/timeline', { 
+				menu: 'timeline', 
+				title: 'Timeline of top artists', 
+				artists: data.results,
+				topResult: data.topResult,
+				pagination: data.pagination,
 			});
 		}).catch(function (error) {
 			next(createError(500, error));
