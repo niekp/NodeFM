@@ -38,13 +38,13 @@ var database = (function () {
      * @param {string} username 
 	 * @returns {Promise} - resolve on connect, rectect on error
 	 */
-	this.connect = function(username) {
+	this.connect = function(username, mode = sqlite3.OPEN_READONLY) {
 		return new Promise((resolve, reject) => {
 			let database_path = this.getDatabasePath(username);
 
 			try {
 				if (fs.existsSync(database_path)) {
-					database[username] = new sqlite3.Database(database_path, sqlite3.OPEN_READONLY, (error) => {
+					database[username] = new sqlite3.Database(database_path, mode, (error) => {
 						if (error) {
 							reject("Error connecting to the database", error);
 						}
