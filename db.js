@@ -40,20 +40,24 @@ var database = (function () {
 	 */
 	this.connect = function(username, mode = sqlite3.OPEN_READONLY) {
 		return new Promise((resolve, reject) => {
-			let database_path = this.getDatabasePath(username);
+			if (this.isConnected(username)) {
+				resolve(true);
+			} else {
+				let database_path = this.getDatabasePath(username);
 
-			try {
-				if (fs.existsSync(database_path)) {
-					database[username] = new sqlite3.Database(database_path, mode, (error) => {
-						if (error) {
-							reject("Error connecting to the database", error);
-						}
+				try {
+					if (fs.existsSync(database_path)) {
+						database[username] = new sqlite3.Database(database_path, mode, (error) => {
+							if (error) {
+								reject("Error connecting to the database", error);
+							}
 
-						resolve(true);
-					});
+							resolve(true);
+						});
+					}
+				} catch(error) {
+					reject("Error connecting to the database", error);
 				}
-			} catch(error) {
-				reject("Error connecting to the database", error);
 			}
 		});
 	}
@@ -66,19 +70,49 @@ var database = (function () {
 	 */
 	this.executeQuery = function(query, username) {
 		return new Promise((resolve, reject) => {
-			if (!this.isConnected(username)) {
-				reject('Database closed or not found');
-			}
-			
-			database[username].serialize(() => {
-				database[username].all(query, (error, result) => {
-					if (error) {
-						reject(error);
-					}
-
-					resolve(result);
+			if (this.isConnected(username)) {
+				// Execute the query
+				database[username].serialize(() => {
+					database[username].all(query, (error, result) => {
+						if (error) {
+							reject(error);
+						}
+	
+						resolve(result);
+					});
 				});
-			});
+
+			} else { // Try to reconnect and execute the query
+				if (database[username] && database[username].open === false) {
+					this.connect(username, database[username].mode).then(function (success) {
+						if (success) {
+							database[username].serialize(() => {
+								database[username].all(query, (error, result) => {
+									if (error) {
+										reject('Error reopening DB: ' + error);
+									}
+				
+									// Execute the query
+									database[username].serialize(() => {
+										database[username].all(query, (error, result) => {
+											if (error) {
+												reject(error);
+											}
+						
+											resolve(result);
+										});
+									});
+
+								});
+							});
+						} else {
+							reject('Database closed. Reopening failed');
+						}
+					})
+				} else {
+					reject('Database closed.');
+				}
+			}
 		});
 	}
   

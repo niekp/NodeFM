@@ -22,7 +22,9 @@ const blacklist = ['helper.js'];
  * @param {string} status 
  */
 function setStatus(user, migration_file, status) {
-    database.executeQuery(`INSERT INTO Migration (name, status, utc) VALUES('${migration_file}', '${status}', CURRENT_TIMESTAMP)`, user);
+    database.executeQuery(`INSERT INTO Migration (name, status, utc) VALUES('${migration_file}', '${status}', CURRENT_TIMESTAMP)`, user).catch(function(error) {
+        console.error('set status', user, error);
+    });
 }
 
 /**
@@ -36,7 +38,7 @@ function hasMigrationRun(user, migration_file) {
         database.executeQuery(`SELECT name FROM Migration WHERE name = '${migration_file}' AND status = 'SUCCESS'`, user).then(function (data) {
             resolve(data.length > 0)
         }).catch(function(error) {
-            if (error.toString().indexOf('no such table: Migration')) {
+            if (error.toString().indexOf('no such table: Migration') >= 0) {
                 resolve(false);
             } else {
                 reject(error);
@@ -47,7 +49,7 @@ function hasMigrationRun(user, migration_file) {
 
 fs.readdir(migrationsFolder, function (error, files) {
     if (error) {
-        return console.log('Unable to scan migrations: ' + error);
+        return console.error('Unable to scan migrations: ' + error);
     }
 
     // Loop through all migrations
@@ -61,7 +63,7 @@ fs.readdir(migrationsFolder, function (error, files) {
         // Loop through all users
         fs.readdir(database_folder, function (error, files) {
             if (error) {
-                return console.log('Unable to scan users: ' + error);
+                return console.error('Unable to scan users: ' + error);
             }
 
             files.forEach(function (user_file) {
@@ -86,6 +88,8 @@ fs.readdir(migrationsFolder, function (error, files) {
                         }).catch(function(error) {
                             console.error(error);
                         });
+                    }).catch(function(error) {
+                        console.error(error);
                     });
                 }
 
