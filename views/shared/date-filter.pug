@@ -1,7 +1,9 @@
 append styles
+	// date-filter::styles
 	link(rel='stylesheet', href='https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/css/bootstrap-datepicker.min.css')
 
 block date-filter
+	// date-filter::date-filter
 	form.datefilter(method='get')
 		.input-group.date
 			#datepicker.input-daterange.input-group
@@ -33,7 +35,7 @@ block date-filter
 				button.btn.btn-default.btn-sm(type='button' data-datefilter='empty') all time
 
 append scripts
-
+	// date-filter::scripts
 	script(type='text/javascript', src='https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/js/bootstrap-datepicker.min.js')
 	script(type='text/javascript', src='https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/locales/bootstrap-datepicker.' + moment.locale() + '.min.js')
 	script(type='text/javascript', src='../js/date-filter.js')

@@ -1,6 +1,7 @@
 extends ../masterpage/layout-list
 
 prepend content
+	// top-artists::content
 	if active.substr(0, 4) === 'top-'
 		include ../navigation/tab-top
 	if active.indexOf('discoveries') >= 0

@@ -4,14 +4,13 @@ prepend content
 	include ../navigation/tab-scrobbles-per
 
 append before-table
+	// scrobbles-per::before-table
 	if (active !== "scrobbles-per-year")
 		if datefilter
-			// scrobbles-per-hour
 			include ../shared/date-filter
 
 append table-content
-	// scrobbles-per-hour::table-content
-	
+	// scrobbles-per::table-content
 	thead
 		tr
 			th #{formatLabel}
