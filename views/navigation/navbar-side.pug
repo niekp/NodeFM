@@ -14,5 +14,5 @@ if loggedIn
             a(href='/stats/scrobbles-per-hour') Scrobbles per
         li(class=(active === "blasts-from-the-past" ? "active" : undefined))
             a(href='/stats/blasts-from-the-past') Blasts from the past        
-        li(class=(active === "timeline" ? "active" : undefined))
-            a(href='/stats/timeline') Timeline of top artists
+        li(class=(active.substr(0, 8) === "timeline" ? "active" : undefined))
+            a(href='/stats/timeline-month') Timeline of top artists

@@ -1,10 +1,13 @@
 extends ../masterpage/layout-list
 
+prepend content
+	include ../navigation/tab-timeline
+
 append table-content
 	// timeline::table-content
 	thead
 		tr
-			th Period
+			th #{periodLabel}
 			th Artist
 			th Scrobbles
 	tbody

@@ -31,6 +31,44 @@ function MigrationHelper(user) {
         });
     }
 
+     /**
+     * Check if the table exists. If not execute the query (the create table)
+     * @param {string} table
+     * @param {string} column
+     * @param {string} type
+     * @return {Promise} resolve when complete
+     */
+    this.addColumn = function(table, column, type) {
+        return new Promise((resolve, reject) => {
+            tableExists(table).then(function (table_exists) {
+                if (table_exists) {
+
+                    // Check if the column exists
+                    columnExists(table, column).then(function(column_exist) {
+                        if (!column_exist) {
+                            executeQuery(`ALTER TABLE ${table} ADD COLUMN ${column} ${type}`).then(function () {
+                                resolve();
+                            }).catch(function (error) {
+                                reject(error);
+                            });
+                        } else {
+                            resolve();
+                        }
+                        
+                    }).catch(function (error) {
+                        reject(error);
+                    });
+                
+
+                } else {
+                    reject('Table doesn\'t exist');
+                }
+            }).catch(function (error) {
+                reject(error);
+            });
+        });
+    }
+
     /**
      * Internal function to check if a table exists
      * @param {string} table 
@@ -42,6 +80,32 @@ function MigrationHelper(user) {
     
             query.then(function(data) {
                 resolve(data.length > 0);
+            }).catch(function(error) {
+                reject(error);
+            })
+
+        });
+    }
+
+    /**
+     * Internal function to check if a column exists
+     * @param {string} table 
+     * @param {string} column 
+     * @returns {Promise} resolve true if exists.
+     */
+    var columnExists = function(table, column) {
+        return new Promise((resolve, reject) => {
+            var query = executeQuery(`PRAGMA table_info('${table}')`);
+    
+            query.then(function(data) {
+                exists = false;
+                data.forEach(function(row) {
+                    if (row.name === column) {
+                        exists = true;
+                    }
+                });
+
+                resolve(exists);
             }).catch(function(error) {
                 reject(error);
             })

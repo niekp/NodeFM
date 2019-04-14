@@ -294,7 +294,7 @@ router.get('/blasts-from-the-past',
 	}
 );
 
-router.get('/timeline', 
+router.get('/timeline-month', 
 	function (req, res, next) {cache_helper.setCacheName(req, res, next);}, 
 	cache.route(cache_helper.getExpires('day')), 
 	function (req, res, next) {
@@ -302,11 +302,33 @@ router.get('/timeline',
 
 		stats.getTimeline(req, res).then(function (data) {
 			res.render('stats/timeline', { 
-				menu: 'timeline', 
+				menu: 'timeline-month', 
 				title: 'Timeline of top artists', 
 				artists: data.results,
 				topResult: data.topResult,
 				pagination: data.pagination,
+				periodLabel: 'Month'
+			});
+		}).catch(function (error) {
+			next(createError(500, error));
+		});
+	}
+);
+
+router.get('/timeline-week', 
+	function (req, res, next) {cache_helper.setCacheName(req, res, next);}, 
+	cache.route(cache_helper.getExpires('day')), 
+	function (req, res, next) {
+		pagination.setLimit(53);
+
+		stats.getTimeline(req, res, '%Y-%W').then(function (data) {
+			res.render('stats/timeline', { 
+				menu: 'timeline-week', 
+				title: 'Timeline of top artists', 
+				artists: data.results,
+				topResult: data.topResult,
+				pagination: data.pagination,
+				periodLabel: 'Week'
 			});
 		}).catch(function (error) {
 			next(createError(500, error));
