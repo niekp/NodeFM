@@ -295,6 +295,8 @@ router.get('/timeline',
 	function (req, res, next) {cache_helper.setCacheName(req, res, next);}, 
 	cache.route(cache_helper.getExpires('day')), 
 	function (req, res, next) {
+		pagination.setLimit(200);
+
 		stats.getTimeline(req, res).then(function (data) {
 			res.render('stats/timeline', { 
 				menu: 'timeline', 
