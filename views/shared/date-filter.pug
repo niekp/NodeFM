@@ -1,6 +1,6 @@
 append styles
 	// date-filter::styles
-	link(rel='stylesheet', href='https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/css/bootstrap-datepicker.min.css')
+	link(rel='stylesheet', href='../vendor/css/bootstrap-datepicker.min.css')
 
 block date-filter
 	// date-filter::date-filter
@@ -36,8 +36,12 @@ block date-filter
 
 append scripts
 	// date-filter::scripts
-	script(type='text/javascript', src='https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/js/bootstrap-datepicker.min.js')
-	script(type='text/javascript', src='https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/locales/bootstrap-datepicker.' + moment.locale() + '.min.js')
+	script(type='text/javascript', src='../vendor/js/bootstrap-datepicker.min.js')
+	if (moment.locale() === 'nl')
+		script(type='text/javascript', src='../vendor/js/bootstrap-datepicker.nl.min.js')
+	else if (moment.locale() !== 'en')
+		script(type='text/javascript', src='https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/locales/bootstrap-datepicker.' + moment.locale() + '.min.js')
+		
 	script(type='text/javascript', src='../js/date-filter.js')
 	script(type='text/javascript', src='../vendor/js/moment-with-locales.js')
 
