@@ -91,7 +91,7 @@ function saveTopArtist(topArtistPromise, period, username, format) {
         topArtistPromise.then(function (artist) {
             if (artist) {
                 database.executeQuery(`DELETE FROM ArtistTimeline WHERE format = '${format}' AND period = '${period}'`, username).then(function () {
-                    database.executeQuery(`INSERT INTO ArtistTimeline (artist, period, scrobbles, format) VALUES ('${artist.name}', '${period}', ${artist.count}, '${format}')`, username).then(function() {
+                    database.executeQuery(`INSERT INTO ArtistTimeline (artist, period, scrobbles, format) VALUES (?, ?, ?, ?)`, username, [artist.name, period, artist.count, format]).then(function() {
                         resolve();
                     }).catch(function (error) {
                         console.error(error);
@@ -131,7 +131,6 @@ module.exports = {
 
                         [['%Y-%m', 12], ['%Y-%W', 53]].forEach(function (format) {
                             getPeriod(username, format[0]).then(function (period) {
-                                console.log('run for', period)
                                 let done = false;
                                 let start, end, current;
 

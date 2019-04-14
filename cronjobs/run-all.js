@@ -1,5 +1,7 @@
 /**
  * A script to run all cronjobs without waiting for the schedule
+ * 
+ * note: This is async so the jobs don't wait on each other.
  */
 
 // 1. Migrations

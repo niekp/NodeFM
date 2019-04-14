@@ -68,12 +68,12 @@ var database = (function () {
      * @param {string} username
 	 * @returns {Promise} - and in the resolve {Array} result
 	 */
-	this.executeQuery = function(query, username) {
+	this.executeQuery = function(query, username, params = []) {
 		return new Promise((resolve, reject) => {
 			if (this.isConnected(username)) {
 				// Execute the query
 				database[username].serialize(() => {
-					database[username].all(query, (error, result) => {
+					database[username].all(query, params, (error, result) => {
 						if (error) {
 							reject(error);
 						}
@@ -87,7 +87,7 @@ var database = (function () {
 					this.connect(username, database[username].mode).then(function (success) {
 						if (success) {
 							database[username].serialize(() => {
-								database[username].all(query, (error, result) => {
+								database[username].all(query, params, (error, result) => {
 									if (error) {
 										reject('Error reopening DB: ' + error);
 									}
