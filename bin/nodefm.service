@@ -1,0 +1,15 @@
+[Unit]
+Description=NodeFM
+After=network.target
+
+[Service]
+Environment=NODE_ENV=production
+WorkingDirectory=/opt/NodeFM
+ExecStart=/usr/bin/node /opt/NodeFM/bin/www
+Restart=on-failure
+StandardOutput=syslog
+StandardError=syslog
+user=niek
+
+[Install]
+WantedBy=multi-user.target
