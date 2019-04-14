@@ -21,6 +21,8 @@ module.exports = {
         let seconds;
         
         switch (duration) {
+            case '5min':
+                seconds = 60 * 5;
             case 'half-hour':
                 seconds = 60 * 30;
                 break;
