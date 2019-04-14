@@ -3,6 +3,7 @@ const sqlite3 = require('sqlite3');
 const config = require('config');
 const fs = require('fs');
 
+
 let CRONJOB_KEY = 'timeline';
 
 let database_folder = config.get('database_folder');
@@ -33,10 +34,10 @@ function getLastRun(username) {
 }
 
 function getMonthTotalFromPeriod(period) {
-	let year = parseInt(period.split('-')[0]);
-	let month = parseInt(period.split('-')[1]);
+    let year = parseInt(period.split('-')[0]);
+    let month = parseInt(period.split('-')[1]);
 
-	return (year * 12) + month
+    return (year * 12) + month
 }
 
 function getPeriod(username) {
@@ -107,76 +108,83 @@ function saveTopArtist(topArtistPromise, period, username) {
     });
 }
 
+module.exports = {
+    run: function() {
+        console.log('Run timeline update');
+        
+        // Loop through all users
+        fs.readdir(database_folder, function (error, files) {
+            if (error) {
+                return console.error('Unable to scan users: ' + error);
+            }
 
-// Loop through all users
-fs.readdir(database_folder, function (error, files) {
-    if (error) {
-        return console.error('Unable to scan users: ' + error);
-    }
+            let promises = [];
 
-    let promises = [];
+            files.forEach(function (user_file) {
+                let username = '';
+                if (user_file.indexOf('.db') > 0) {
+                    username = user_file.replace('.db', '');
+                }
+                if (username) {
+                    database.connect(username, sqlite3.OPEN_READWRITE).then(function () {
+                        promises[username] = [];
 
-    files.forEach(function (user_file) {
-        let username = '';
-        if (user_file.indexOf('.db') > 0) {
-            username = user_file.replace('.db', '');
-        }
-        if (username) {
-            database.connect(username, sqlite3.OPEN_READWRITE).then(function () {
-                promises[username] = [];
+                        getPeriod(username).then(function (period) {
+                            let done = false;
+                            let start, end, current;
 
-                getPeriod(username).then(function (period) {
-                    let done = false;
-                    let start, end, current;
+                            if (!period[0]['start'] || !period[0]['end']) {
+                                done = true;
+                            } else {
+                                start = period[0]['start'];
+                                end = period[0]['end'];    
+                                current = start;
+                            }
 
-                    if (!period[0]['start'] || !period[0]['end']) {
-                        done = true;
-                    } else {
-                        start = period[0]['start'];
-                        end = period[0]['end'];    
-                        current = start;
-                    }
+                            while (!done) {
+                                // Setup this period
+                                let year = current.split('-')[0];
+                                let month = current.split('-')[1];
 
-                    while (!done) {
-                        // Setup this period
-                        let year = current.split('-')[0];
-                        let month = current.split('-')[1];
+                                promises[username].push(saveTopArtist(getTopArtist(current, username), current, username));
 
-                        promises[username].push(saveTopArtist(getTopArtist(current, username), current, username));
-
-                        // Check if done
-                        if (getMonthTotalFromPeriod(current) >= getMonthTotalFromPeriod(end)) {
-                            done = true;
-                        }
+                                // Check if done
+                                if (getMonthTotalFromPeriod(current) >= getMonthTotalFromPeriod(end)) {
+                                    done = true;
+                                }
 
 
-                        // Setup next period
-                        month++;
-                        if (month > 12) {
-                            month = 1;
-                            year++;
-                        }
+                                // Setup next period
+                                month++;
+                                if (month > 12) {
+                                    month = 1;
+                                    year++;
+                                }
 
-                        current = year + '-' + month.toString().padStart(2, '0');
-                    }
+                                current = year + '-' + month.toString().padStart(2, '0');
+                            }
 
-                    Promise.all(promises[username]).then(function () {
-                        database.executeQuery(
-                            `INSERT INTO Cronjob (key, status) VALUES ('${CRONJOB_KEY}', 'SUCCESS')`,
-                            username
-                        );
-                    }).catch(function(error) {
-                        database.executeQuery(
-                            `INSERT INTO Cronjob (key, status, info) VALUES ('${CRONJOB_KEY}', 'FAIL', '${error}')`,
-                            username
-                        )
-                    })
-                    
-                }).catch(function (error) {
-                    console.error(error)
-                })
+                            Promise.all(promises[username]).then(function () {
+                                database.executeQuery(
+                                    `INSERT INTO Cronjob (key, status) VALUES ('${CRONJOB_KEY}', 'SUCCESS')`,
+                                    username
+                                );
+                            }).catch(function(error) {
+                                database.executeQuery(
+                                    `INSERT INTO Cronjob (key, status, info) VALUES ('${CRONJOB_KEY}', 'FAIL', '${error}')`,
+                                    username
+                                ).catch(function() {
+                                    console.error(error)
+                                });
+                            })
+                            
+                        }).catch(function (error) {
+                            console.error(error)
+                        })
+                    });
+
+                }
             });
-
-        }
-    });
-});
+        });
+    }
+}

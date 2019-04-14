@@ -38,8 +38,10 @@ require('../cronjobs/migration.js');
 /**
  * Setup cronjobs
  */
-cron.schedule('0 * * * *', () => {
-  require('../cronjobs/timeline.js');
+let cron_timeline = require('../cronjobs/timeline.js');
+
+cron.schedule('*/20 * * * * *', () => {
+  cron_timeline.run();
 });
 
 /**
