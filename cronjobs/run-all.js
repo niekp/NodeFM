@@ -5,10 +5,10 @@
  */
 
 // 1. Migrations
-require('../cronjobs/migration.js');
+//require('../cronjobs/migration.js');
 
 // 2. Timeline
-require('./timeline.js').run();
+//require('./timeline.js').run();
 
 // 3. Musicbrainz
 require('./musicbrainz.js').run();

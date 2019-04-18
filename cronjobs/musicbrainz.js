@@ -3,7 +3,7 @@ const sqlite3 = require('sqlite3');
 const config = require('config');
 const fs = require('fs');
 
-var NB = require('nodebrainz');
+var NB = require('../custom_modules/nodebrainz');
 var moment = require('moment');
 
 let database_folder = config.get('database_folder');
@@ -13,7 +13,7 @@ if (database_folder.substr(0, database_folder -1) !== '/') {
 }
 
 // Setup musicbrainz
-var nb = new NB({userAgent:'nodefm/1.0.0 ( https://nodefm.niekvantoepassing.nl )'});
+var nb = new NB({userAgent:'nodefm/1.0.0 (nodefm@niekvantoepassing.nl)', retryOn: true });
 
 var getMbIdFromId = function(id) {
     if (id.substr(0, 5) === 'mbid:')
@@ -38,7 +38,7 @@ module.exports = {
                                         
                     database.connect(username, sqlite3.OPEN_READWRITE).then(function () {
                         
-                        database.executeQuery("SELECT * FROM Album WHERE id LIKE 'mbid:%' AND mbid IS NULL LIMIT 0, 1000", username).then(function(albums) {
+                        database.executeQuery("SELECT * FROM Album WHERE id LIKE 'mbid:%' AND mbid IS NULL", username).then(function(albums) {
 
                             var timer = 0;
                             albums.forEach(function(album) {
@@ -49,7 +49,8 @@ module.exports = {
                                         return;
                                     }
 
-                                    nb.release(mbid, { inc:'artists+recordings' }, function(err, response) {
+                                    console.log('doe verzoek' + mbid);
+                                    nb.release(mbid, { inc: 'artists+recordings' }, function(err, response) {
                                         if (err) {
                                             console.error(err);
                                             return;
@@ -61,7 +62,7 @@ module.exports = {
 
                                         console.log(album.name);
 
-                                        var release_date = moment(response.date).format("X");
+                                        var release_date = moment(response.date, "YYYY-MM-DD").format("X");
 
                                         // Update album info
                                         database.executeQuery(`UPDATE Album SET musicbrainz_last_search = CURRENT_TIMESTAMP, mbid = ?, release_date = ? WHERE id = ?`, username, [
@@ -112,7 +113,7 @@ module.exports = {
                                     });
                                 }, timer);
 
-                                timer+=1000;
+                                timer += 1000;
                             });
 
                         }).catch(function(error) {
@@ -122,6 +123,7 @@ module.exports = {
                     }).catch(function(error) {
                         console.error(error);
                     });
+
                 }
             });
         });
