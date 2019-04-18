@@ -29,6 +29,8 @@ module.exports = {
                 return console.error('Unable to scan users: ' + error);
             }
 
+            var timer = 0;
+
             files.forEach(function (user_file) {
                 let username = '';
                 if (user_file.indexOf('.db') > 0) {
@@ -40,7 +42,6 @@ module.exports = {
                         
                         database.executeQuery("SELECT * FROM Album WHERE id LIKE 'mbid:%' AND mbid IS NULL", username).then(function(albums) {
 
-                            var timer = 0;
                             albums.forEach(function(album) {
                                 setTimeout(function () {
                                     var mbid = getMbIdFromId(album.id);
