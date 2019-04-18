@@ -20,9 +20,22 @@ var getMbIdFromId = function(id) {
         return id.replace('mbid:', '');
     return null;
 }
+/*
+nb.release('12b5285d-5e62-3ad4-974b-818274a5d97b', { inc: 'artists+recordings' }, function(err, response) {
+    console.log(response.media[0].tracks)
+});
+*/
+
+var running = false;
 
 module.exports = {
+    
+    isRunning: function() {
+        return running;
+    },
+
     run: function() {
+        running = true;
         // Loop through all users
         fs.readdir(database_folder, function (error, files) {
             if (error) {
@@ -30,6 +43,9 @@ module.exports = {
             }
 
             var timer = 0;
+
+            var total = 0;
+            var done = 0;
 
             files.forEach(function (user_file) {
                 let username = '';
@@ -40,17 +56,27 @@ module.exports = {
                                         
                     database.connect(username, sqlite3.OPEN_READWRITE).then(function () {
                         
-                        database.executeQuery("SELECT * FROM Album WHERE id LIKE 'mbid:%' AND mbid IS NULL", username).then(function(albums) {
+                        database.executeQuery("SELECT * FROM Album WHERE (id LIKE 'mbid:%' OR mbid IS NOT NULL) AND musicbrainz_last_search IS NULL", username).then(function(albums) {
 
                             albums.forEach(function(album) {
+                                total++;
                                 setTimeout(function () {
-                                    var mbid = getMbIdFromId(album.id);
+                                    done++;
+
+                                    // If done, set done state 2 minutes later. A bit arbitrary, but will work for now.
+                                    if (done >= total) {
+                                        setTimeout(function() {
+                                            if (done >= total)
+                                                running = false;
+                                        }, 60*2*1000);
+                                    }
+
+                                    var mbid = album.mbid ? album.mbid : getMbIdFromId(album.id);
 
                                     if (!mbid) {
                                         return;
                                     }
 
-                                    console.log('doe verzoek' + mbid);
                                     nb.release(mbid, { inc: 'artists+recordings' }, function(err, response) {
                                         if (err) {
                                             console.error(err);
@@ -60,8 +86,6 @@ module.exports = {
                                         if (!response) {
                                             return;
                                         }
-
-                                        console.log(album.name);
 
                                         var release_date = moment(response.date, "YYYY-MM-DD").format("X");
 
@@ -82,9 +106,13 @@ module.exports = {
                                         // Search for tracks and update them
                                         response.media.forEach(function(media) {
                                             media.tracks.forEach(function(track_mb) {
-                                                console.log(mbid, track_mb.title)
-                                                database.executeQuery(`SELECT * FROM Track WHERE album_id = ? AND name = ?`, username, [
-                                                    album.id, track_mb.title
+
+                                                // Correct the title
+                                                var title = track_mb.title;
+                                                title = title.replace(/\’/g, "'");
+
+                                                database.executeQuery(`SELECT * FROM Track WHERE album_id = ? AND (name = ? OR id = ?)`, username, [
+                                                    album.id, title, 'mbid:' + track_mb.id
                                                 ]).then(function (result) {
                                                     if (result.length) {
                                                         track_result = result[0];
@@ -102,7 +130,8 @@ module.exports = {
                                                                 track_result.id
                                                             ]).catch(function(error) {
                                                                 console.error(error);
-                                                            });
+                                                            }
+                                                        );
                                                     }
                                                     
 
@@ -128,5 +157,6 @@ module.exports = {
                 }
             });
         });
-    }
+    },
+
 }
