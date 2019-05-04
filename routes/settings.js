@@ -17,9 +17,17 @@ router.get('/login', function (req, res, next) {
 	res.render('settings/login');
 });
 
+router.get('/login/:username', function(req, res,) {
+	login(req, res, req.params.username);
+});
+
 router.post('/login', function (req, res, next) {
+	login(req, res, req.body.username);
+});
+
+function login(req, res, username) {
 	// Check the login
-	let username = user.sanitizeUsername(req.body.username);
+	username = user.sanitizeUsername(username);
 	let validlogin = user.checkLogin(username) ;
 
 	// Set the username cookie
@@ -41,7 +49,7 @@ router.post('/login', function (req, res, next) {
 			success: validlogin
 		});
 	}
-});
+}
 
 router.get('/download', function (req, res, next) {
 	var file = db.getDatabasePath(res.locals.username);
