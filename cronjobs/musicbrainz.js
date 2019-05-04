@@ -20,11 +20,17 @@ var getMbIdFromId = function(id) {
         return id.replace('mbid:', '');
     return null;
 }
-/*
-nb.release('12b5285d-5e62-3ad4-974b-818274a5d97b', { inc: 'artists+recordings' }, function(err, response) {
-    console.log(response.media[0].tracks)
+
+
+nb.release('52ee3840-a4a6-4d4d-9ce3-ca82453bd1f4', { inc: 'artists+recordings' }, function(err, response) {
+    response.media[0].tracks.forEach(function(track) {
+        var title = track.title;
+        title = title.replace(/\’/g, "'");
+        title = title.replace(/\\'/g, "'");
+
+        console.log(title)
+    })
 });
-*/
 
 var running = false;
 
@@ -97,7 +103,7 @@ module.exports = {
                                         });
 
                                         // Update artist info
-                                        database.executeQuery(`UPDATE Artist SET musicbrainz_last_search = CURRENT_TIMESTAMP, mbid = ? WHERE id = ? AND name = ?`, username, [
+                                        database.executeQuery(`UPDATE Artist SET musicbrainz_last_search = CURRENT_TIMESTAMP, mbid = ? WHERE id = ? AND name LIKE ?`, username, [
                                             response['artist-credit'][0].artist.id, album.artist_id, response['artist-credit'][0].artist.name
                                         ]).catch(function(error) {
                                             console.error(error);
@@ -110,8 +116,10 @@ module.exports = {
                                                 // Correct the title
                                                 var title = track_mb.title;
                                                 title = title.replace(/\’/g, "'");
+                                                title = title.replace(/\\'/g, "'");
+                                                title = title.replace(/\?/g, "and");
 
-                                                database.executeQuery(`SELECT * FROM Track WHERE album_id = ? AND (name = ? OR id = ?)`, username, [
+                                                database.executeQuery(`SELECT * FROM Track WHERE album_id = ? AND (replace(name, '&', 'and') LIKE ? OR id = ?)`, username, [
                                                     album.id, title, 'mbid:' + track_mb.id
                                                 ]).then(function (result) {
                                                     if (result.length) {
