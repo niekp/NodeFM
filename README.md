@@ -1,5 +1,5 @@
 # Node.FM
-Node.FM is a webapp based on a copy of your last.fm data (using [lastfm-sqlite-backup](https://github.com/niekp/lastfm-sqlite-backup)).
+Node.FM is a webapp based on a copy of your last.fm data (using [lastfm-sqlite-backup](/_/LastfmCloner)).
 
 The application currently contains:
 - Recent tracks
@@ -14,7 +14,7 @@ _click the image for a video demo_
 
 # How to run
 - First of all you need a database.
-    + Clone [lastfm-sqlite-backup](https://github.com/niekp/lastfm-sqlite-backup)
+    + Clone [lastfm-sqlite-backup](/_/LastfmCloner)
     + Set the API-keys and parameters
     + Manually run the first time
     + Setup a cronjob so it keeps the DB up to date
