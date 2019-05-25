@@ -70,6 +70,15 @@ function MigrationHelper(user) {
     }
 
     /**
+     * Public function to execute a query. This doesn't require a username parameter like the database.executeQuery does.
+     * @param {string} table 
+     * @returns {Promise} resolve with the query result.
+     */
+    this.executeQuery = function(query) {
+        return executeQuery(query);
+    }
+
+    /**
      * Internal function to check if a table exists
      * @param {string} table 
      * @returns {Promise} resolve true if exists.

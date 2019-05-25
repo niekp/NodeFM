@@ -43,6 +43,8 @@ function getMonthTotalFromPeriod(period, year_amount) {
 function getPeriod(username, format = '%Y-%m') {
     return new Promise((resolve, reject) => {
         getLastRun(username).then(function (last_run) {
+            last_run = (new Date(last_run).getTime()/ 1000) - (30 * 24 * 60 * 60);
+
             database.executeQuery(`
             SELECT MIN(STRFTIME('${format}', DATETIME(utc, 'unixepoch'))) AS start, 
             MAX(STRFTIME('${format}', DATETIME(utc, 'unixepoch'))) as end 
