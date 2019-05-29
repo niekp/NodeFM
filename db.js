@@ -54,6 +54,8 @@ var database = (function () {
 
 							resolve(true);
 						});
+					} else {
+						reject("Database not found", error);
 					}
 				} catch(error) {
 					reject("Error connecting to the database", error);
