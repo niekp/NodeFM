@@ -12,9 +12,10 @@ append table-content
 		tr
 			th Artist
 			th Track
+			th 
 	tbody
 		each val in tracks
-			tr
-				td #{val.artist}
-				td #{val.track}
+			tr(data-type='track')
+				td(data-search='artist') #{val.artist}
+				td(data-search='track') #{val.track}
 				td #{moment(val.utc, 'X').format('L LT')}

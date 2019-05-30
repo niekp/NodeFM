@@ -2,12 +2,19 @@ extends ../masterpage/layout
 
 append content
 	// settings::content
+	h2 Username
 	p Logged in as #{username}
 	a.btn.btn-primary(href="/settings/login") change
-	
-	p #[br] #[br]
 
+	h2 Download database
 	p You can download the `sqlite` database to run your own queries against. 
 		| I recommend #[a(href="https://dbeaver.io/") DBeaver] as sqlite3 manager
 	a.btn.btn-primary(href="/settings/download") download
-	
+
+	h2 Spotify
+	if spotify_username
+		p Logged in as #{spotify_username}
+
+	a.btn.btn-primary(href="/spotify/authenticate") Authenticate
+
+

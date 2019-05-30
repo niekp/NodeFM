@@ -13,11 +13,13 @@ var app = express();
 // Needed for app setup
 var db = require('./db.js');
 var user = require('./models/user.js');
+var spotify_helper = require('./models/spotify_helper.js');
 
 // Routers
 var indexRouter = require('./routes/index');
 var statsRouter = require('./routes/stats');
 var settingsRouter = require('./routes/settings');
+var spotifyRouter = require('./routes/spotify');
 
 // Setup view engine pug
 app.set('views', path.join(__dirname, 'views'));
@@ -39,7 +41,9 @@ app.locals.moment.locale(config.has('locale') ? config.get('locale') : 'en_GB');
 
 // Inject local variables and connect the DB
 function injectLocal(req, res, next){
+  let promises = [];
   user.injectLocalVariables(req, res);
+  promises.push(spotify_helper.injectLocalVariables(req, res));
 
   if (req.query.filter)
     res.locals.filter = req.query.filter;
@@ -47,15 +51,14 @@ function injectLocal(req, res, next){
   // Connect to the DB if it's closed.
   let username = user.getUsername(req);
   if (username && !db.isConnected(username)) {
-    db.connect(username).then(function() {
-      next();
-    }).catch(function() {
-      next();
-    });
-
-  } else {
-    next();
+    promises.push(db.connect(username))
   }
+
+  Promise.all(promises).then(function (values) {
+    next();
+  }).catch(function() {
+    next();
+  })
 };
 
 // First inject variables
@@ -65,6 +68,7 @@ app.get('/*', injectLocal);
 app.use('/', indexRouter);
 app.use('/settings', settingsRouter);
 app.use('/stats', statsRouter);
+app.use('/spotify', spotifyRouter);
 
 // If no route is found create a 404
 app.use(function(req, res, next) {

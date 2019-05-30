@@ -2,7 +2,6 @@ var express = require('express');
 var router = express.Router();
 var user = require('../models/user.js');
 var db = require('../db.js');
-var moment = require('moment');
 
 // Only allow logged in sessions
 router.get('/', function (req, res, next) {

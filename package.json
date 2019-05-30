@@ -19,6 +19,7 @@
     "nodebrainz": "2.1.1",
     "pug": "^2.0.3",
     "shelljs": "^0.8.3",
+    "spotify-web-api-node": "^4.0.0",
     "sqlite3": "^4.0.6"
   },
   "devDependencies": {},

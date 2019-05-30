@@ -12,9 +12,9 @@ append table-content
 			th Scrobbles
 	tbody
 		each artist in artists
-			tr
+			tr(data-type='artist')
 				td #{artist.period}
-				td #{artist.artist}
+				td(data-search='artist') #{artist.artist}
 				td(class=(topResult ? "progress-td" : undefined))
 					if topResult
 						- var value = artist.scrobbles

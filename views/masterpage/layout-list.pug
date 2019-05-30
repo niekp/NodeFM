@@ -1,5 +1,9 @@
 extends layout
 
+append scripts-head
+	if spotify_username
+		script(type='text/javascript', src='../js/spotify.js')
+
 append content
 	// layout-list::content
 

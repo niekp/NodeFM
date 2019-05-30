@@ -23,10 +23,10 @@ append table-content
 			th Scrobbles
 	tbody
 		each track in tracks
-			tr
-				td #{track.artist}
-				td #{track.album}
-				td #{track.track}
+			tr(data-type='track')
+				td(data-search='artist') #{track.artist}
+				td(data-search='album') #{track.album}
+				td(data-search='track') #{track.track}
 				td(class=(topResult ? "progress-td" : undefined))
 					if topResult
 						- var value = track.scrobbles

@@ -130,3 +130,7 @@ form.datefilter, form.datefilter .input-group.date {
 .table-responsive table td {
   max-width: 300px;
 }
+
+.fa-play-circle {
+  cursor: pointer;
+}

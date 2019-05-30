@@ -17,8 +17,8 @@ append table-content
 			th Scrobbles
 	tbody
 		each artist in artists
-			tr
-				td #{artist.artist}
+			tr(data-type='artist')
+				td(data-search='artist') #{artist.artist}
 				td #{moment(artist.lastscrobble, 'X').format('L LT')}
 				td(class=(topResult ? "progress-td" : undefined))
 					if topResult

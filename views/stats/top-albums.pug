@@ -22,9 +22,9 @@ append table-content
 			th Scrobbles
 	tbody
 		each album in albums
-			tr
-				td #{album.artist}
-				td #{album.album}
+			tr(data-type='album')
+				td(data-search='artist') #{album.artist}
+				td(data-search='album') #{album.album}
 				td(class=(topResult ? "progress-td" : undefined))
 					if topResult
 						- var value = album.scrobbles
