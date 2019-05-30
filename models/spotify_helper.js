@@ -142,6 +142,8 @@ module.exports = {
                 spotifyApi.setAccessToken(data.body['access_token']);
                 spotifyApi.setRefreshToken(data.body['refresh_token']);
 
+                cache.del('*' + res.locals.username + '*', function (error, added) { });
+
                 setMe(req, res).then(function() {
                     resolve();
                 })
