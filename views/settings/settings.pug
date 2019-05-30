@@ -16,5 +16,8 @@ append content
 		p Logged in as #{spotify_username}
 
 	a.btn.btn-primary(href="/spotify/authenticate") Authenticate
+	if spotify_username
+		| &nbsp;&nbsp;
+		a.btn.btn-primary(href="/spotify/authenticate/unlink") Unlink
 
 

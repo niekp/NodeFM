@@ -27,7 +27,17 @@ router.get('/authenticate', function (req, res, next) {
 });
 
 router.get('/authenticate/callback', function (req, res, next) {
-	spotify_helper.handleCallback(req, res).then(function() {
+	spotify_helper.handleCallback(req, res).then(function () {
+		res.redirect('/settings');
+	}).catch(function () {
+		res.render('spotify/authenticate', {
+			error: true
+		});
+	})
+});
+
+router.get('/authenticate/unlink', function (req, res, next) {
+	spotify_helper.unlink(req, res).then(function () {
 		res.redirect('/settings');
 	}).catch(function () {
 		res.render('spotify/authenticate', {

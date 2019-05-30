@@ -156,6 +156,29 @@ module.exports = {
     },
 
     /**
+     * Unlink the spotify account
+     * @param {Request} req 
+     * @param {Response} res 
+     */
+    unlink: function(req, res) {
+        return new Promise((resolve, reject) => {
+
+            promises = [];
+            promises.push(setValue('refresh_token', '', res))
+            promises.push(setValue('token', '', res))
+            promises.push(setValue('code', '', res))
+            promises.push(setValue('username', '', res))
+            promises.push(setValue('token_expires', '', res))
+            cache.del('*' + res.locals.username + '*', function (error, added) { });
+            Promise.all(promises).then(function () {
+                resolve();
+            }).catch(function() {
+                reject();
+            });
+        });
+    },
+
+    /**
      * Get a spotify token. Use the current token if its still valid.
      * @param {Request} req 
      * @param {Response} res 
