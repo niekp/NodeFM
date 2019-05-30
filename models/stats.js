@@ -146,7 +146,6 @@ function prepareUtcWhere(req, res, where) {
 	}
 
 	if (startdate && parseInt(enddate) < parseInt(startdate)) {
-		console.log('set enddate', parseInt(enddate), '<', parseInt(startdate), (parseInt(enddate) < parseInt(startdate)))
 		enddate = startdate;
 		req.query.filter['end-date'] = req.app.locals.moment(enddate, 'X').format('L');
 		res.locals.filter = req.query.filter;

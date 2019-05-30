@@ -70,7 +70,6 @@ function getSearchResult(api, type, artist, album, track) {
             })
         } else if (type == 'artist') {
             api.searchArtists(getSearchQuery(artist), { limit: 1 }).then(function (results) {
-                console.log(results.body)
                 if ((artist = results.body.artists.items) && artist.length > 0) {
                     resolve(artist[0]);
                 } else {
