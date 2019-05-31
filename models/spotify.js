@@ -1,5 +1,6 @@
 var SpotifyWebApi = require('spotify-web-api-node');
 var spotify_helper = require('./spotify_helper.js')
+var cache_helper = require('./cache_helper.js');
 
 /**
  * Get the spotify API with token
@@ -34,7 +35,7 @@ function getSearchQuery(artist, album, track) {
     if (track)
         query += 'track:' + track + ' ';
 
-    return query;
+    return query.trim();
 }
 
 /**
@@ -49,35 +50,44 @@ function getSearchQuery(artist, album, track) {
 function getSearchResult(api, type, artist, album, track) {
     return new Promise((resolve, reject) => {
 
-        // Search track
-        if (type == 'track') {
-            api.searchTracks(getSearchQuery(artist, null, track), { limit: 1 }).then(function (results) {
-                if ((tracks = results.body.tracks.items) && tracks.length > 0) {
-                    resolve(tracks[0]);
-                } else {
-                    reject('No results');
-                }
-            }).catch(function (ex) {
-                reject(ex);
-            })
-        } else if (type == 'album') {
-            api.searchAlbums(getSearchQuery(artist, album), { limit: 1 }).then(function (results) {
-                if ((albums = results.body.albums.items) && albums.length > 0) {
-                    resolve(albums[0]);
-                } else {
-                    reject('No results');
-                }
-            })
-        } else if (type == 'artist') {
-            api.searchArtists(getSearchQuery(artist), { limit: 1 }).then(function (results) {
-                if ((artist = results.body.artists.items) && artist.length > 0) {
-                    resolve(artist[0]);
-                } else {
-                    reject('No results');
-                }
-            })
-        }
-        
+        let cache_key = type + '_' + getSearchQuery(artist, album, track);
+        let cache_expire = cache_helper.getExpiresSeconds('month');
+
+        cache_helper.get(cache_key).then(function(result) {
+            resolve(result);
+        }).catch(function() {
+            // Search track
+            if (type == 'track') {
+                api.searchTracks(getSearchQuery(artist, null, track), { limit: 1 }).then(function (results) {
+                    if ((tracks = results.body.tracks.items) && tracks.length > 0) {
+                        cache_helper.save(cache_key, tracks[0], cache_expire, 'json');
+                        resolve(tracks[0]);
+                    } else {
+                        reject('No results');
+                    }
+                }).catch(function (ex) {
+                    reject(ex);
+                })
+            } else if (type == 'album') {
+                api.searchAlbums(getSearchQuery(artist, album), { limit: 1 }).then(function (results) {
+                    if ((albums = results.body.albums.items) && albums.length > 0) {
+                        cache_helper.save(cache_key, albums[0], cache_expire, 'json');
+                        resolve(albums[0]);
+                    } else {
+                        reject('No results');
+                    }
+                })
+            } else if (type == 'artist') {
+                api.searchArtists(getSearchQuery(artist), { limit: 1 }).then(function (results) {
+                    if ((artist = results.body.artists.items) && artist.length > 0) {
+                        cache_helper.save(cache_key, artist[0], cache_expire, 'json');
+                        resolve(artist[0]);
+                    } else {
+                        reject('No results');
+                    }
+                })
+            }
+        });
     });
 }
 

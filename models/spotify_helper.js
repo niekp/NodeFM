@@ -106,8 +106,7 @@ module.exports = {
 
         // Generate a state and save it in the cache. This is used to check the callback against.
         let state = uuid.v4();
-        cache.add(res.locals.username + ':spotify_state', state, { expire: 60 * 24, type: 'String' },
-            function (error, added) { });
+        cache_helper.save((res.locals.username + ':spotify_state'), state, 60 * 60);
 
         var spotifyApi = new SpotifyWebApi({
             redirectUri: config.get('spotify_redirect_uri'),
@@ -128,40 +127,49 @@ module.exports = {
      */
     handleCallback: function(req, res) {
         return new Promise((resolve, reject) => {
-            cache.get(res.locals.username + ':spotify_state', function (error, entries) { 
-                if (entries[0].body != req.query.state) {
+            let wait_for = [];
+
+            wait_for.push(cache_helper.get(res.locals.username + ':spotify_state').then(function(state) {
+                console.log('State uit cache is: ', state);
+                if (state !== req.query.state) {
+                    console.log('Invalid state :(')
                     reject('Invalid state');
+                    return;
                 }
-            });
+            }).catch(err => reject('Invalid state')));
 
-            let code = req.query.code;
-            setValue('code', code, res);
+            Promise.all(wait_for).then(function () {
+                let code = req.query.code;
+                setValue('code', code, res);
 
-            var spotifyApi = new SpotifyWebApi({
-                redirectUri: config.get('spotify_redirect_uri'),
-                clientId: config.get('spotify_client'),
-                clientSecret: config.get('spotify_secret')
-            });
+                var spotifyApi = new SpotifyWebApi({
+                    redirectUri: config.get('spotify_redirect_uri'),
+                    clientId: config.get('spotify_client'),
+                    clientSecret: config.get('spotify_secret')
+                });
 
-            // Retrieve an access token and a refresh token
-            spotifyApi.authorizationCodeGrant(code).then(function (data) {
-                setValue('refresh_token', data.body['refresh_token'], res)
-                setValue('token', data.body['access_token'], res)
+                // Retrieve an access token and a refresh token
+                spotifyApi.authorizationCodeGrant(code).then(function (data) {
+                    setValue('refresh_token', data.body['refresh_token'], res)
+                    setValue('token', data.body['access_token'], res)
 
-                let expires = (new Date()).getTime() + (data.body['expires_in'] * 1000)
-                setValue('token_expires', expires, res)
+                    let expires = (new Date()).getTime() + (data.body['expires_in'] * 1000)
+                    setValue('token_expires', expires, res)
 
-                // Set the access token on the API object to use it in later calls
-                spotifyApi.setAccessToken(data.body['access_token']);
-                spotifyApi.setRefreshToken(data.body['refresh_token']);
+                    // Set the access token on the API object to use it in later calls
+                    spotifyApi.setAccessToken(data.body['access_token']);
+                    spotifyApi.setRefreshToken(data.body['refresh_token']);
 
-                cache.del('*' + res.locals.username + '*', function (error, added) { });
+                    cache.del('*' + res.locals.username + '*', function (error, added) { });
 
-                setMe(req, res).then(function() {
-                    resolve();
-                })
-            }, function (err) {
-                reject(err);
+                    setMe(req, res).then(function() {
+                        resolve();
+                    })
+                }, function (err) {
+                    reject(err);
+                }).catch(function(err) {
+                    reject(err);
+                });
             }).catch(function(err) {
                 reject(err);
             });
