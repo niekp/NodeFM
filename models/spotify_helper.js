@@ -1,7 +1,8 @@
 var database = require('../db.js')
 var SpotifyWebApi = require('spotify-web-api-node');
 var config = require('config');
-var cache_helper = require('./cache_helper.js')
+var cache_helper = require('./cache_helper.js');
+var security = require('./security.js')
 var cache = require('express-redis-cache')({ prefix: cache_helper.getPrefix() });
 var uuid = require("uuid");
 
@@ -28,9 +29,21 @@ function setValue(key, value, res) {
  */
 function getValue(key, res) {
     return new Promise((resolve, reject) => {
-        database.executeQuery(`SELECT ${key} FROM Spotify`, res.locals.username)
-            .then(function (result) {
-                resolve(result ? eval('result[0].' + key) : '');
+        database.executeQuery(`SELECT ${key} FROM Spotify`, res.locals.username).then(function (result) {
+                // Something is wrong with the DB record. Reset it.
+                if (result.length == 0) {
+                    database.executeQuery("DELETE FROM Spotify", res.locals.username).then(function () {
+                        database.executeQuery("INSERT INTO Spotify (code) values ('')", res.locals.username).then(function () {
+                            resolve('');
+                        }).catch(function (error) {
+                            reject(error);
+                        });
+                    }).catch(function (error) {
+                        reject(error);
+                    });
+                } else {
+                    resolve(result ? eval('result[0].' + key) : '');                    
+                }
             })
             .catch(function (error) {
                 reject(error);
@@ -237,10 +250,22 @@ module.exports = {
      * @returns {Promise}
      */
     injectLocalVariables: function (req, res) {
-        return getValue('username', res).then(function (username) {
-            res.locals.spotify_username = username;
-        })
-
+        return new Promise((resolve, reject) => {
+            security.isUnlocked(req, res).then(function(unlocked) {
+                if (unlocked) {
+                    getValue('username', res).then(function (username) {
+                        res.locals.spotify_username = username;
+                        resolve();
+                    }).catch(function (error) {
+                        reject(error);
+                    })
+                } else {
+                    resolve();
+                }
+            }).catch(function (error) {
+                reject(error);
+            });
+        });
     },
 }
 

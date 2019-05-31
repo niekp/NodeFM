@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var user = require('../models/user.js');
+var security = require('../models/security.js');
 var db = require('../db.js');
 
 // Only allow logged in sessions
@@ -8,7 +9,17 @@ router.get('/', function (req, res, next) {
 	if (!res.locals.loggedIn) {
 		res.redirect('/settings/login');
 	} else {
-		res.render('settings/settings');
+		p_isUnlocked = security.isUnlocked(req, res);
+		p_hasPassword = security.hasPassword(req, res);
+
+		Promise.all([p_isUnlocked, p_hasPassword]).then(function(values) {
+			res.render('settings/settings', {
+				unlocked: values[0],
+				hasPassword: values[1]
+			});
+		}).catch(function () {
+			res.render('settings/settings');
+		})
 	}
 });
 
@@ -38,8 +49,7 @@ function login(req, res, username) {
 	user.injectLocalVariables(req, res);
 	
 	if (validlogin) {
-		res.redirect('/');
-		
+		res.redirect('/security/unlock');
 	} else {
 		// Render the login page
 		res.render('settings/login', { 
@@ -51,8 +61,17 @@ function login(req, res, username) {
 }
 
 router.get('/download', function (req, res, next) {
-	var file = db.getDatabasePath(res.locals.username);
-  	res.download(file);
+	security.isUnlocked(req, res).then(function (unlocked) {
+		if (unlocked) {
+			var file = db.getDatabasePath(res.locals.username);
+			res.download(file);
+		} else {
+			res.redirect('/settings');
+		}
+	}).catch(function() {
+		res.redirect('/settings');
+	})
+	
 });
 
 module.exports = router;

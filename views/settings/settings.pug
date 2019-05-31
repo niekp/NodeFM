@@ -6,18 +6,36 @@ append content
 	p Logged in as #{username}
 	a.btn.btn-primary(href="/settings/login") change
 
-	h2 Download database
-	p You can download the `sqlite` database to run your own queries against. 
-		| I recommend #[a(href="https://dbeaver.io/") DBeaver] as sqlite3 manager
-	a.btn.btn-primary(href="/settings/download") download
+	if unlocked
+		h2 Download database
+		p You can download the `sqlite` database to run your own queries against. 
+			| I recommend #[a(href="https://dbeaver.io/") DBeaver] as sqlite3 manager
+		a.btn.btn-primary(href="/settings/download") download
 
-	h2 Spotify
-	if spotify_username
-		p Logged in as #{spotify_username}
+		h2 Spotify
+		if spotify_username
+			p Logged in as #{spotify_username}
 
-	a.btn.btn-primary(href="/spotify/authenticate") Authenticate
-	if spotify_username
+		a.btn.btn-primary(href="/spotify/authenticate") Authenticate
+		if spotify_username
+			| &nbsp;&nbsp;
+			a.btn.btn-primary(href="/spotify/authenticate/unlink") Unlink
+
+		h2 Security
+		p Change your password (this is used to protect your spotify account)
+		a.btn.btn-primary(href="/security/setpassword") Set password
+
+	else if hasPassword
+		h2 Unlock
+		p 
+			| Enter your password to unlock the spotify integration.
+			br
+			| If you forgot your password you can reset it. This also wipes the spotify login data.
+		a.btn.btn-primary(href="/security/unlock") Unlock spotify
 		| &nbsp;&nbsp;
-		a.btn.btn-primary(href="/spotify/authenticate/unlink") Unlink
+		a.btn.btn-primary(href="/security/reset") Reset
 
-
+	else
+		h2 Security
+		p Add a password to enable spotify integration
+		a.btn.btn-primary(href="/security/setpassword") Set password

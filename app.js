@@ -17,6 +17,7 @@ var spotify_helper = require('./models/spotify_helper.js');
 
 // Routers
 var indexRouter = require('./routes/index');
+var securityRouter = require('./routes/security');
 var statsRouter = require('./routes/stats');
 var settingsRouter = require('./routes/settings');
 var spotifyRouter = require('./routes/spotify');
@@ -63,9 +64,11 @@ function injectLocal(req, res, next){
 
 // First inject variables
 app.get('/*', injectLocal);
+app.post('/*', injectLocal);
 
 // Setup the routes
 app.use('/', indexRouter);
+app.use('/security', securityRouter);
 app.use('/settings', settingsRouter);
 app.use('/stats', statsRouter);
 app.use('/spotify', spotifyRouter);

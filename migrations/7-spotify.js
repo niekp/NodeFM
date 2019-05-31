@@ -13,10 +13,16 @@ function Migration(user) {
             migration_helper.addTable('Spotify',
                 'CREATE TABLE Spotify (id INTEGER PRIMARY KEY, code string, refresh_token string, token string, token_expires DATETIME, username string, device_id string)'
             ).then(function () {
-                migration_helper.executeQuery("DELETE FROM Spotify");
-                migration_helper.executeQuery("INSERT INTO Spotify (code) values ('')");
+                migration_helper.executeQuery("DELETE FROM Spotify").then(function() {
+                    migration_helper.executeQuery("INSERT INTO Spotify (code) values ('')").then(function() {
+                        resolve();
+                    }).catch(function(error) {
+                        reject(error);
+                    });
+                }).catch(function (error) {
+                    reject(error);
+                });
 
-                resolve();
             }).catch(function (error) {
                 reject(error);
             });

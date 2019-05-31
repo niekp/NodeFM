@@ -1,0 +1,13 @@
+extends ../masterpage/layout
+
+append content
+	// login::content
+	if (success === false)
+		p.alert.alert-danger The password is incorrect. Try again
+	
+	form(method='POST' action='')
+		div.form-group
+			label(for='password') Password:
+			input#password.form-control(type='password', placeholder='Password' name='password')
+
+		button.btn.btn-primary(type='submit') Login

@@ -2,13 +2,20 @@ var express = require('express');
 var router = express.Router();
 var spotify_helper = require('../models/spotify_helper.js')
 var spotify = require('../models/spotify.js')
+var security = require('../models/security.js')
 
 // Only allow logged in sessions
 router.get('/*', function (req, res, next) {
 	if (!res.locals.loggedIn) {
 		res.redirect('/settings/login');
 	} else {
-		next();
+		security.isUnlocked(req, res).then(function(unlocked) {
+			if (unlocked) {
+				next();
+			} else {
+				res.redirect('/security/unlock');
+			}
+		});
 	}
 });
 
