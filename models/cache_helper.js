@@ -62,7 +62,7 @@ module.exports = {
             return 'dev:' + new Date().getTime();
         }
 
-        return res.locals.username + '/' + req.url + '/' + JSON.stringify(req.params) + '/' + JSON.stringify(req.query);
+        return res.locals.username + '/' + req.url + '/' + (req.xhr ? 'ajax/' : '') + JSON.stringify(req.params) + '/' + JSON.stringify(req.query);
     },
 
     /**

@@ -1,9 +1,23 @@
-$(document).ready(function() {
-    // Prepend a play button in the table
-    $('[data-type]').parents('table').find('thead tr').prepend("<th style='width: 16px;' />");
-    $('[data-type]').prepend("<td data-play-button><i class='far fa-play-circle'></i></td>");
+(function ($) {
+
+    $(document).ready(function() {
+        // Prepend a play button in the table
+        $('[data-type]').parents('table').find('thead tr').prepend("<th style='width: 16px;' />");
+        $('[data-type]').prepend("<td data-play-button><i class='far fa-play-circle'></i></td>");
+
+        $('[data-play-button]').on('click', play);
+
+        $(".table").on('page:loaded', function () {
+            console.log('page loaded');
+            $('[data-play-button]').unbind('click');
+            $('[data-play-button]').on('click', play);
+        })
+
+    });
+
     
-    $('[data-play-button]').click(function () {
+
+    function play() {
         let tr = $(this).closest('[data-type]');
 
         let type = tr.data('type');
@@ -11,7 +25,7 @@ $(document).ready(function() {
         artist = album = track = '';
 
         // Extract all search variables
-        tr.find('td[data-search]').each(function() {
+        tr.find('td[data-search]').each(function () {
             let search = $(this).data('search');
             let value = $(this).text();
             switch (search) {
@@ -28,17 +42,17 @@ $(document).ready(function() {
         });
 
         // Execute the play command
-        fetch('/spotify/control/play?type=' 
-            + encodeURI(type) 
-            + '&artist=' + encodeURI(artist) 
-            + '&album=' + encodeURI(album) 
-            + '&track=' + encodeURI(track)).then(res => res.json()).then(function(data)
-        {
-            if (!data.success && data.error) {
-                console.error(data.error)
-                alert("Something went wrong.");
-            }
-        });
+        fetch('/spotify/control/play?type='
+            + encodeURI(type)
+            + '&artist=' + encodeURI(artist)
+            + '&album=' + encodeURI(album)
+            + '&track=' + encodeURI(track)).then(res => res.json()).then(function (data) {
+                if (!data.success && data.error) {
+                    console.error(data.error)
+                    alert("Something went wrong.");
+                }
+            });
 
-    })
-});
+    }
+
+}) (jQuery);

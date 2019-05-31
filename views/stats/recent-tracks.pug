@@ -18,4 +18,4 @@ append table-content
 			tr(data-type='track')
 				td(data-search='artist') #{val.artist}
 				td(data-search='track') #{val.track}
-				td #{moment(val.utc, 'X').format('L LT')}
+				td(data-property='utc') #{moment(val.utc, 'X').format('L LT')}

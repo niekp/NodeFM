@@ -20,13 +20,18 @@ router.get('/',
 	cache.route(cache_helper.getExpires('5min')), 
 	function (req, res, next) {
 	stats.getRecentTracks(req, res).then(function (data) {
-		res.render('stats/recent-tracks', { 
-			menu: 'recent', 
-			title: 'Recent tracks', 
+		data = {
+			menu: 'recent',
+			title: 'Recent tracks',
 			tracks: data.results,
 			pagination: data.pagination,
 			datefilter: true
-		});
+		}
+		if (req.xhr) {
+			res.json(data);
+		} else {
+			res.render('stats/recent-tracks', data);
+		}
 	}).catch(function (error) {
 		next(createError(500, error));
 	});
@@ -37,14 +42,20 @@ router.get('/artists',
 	cache.route(cache_helper.getExpires('half-day')), 
 	function (req, res, next) {
 		stats.getTopArtists(req, res).then(function (data) {
-			res.render('stats/top-artists', { 
-				menu: 'top-artists', 
-				title: 'Top artists', 
+			data = {
+				menu: 'top-artists',
+				title: 'Top artists',
 				artists: data.results,
 				pagination: data.pagination,
 				topResult: data.topResult,
 				datefilter: true
-			});
+			}
+
+			if (req.xhr) {
+				res.json(data);
+			} else {
+				res.render('stats/top-artists', data);
+			}
 		}).catch(function (error) {
 			next(createError(500, error));
 		});
@@ -56,14 +67,19 @@ router.get('/albums',
 	cache.route(cache_helper.getExpires('half-day')), 
 	function (req, res, next) {
 		stats.getTopAlbums(req, res).then(function (data) {
-			res.render('stats/top-albums', { 
-				menu: 'top-albums', 
-				title: 'Top albums', 
+			data = {
+				menu: 'top-albums',
+				title: 'Top albums',
 				albums: data.results,
 				pagination: data.pagination,
 				topResult: data.topResult,
 				datefilter: true
-			});
+			}
+			if (req.xhr) {
+				res.json(data);
+			} else {
+				res.render('stats/top-albums', data);
+			}
 		}).catch(function (error) {
 			next(createError(500, error));
 		});
@@ -75,14 +91,19 @@ router.get('/tracks',
 	cache.route(cache_helper.getExpires('half-day')), 
 	function (req, res, next) {
 		stats.getTopTracks(req, res).then(function (data) {
-			res.render('stats/top-tracks', { 
-				menu: 'top-tracks', 
-				title: 'Top tracks', 
+			data = {
+				menu: 'top-tracks',
+				title: 'Top tracks',
 				tracks: data.results,
 				pagination: data.pagination,
 				topResult: data.topResult,
 				datefilter: true
-			});
+			}
+			if (req.xhr) {
+				res.json(data);
+			} else {
+				res.render('stats/top-tracks', data);
+			}
 		}).catch(function (error) {
 			next(createError(500, error));
 		});
@@ -94,14 +115,19 @@ router.get('/artist-discoveries',
 	cache.route(cache_helper.getExpires('half-day')), 
 	function (req, res, next) {
 		stats.getTopArtistDiscoveries(req, res).then(function (data) {
-			res.render('stats/top-artists', { 
-				menu: 'artist-discoveries', 
-				title: 'Top artist discoveries', 
+			data = {
+				menu: 'artist-discoveries',
+				title: 'Top artist discoveries',
 				artists: data.results,
 				pagination: data.pagination,
 				topResult: data.topResult,
 				datefilter: true
-			});
+			}
+			if (req.xhr) {
+				res.json(data);
+			} else {
+				res.render('stats/top-artists', data);
+			}
 		}).catch(function (error) {
 			next(createError(500, error));
 		});
@@ -113,14 +139,19 @@ router.get('/album-discoveries',
 	cache.route(cache_helper.getExpires('half-day')), 
 	function (req, res, next) {
 		stats.getTopAlbumDiscoveries(req, res).then(function (data) {
-			res.render('stats/top-albums', { 
-				menu: 'album-discoveries', 
-				title: 'Top album discoveries', 
+			data = {
+				menu: 'album-discoveries',
+				title: 'Top album discoveries',
 				albums: data.results,
 				pagination: data.pagination,
 				topResult: data.topResult,
 				datefilter: true
-			});
+			}
+			if (req.xhr) {
+				res.json(data);
+			} else {
+				res.render('stats/top-albums', data);
+			}
 		}).catch(function (error) {
 			next(createError(500, error));
 		});
@@ -132,14 +163,19 @@ router.get('/track-discoveries',
 	cache.route(cache_helper.getExpires('half-day')), 
 	function (req, res, next) {
 		stats.getTopTrackDiscoveries(req, res).then(function (data) {
-			res.render('stats/top-tracks', { 
-				menu: 'track-discoveries', 
-				title: 'Top track discoveries', 
+			data = {
+				menu: 'track-discoveries',
+				title: 'Top track discoveries',
 				tracks: data.results,
 				pagination: data.pagination,
 				topResult: data.topResult,
 				datefilter: true
-			});
+			}
+			if (req.xhr) {
+				res.json(data);
+			} else {
+				res.render('stats/top-tracks', data);
+			}
 		}).catch(function (error) {
 			next(createError(500, error));
 		});
