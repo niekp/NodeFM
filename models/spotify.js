@@ -8,10 +8,10 @@ var cache_helper = require('./cache_helper.js');
  * @param {Response} res 
  * @returns {Promise<SpotifyWebApi>}
  */
-function getSpotifyApi(req, res) {
+function getSpotifyApi(username) {
     return new Promise((resolve, reject) => {
         var spotifyApi = new SpotifyWebApi();
-        spotify_helper.getToken(req, res).then(function (token) {
+        spotify_helper.getToken(username).then(function (token) {
             spotifyApi.setAccessToken(token);
             resolve(spotifyApi);
         }).catch(function(ex) {
@@ -98,7 +98,7 @@ module.exports = {
      * @param {Response} res 
      */
     next: function (req, res) {
-        getSpotifyApi(req, res).then(function(api) {
+        getSpotifyApi(res.locals.username).then(function(api) {
             api.skipToNext().then(function () {
                 resolve();
             }).catch(function(ex) {
@@ -116,7 +116,7 @@ module.exports = {
      */
     play: function (req, res) {
         return new Promise((resolve, reject) => {
-            getSpotifyApi(req, res).then(function (api) {
+            getSpotifyApi(res.locals.username).then(function (api) {
                 let type = req.query.type;
                 let artist = req.query.artist;
                 let album = req.query.album;

@@ -10,11 +10,11 @@ var uuid = require("uuid");
  * Set a value to the spotify settings table
  * @param {string} key 
  * @param {string} value 
- * @param {Response} res 
+ * @param {string} username 
  * @see getValue
  */
-function setValue(key, value, res) {
-    database.executeQuery(`UPDATE Spotify SET ${key} = ?`, res.locals.username, [
+function setValue(key, value, username) {
+    database.executeQuery(`UPDATE Spotify SET ${key} = ?`, username, [
         value
     ]).catch(function (error) {
         console.error(error);
@@ -24,16 +24,16 @@ function setValue(key, value, res) {
 /**
  * Get a value from the spotify settings table
  * @param {string} key 
- * @param {Response} res 
+ * @param {string} username 
  * @see setValue
  */
-function getValue(key, res) {
+function getValue(key, username) {
     return new Promise((resolve, reject) => {
-        database.executeQuery(`SELECT ${key} FROM Spotify`, res.locals.username).then(function (result) {
+        database.executeQuery(`SELECT ${key} FROM Spotify`, username).then(function (result) {
                 // Something is wrong with the DB record. Reset it.
                 if (result.length == 0) {
-                    database.executeQuery("DELETE FROM Spotify", res.locals.username).then(function () {
-                        database.executeQuery("INSERT INTO Spotify (code) values ('')", res.locals.username).then(function () {
+                    database.executeQuery("DELETE FROM Spotify", username).then(function () {
+                        database.executeQuery("INSERT INTO Spotify (code) values ('')", username).then(function () {
                             resolve('');
                         }).catch(function (error) {
                             reject(error);
@@ -59,11 +59,11 @@ function getValue(key, res) {
 function setMe(req, res) {
     return new Promise((resolve, reject) => {
         var spotifyApi = new SpotifyWebApi();
-        module.exports.getToken(req, res).then(function (token) {
+        module.exports.getToken(res.locals.username).then(function (token) {
             spotifyApi.setAccessToken(token);
 
             spotifyApi.getMe().then(function (data) {
-                setValue('username', data.body['display_name'], res);
+                setValue('username', data.body['display_name'], res.locals.username);
                 resolve(data.body['display_name']);
             });
         }).catch(function (ex) {
@@ -78,21 +78,21 @@ module.exports = {
     * Set a value to the spotify settings table
     * @param {string} key
     * @param {string} value
-    * @param {Response} res
+    * @param {string} username
     * @see getValue
     */
-    setValue: function(key, value, res) {
-        setValue(key, value, res);
+    setValue: function (key, value, username) {
+        setValue(key, value, username);
     },
     
     /**
     * Get a value from the spotify settings table
     * @param {string} key
-    * @param {Response} res
+    * @param {string} username
     * @see setValue
     */
-    getValue: function(key, res) {
-        return getValue(key, res);
+    getValue: function (key, username) {
+        return getValue(key, username);
     },
 
     /**
@@ -138,7 +138,7 @@ module.exports = {
 
             Promise.all(wait_for).then(function () {
                 let code = req.query.code;
-                setValue('code', code, res);
+                setValue('code', code, res.locals.username);
 
                 var spotifyApi = new SpotifyWebApi({
                     redirectUri: config.get('spotify_redirect_uri'),
@@ -148,11 +148,11 @@ module.exports = {
 
                 // Retrieve an access token and a refresh token
                 spotifyApi.authorizationCodeGrant(code).then(function (data) {
-                    setValue('refresh_token', data.body['refresh_token'], res)
-                    setValue('token', data.body['access_token'], res)
+                    setValue('refresh_token', data.body['refresh_token'], res.locals.username)
+                    setValue('token', data.body['access_token'], res.locals.username)
 
                     let expires = (new Date()).getTime() + (data.body['expires_in'] * 1000)
-                    setValue('token_expires', expires, res)
+                    setValue('token_expires', expires, res.locals.username)
 
                     // Set the access token on the API object to use it in later calls
                     spotifyApi.setAccessToken(data.body['access_token']);
@@ -183,11 +183,11 @@ module.exports = {
         return new Promise((resolve, reject) => {
 
             promises = [];
-            promises.push(setValue('refresh_token', '', res))
-            promises.push(setValue('token', '', res))
-            promises.push(setValue('code', '', res))
-            promises.push(setValue('username', '', res))
-            promises.push(setValue('token_expires', '', res))
+            promises.push(setValue('refresh_token', '', res.locals.username))
+            promises.push(setValue('token', '', res.locals.username))
+            promises.push(setValue('code', '', res.locals.username))
+            promises.push(setValue('username', '', res.locals.username))
+            promises.push(setValue('token_expires', '', res.locals.username))
             cache.del('*' + res.locals.username + '*', function (error, added) { });
             Promise.all(promises).then(function () {
                 resolve();
@@ -199,14 +199,13 @@ module.exports = {
 
     /**
      * Get a spotify token. Use the current token if its still valid.
-     * @param {Request} req 
-     * @param {Response} res 
+     * @param {string} username 
      */
-    getToken: function(req, res) {
+    getToken: function(username) {
         return new Promise((resolve, reject) => {
-            current_token = getValue('token', res);
-            current_token_expires = getValue('token_expires', res)
-            current_refresh_token = getValue('refresh_token', res);
+            current_token = getValue('token', username);
+            current_token_expires = getValue('token_expires', username)
+            current_refresh_token = getValue('refresh_token', username);
 
             Promise.all([current_token, current_refresh_token, current_token_expires]).then(function (values) {
                 // TODO: Uitzoeken hoe ik die promisses netjes resolve zonder deze gekkigheid
@@ -231,8 +230,8 @@ module.exports = {
                             spotifyApi.setAccessToken(data.body['access_token']);
 
                             let expires = (new Date()).getTime() + (data.body['expires_in'] * 1000)
-                            setValue('token_expires', expires, res)
-                            setValue('token', data.body['access_token'], res)
+                            setValue('token_expires', expires, username)
+                            setValue('token', data.body['access_token'], username)
 
                             resolve(data.body['access_token']);
                         },
@@ -259,7 +258,7 @@ module.exports = {
         return new Promise((resolve, reject) => {
             security.isUnlocked(req, res).then(function(unlocked) {
                 if (unlocked) {
-                    getValue('username', res).then(function (username) {
+                    getValue('username', res.locals.username).then(function (username) {
                         res.locals.spotify_username = username;
                         resolve();
                     }).catch(function (error) {
