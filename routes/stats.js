@@ -182,6 +182,16 @@ router.get('/track-discoveries',
 	}
 );
 
+
+// Block AJAX from here
+router.get('/*', function (req, res, next) {
+	if (req.xhr) {
+		res.json({blocked: true});
+	} else {
+		next();
+	}
+});
+
 router.get('/scrobbles-per-hour', 
 	function (req, res, next) {cache_helper.setCacheName(req, res, next);}, 
 	cache.route(cache_helper.getExpires('week')), 

@@ -37,7 +37,8 @@
         }).then(response => response.json()).catch(function () {
             no_ajax = true;
         }).then(function (json) {
-            if (no_ajax) {
+            if (no_ajax || 'blocked' in json) {
+                no_ajax = true;
                 return;
             }
 
