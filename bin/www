@@ -39,9 +39,14 @@ require('../cronjobs/migration.js');
  * Setup cronjobs
  */
 let cron_timeline = require('../cronjobs/timeline.js');
+let cron_spotify_releases = require('../cronjobs/spotify-releases.js');
 
 cron.schedule('0 * * * *', () => {
   cron_timeline.run();
+});
+
+cron.schedule('0 1 * * *', () => {
+  cron_spotify_releases.run();
 });
 
 /**

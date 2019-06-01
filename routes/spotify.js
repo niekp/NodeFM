@@ -55,6 +55,20 @@ router.get('/authenticate/unlink', function (req, res, next) {
 });
 
 /**
+ * List routes
+ */
+ router.get('/releases', function (req, res, next) {
+	 console.log('hier')
+	 spotify.getReleases(req, res).then(function (releases) {
+		 res.render('spotify/releases', {
+			 menu: 'releases',
+			 title: 'New releases',
+			 releases: releases
+		 });
+	 });
+ });
+
+/**
  * Control routes
  */
 router.get('/control/nowplaying', function (req, res, next) {

@@ -1,4 +1,5 @@
 var SpotifyWebApi = require('spotify-web-api-node');
+var database = require('../db.js')
 var spotify_helper = require('./spotify_helper.js')
 var cache_helper = require('./cache_helper.js');
 
@@ -124,6 +125,14 @@ function getNowPlaying(now_playing, username) {
 }
 
 module.exports = {
+    /**
+     * Get the spotify API
+     * @param {string} username 
+     * @returns {Promise<SpotifyWebApi>}
+     */
+    getApi: function(username) {
+        return getSpotifyApi(username);
+    },
 
     nowplaying: function(username) {
         return new Promise((resolve, reject) => {
@@ -213,6 +222,16 @@ module.exports = {
 
                 }
             });
+        });
+    },
+
+    getReleases: function(req, res) {
+        return new Promise((resolve, reject) => {
+            database.executeQuery(`SELECT * FROM Releases WHERE match = 1 ORDER BY release_date DESC`, res.locals.username).then(function (releases) {
+                resolve(releases);
+            }).catch(function(ex) {
+                reject(ex);
+            })
         });
     }
 }

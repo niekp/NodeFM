@@ -1,0 +1,17 @@
+extends ../masterpage/layout-list
+
+append table-content
+	// releases::table-content
+	thead
+		tr
+			th Artist
+			th Album
+			th Type
+			th Release date
+	tbody
+		each val in releases
+			tr(data-type='album')
+				td(data-search='artist') #{val.artist}
+				td(data-search='album') #{val.album}
+				td #{val.type}
+				td(data-property='utc') #{moment(val.release_date).format('L')}

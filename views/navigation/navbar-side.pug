@@ -10,6 +10,9 @@ if loggedIn
             a(href='/stats/artists') Top scrobbles
         li(class=(active.indexOf('discoveries') >= 0 ? "active" : undefined))
             a(href='/stats/artist-discoveries') Top discoveries
+        if spotify_username
+            li(class=(active.indexOf('releases') >= 0 ? "active" : undefined))
+                a(href='/spotify/releases') New releases
         li(class=(active.substr(0, 13) === "scrobbles-per" ? "active" : undefined))
             a(href='/stats/scrobbles-per-hour') Scrobbles per
         li(class=(active === "blasts-from-the-past" ? "active" : undefined))

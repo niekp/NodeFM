@@ -77,7 +77,7 @@ fs.readdir(migrationsFolder, function (error, files) {
                             if (!has_run) {
                                 console.log('Run', migration_file, user);
                                 let runner = new migration(user);
-            
+    
                                 runner.run().then(function () {
                                     setStatus(user, migration_file, 'SUCCESS');
                                 }).catch(function (error) {
