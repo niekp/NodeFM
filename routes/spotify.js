@@ -3,6 +3,7 @@ var router = express.Router();
 var spotify_helper = require('../models/spotify_helper.js')
 var spotify = require('../models/spotify.js')
 var security = require('../models/security.js')
+var cache_helper = require('../models/cache_helper.js')
 
 // Only allow logged in sessions
 router.get('/*', function (req, res, next) {
@@ -56,12 +57,44 @@ router.get('/authenticate/unlink', function (req, res, next) {
 /**
  * Control routes
  */
+router.get('/control/nowplaying', function (req, res, next) {
+	let cache_expires = cache_helper.getExpiresSeconds('1min');
+	let cache_key = res.locals.username + ':now_playing';
+
+	if (req.query.force) {
+		spotify.nowplaying(res.locals.username).then(function (data) {
+			cache_helper.save(cache_key, data, cache_expires, 'json');
+			res.json(data);
+		}).catch(function (ex) {
+			cache_helper.save(cache_key, {}, cache_expires, 'json');
+			res.json({ error: ex });
+		});
+		
+	} else {
+		cache_helper.get(cache_key).then(function (data) {
+			res.json(data);
+		}).catch(function (ex) {
+			spotify.nowplaying(res.locals.username).then(function (data) {
+				cache_helper.save(cache_key, data, cache_expires, 'json');
+				res.json(data);
+			}).catch(function (ex) {
+				console.error(ex);
+				res.json({ error: ex });
+			});
+		});
+	}
+	
+
+});
+
 router.get('/control/next', function (req, res, next) {
 	spotify.next(req, res);
+	res.json({ ok: true });
+});
 
-	res.render('spotify/authenticate', {
-
-	});
+router.get('/control/prev', function (req, res, next) {
+	spotify.prev(req, res);
+	res.json({ ok: true });
 });
 
 router.get('/control/play', function (req, res, next) {

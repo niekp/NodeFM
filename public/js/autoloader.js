@@ -30,11 +30,15 @@
 
         filter.replace('limit=', 'xlimit=');
         filter.replace('page=', 'xpage=');
+
+        $("[data-id='autoloader']").text('Loading next page..').show();
+
         fetch(`${pathname}?limit=20&page=${page}&${filter}`, {
             headers: {
                 "X-Requested-With": "XMLHttpRequest"
             }
         }).then(response => response.json()).catch(function () {
+            $("[data-id='autoloader']").text('').hide();
             no_ajax = true;
         }).then(function (json) {
             if (no_ajax || 'blocked' in json) {

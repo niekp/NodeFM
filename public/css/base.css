@@ -134,3 +134,58 @@ form.datefilter, form.datefilter .input-group.date {
 .fa-play-circle {
   cursor: pointer;
 }
+
+/** Spotify **/
+.album-art, .album-art img {
+  width: 100%;
+}
+.spotify-player {
+  text-align: center;
+  display:none;
+}
+.spotify-player span {
+  display: block;
+  padding: 2px 0 2px 0;
+}
+.spotify-player .album {
+  font-style: italic;
+  color: rgb(85, 85, 85);
+}
+
+.spotify-player .controls {
+  font-size: 1.5em;
+  padding-top: 4px;
+  position: relative;
+  top: -30px;
+}
+.fas {
+  cursor: pointer;
+}
+.spotify-player .controls i {
+  
+   -webkit-text-stroke-width: 2px;
+   -webkit-text-stroke-color: white;
+}
+.spotify-player .controls i:first-child  {
+  float:left;
+  margin-left:10px;
+}
+.spotify-player .controls i:last-child  {
+  float:right;
+  margin-right:10px;
+}
+
+@media only screen and (max-width: 576px) {
+  .spotify-player .album-art {
+    display: none;
+  }
+  .spotify-player .artist, .spotify-player .album {
+    display: none;
+  }
+  .spotify-player .controls {
+    top: 0;
+  }
+}
+.play-button {
+  display: none;
+}

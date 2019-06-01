@@ -91,21 +91,74 @@ function getSearchResult(api, type, artist, album, track) {
     });
 }
 
+/**
+ * The layer to extract the relevant now_playing info.
+ * @todo Save artist image and ID data for future use.
+ * @param {JSON} now_playing 
+ * @param {string} username 
+ */
+function getNowPlaying(now_playing, username) {
+    if (now_playing) {
+        let progress = now_playing.progress_ms;
+        let duration = now_playing.item.duration_ms;
+
+        let album = now_playing.item.album.name;
+        let album_image = now_playing.item.album.images;
+        let artist = now_playing.item.artists[0].name;
+        let track = now_playing.item.name;
+
+        let data = JSON.stringify({
+            artist: artist,
+            album: album,
+            track: track,
+            image: album_image[1].url,
+            duration: duration,
+            timestamp: (new Date().getTime()),
+            progress: progress
+        });
+
+        return data;
+    } else {
+        return {};
+    }
+}
+
 module.exports = {
+
+    nowplaying: function(username) {
+        return new Promise((resolve, reject) => {
+            // First get the result from the DB
+            getSpotifyApi(username).then(function (api) {
+                api.getMyCurrentPlayingTrack().then(function (now_playing) {
+                    resolve(getNowPlaying(now_playing.body, username));
+                }).catch(function (ex) {
+                    reject(ex);
+                });
+            }).catch(function (ex) {
+                reject(ex);
+            })
+        });
+    },
+
     /**
      * Skip the current song
      * @param {Request} req 
      * @param {Response} res 
      */
     next: function (req, res) {
-        getSpotifyApi(res.locals.username).then(function(api) {
-            api.skipToNext().then(function () {
-                resolve();
-            }).catch(function(ex) {
-                reject(ex);
-            })
-        }).catch(function (ex) {
-            reject(ex);
+        getSpotifyApi(res.locals.username).then(function (api) {
+            api.skipToNext();
+        });
+    },
+
+    /**
+     * Skip the current song
+     * @param {Request} req 
+     * @param {Response} res 
+     */
+    prev: function (req, res) {
+        getSpotifyApi(res.locals.username).then(function (api) {
+            api.skipToPrevious();
         });
     },
 
