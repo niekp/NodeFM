@@ -130,9 +130,7 @@ module.exports = {
             let wait_for = [];
 
             wait_for.push(cache_helper.get(res.locals.username + ':spotify_state').then(function(state) {
-                console.log('State uit cache is: ', state);
                 if (state !== req.query.state) {
-                    console.log('Invalid state :(')
                     reject('Invalid state');
                     return;
                 }
@@ -217,7 +215,7 @@ module.exports = {
                 current_token_expires = values[2];
 
                 // Is the current token still valid?
-                if (parseInt(current_token_expires) < (new Date()).getTime()) {
+                if (parseInt(current_token_expires) > (new Date()).getTime()) {
                     resolve(current_token);
                 } else {
                     var spotifyApi = new SpotifyWebApi({
