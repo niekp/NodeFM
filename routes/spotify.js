@@ -14,7 +14,11 @@ router.get('/*', function (req, res, next) {
 			if (unlocked) {
 				next();
 			} else {
-				res.redirect('/security/unlock');
+				if (req.xhr) {
+					res.json({ error: 'not authorized' });
+				} else {
+					res.redirect('/security/unlock');
+				}
 			}
 		});
 	}

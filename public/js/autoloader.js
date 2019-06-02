@@ -4,7 +4,7 @@
     let no_ajax = false;
 
     $(document).ready(function () {
-        loadPage(next);
+        //setTimeout(loadPage, 1000, next);
     });
 
     $(window).scroll(function () {
@@ -86,7 +86,6 @@
                 $tr.appendTo($tbody);
             });
 
-            console.log('trigger event')
             $(".table").trigger('page:loaded');
 
             $(".pagination").hide();

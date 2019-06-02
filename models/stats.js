@@ -13,7 +13,7 @@ var pagination = require('./pagination.js')
  * @param {string} select_count - If COUNT(*) from_where is not sufficient or not efficient enought pass a complete count query. Note: Define the count `AS count`
  * @returns {Promise} - and in the resolve an object { results: {query result}, pagination: {pagination}, topResult: {top result without pagination} }
  */
-function handleStatsRequest(req, res, select, from_where, group_by, order_by, select_count = null, utc_filter = null, top_query_order = null) {
+function handleStatsRequest(req, res, select, from_where, group_by, order_by, select_count = null, utc_filter = null, top_query_order = null, parameters = undefined) {
 	// Setup the pagination
 	pagination.resetDefault();
 	pagination.calculate(req);
@@ -44,9 +44,8 @@ function handleStatsRequest(req, res, select, from_where, group_by, order_by, se
 		utc_filter = '';
 	}
 
-
 	// Execute the count query
-	let count = database.executeQuery(select_count, res.locals.username);
+	let count = database.executeQuery(select_count, res.locals.username, parameters);
 
 	// Execute the select query
 	let results = database.executeQuery(`
@@ -56,7 +55,7 @@ function handleStatsRequest(req, res, select, from_where, group_by, order_by, se
 		${group_by}
 		${order_by}
 		LIMIT ${pagination.offset},${pagination.limit}`,
-		res.locals.username);
+		res.locals.username, parameters);
 		
 	if (!top_query_order) {
 		top_query_order = order_by;
@@ -70,7 +69,7 @@ function handleStatsRequest(req, res, select, from_where, group_by, order_by, se
 		${group_by}
 		${top_query_order}
 		LIMIT 0, 1`,
-		res.locals.username);
+		res.locals.username, parameters);
 
 	// Wait for the queries and build the response	
 	return new Promise((resolve, reject) => {
@@ -100,6 +99,8 @@ function handleStatsRequest(req, res, select, from_where, group_by, order_by, se
 		// Wait for all and return.
 		Promise.all([count, results, topResult]).then(function(values) {
 			resolve(data);
+		}).catch(function (ex) {
+			reject(ex);
 		});
 	});
 
@@ -165,6 +166,10 @@ function prepareUtcWhere(req, res, where) {
 }
 
 module.exports = {
+	handleStatsRequest: function() {
+		return handleStatsRequest.apply(this, arguments);
+	},
+
 	/**
 	 * @param {Request} req 
 	 * @param {Response} res

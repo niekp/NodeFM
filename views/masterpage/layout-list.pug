@@ -2,14 +2,14 @@ extends layout
 
 append scripts-head
 	if spotify_username
-		script(type='text/javascript', src='../js/spotify.js')
-	
-	script(type='text/javascript', src='../js/autoloader.js')
-
+		script(type='text/javascript', src='/js/spotify.js')
+	script(type='text/javascript', src='/js/modal.js')
+		
 append content
 	// layout-list::content
 
-	h1 #{title}
+	if title
+		h1 #{title}
 
 	block before-table
 		//layout-list::before-table

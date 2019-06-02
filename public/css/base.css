@@ -7,6 +7,9 @@ body {
   padding-top: 50px;
 }
 
+body.modal-mode {
+  padding-top: 0;
+}
 
 /*
   * Global add-ons
@@ -188,5 +191,21 @@ form.datefilter, form.datefilter .input-group.date {
 }
 .play-button {
   display: none;
+  color: rgb(109, 109, 109);
+}
+
+.hidden {
+  display:none;
+}
+
+.modal-dialog {
+  background: white;
+  width: 90%;
+}
+
+[data-search='artist'] {
+  cursor: pointer;
+}
+[data-search='artist']:hover {
   color: rgb(109, 109, 109);
 }

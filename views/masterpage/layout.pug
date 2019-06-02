@@ -2,25 +2,36 @@ extends _bootstrap
 
 append styles
 	// layout::styles
-	link(href='../css/base.css', rel='stylesheet')
+	link(href='/css/base.css', rel='stylesheet')
 
 block body
 	// layout::body
-	nav.navbar.navbar-inverse.navbar-fixed-top
-		.container-fluid
-			include ../navigation/navbar-top.pug
-			
-	.container-fluid
-		.row
-			.col-sm-3.col-md-2.sidebar
-				include ../navigation/navbar-side.pug
-				include ../spotify/player.pug
+	if modal
+		.modal(tabindex='-1', role='dialog', id='modal')
+			.modal-dialog(role='document')
+				.modal-content
+				.modal-header
+					h5.modal-title
+						block modal-title
+				.modal-body
+					block content
+	else			
+		nav.navbar.navbar-inverse.navbar-fixed-top
+			.container-fluid
+				include ../navigation/navbar-top.pug
 					
-			.col-sm-9.col-sm-offset-3.col-md-10.col-md-offset-2.main
-				block content
-					// layout::content
+		.container-fluid
+			.row
+				.col-sm-3.col-md-2.sidebar
+					include ../navigation/navbar-side.pug
+					include ../spotify/player.pug
 
-				block pagination
-					// layout::pagination
-					if pagination && pagination.pages.length > 1
-						include ../shared/pagination
+			
+				.col-sm-9.col-sm-offset-3.col-md-10.col-md-offset-2.main
+					block content
+						// layout::content
+
+					block pagination
+						// layout::pagination
+						if pagination && pagination.pages.length > 1
+							include ../shared/pagination

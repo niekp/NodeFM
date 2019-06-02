@@ -1,0 +1,24 @@
+extends ../masterpage/layout-list
+
+append modal-title
+	strong #{artist}
+
+append table-content
+	// artist::table-content
+	thead
+		tr
+			th Album
+			th Scrobbles
+	tbody
+		each album in albums
+			tr(data-type='album')
+				td.hidden(data-search='artist') #{album.artist}
+				td(data-search='album') #{album.album}
+				td(class=(topResult ? "progress-td" : undefined))
+					if topResult
+						- var value = album.scrobbles
+						- var total = topResult.scrobbles
+						include ../shared/progress
+						
+					else
+						| #{album.scrobbles}

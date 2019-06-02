@@ -1,24 +1,35 @@
 (function ($) {
     pendingTimeouts = [];
-
+    let play_button_added = false;
     $(document).ready(function() {
         // Prepend a play button in the table
-        $('[data-type]').parents('table').find('thead tr').prepend("<th style='width: 16px;' />");
-        $('[data-type]').prepend("<td data-play-button><i class='play-button fas fa-play'></i></td>");
-
-        $('[data-play-button]').on('click', play);
-
+        addPlayButtons();
         $(".table").on('page:loaded', function () {
-            console.log('page loaded');
-            $('[data-play-button]').unbind('click');
-            $('[data-play-button]').on('click', play);
+            addPlayButtons();
         });
+
+        $('body').on('modal:loaded', function() {
+            addPlayButtons();
+        })
 
         $(".spotify-player [data-toggle='next']").on('click', next);
         $(".spotify-player [data-toggle='prev']").on('click', prev);
 
         nowPlaying();
     });
+
+    function addPlayButtons() {
+        $(".table").each(function () {
+            if (!$(this).data('play-button-added')) {
+                $(this).find('[data-type]:not([data-play-button-added])').parents('table').find('thead tr').prepend("<th style='width: 16px;' />");
+                $(this).find('[data-type]:not([data-play-button-added])').prepend("<td data-play-button><i class='play-button fas fa-play'></i></td>");
+                $(this).data('play-button-added', true);
+            }
+        });
+
+        $('[data-play-button]').unbind('click');
+        $('[data-play-button]').on('click', play);
+    }
 
     function play() {
         let tr = $(this).closest('[data-type]');

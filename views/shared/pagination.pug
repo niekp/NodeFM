@@ -1,15 +1,19 @@
 // pagination::root
+
+append scripts-head
+	script(type='text/javascript', src='/js/autoloader.js')
+
 span(data-id='autoloader')
 nav(aria-label="Pagination")
-  ul.pagination
-    if pagination.previous
-        li.page-item
-            a.page-link(href=pagination.getUrl(pagination.previous)) <
+	ul.pagination
+		if pagination.previous
+			li.page-item
+				a.page-link(href=pagination.getUrl(pagination.previous)) <
 
-    each page in pagination.pages
-        li(class=(pagination.current === page ? "active" : undefined)).page-item
-            a.page-link(href=pagination.getUrl(page)) #{page}
+		each page in pagination.pages
+			li(class=(pagination.current === page ? "active" : undefined)).page-item
+				a.page-link(href=pagination.getUrl(page)) #{page}
 
-    if pagination.next
-        li.page-item
-            a.page-link(href=pagination.getUrl(pagination.next)) >
+		if pagination.next
+			li.page-item
+				a.page-link(href=pagination.getUrl(pagination.next)) >

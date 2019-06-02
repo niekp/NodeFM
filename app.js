@@ -21,6 +21,7 @@ var securityRouter = require('./routes/security');
 var statsRouter = require('./routes/stats');
 var settingsRouter = require('./routes/settings');
 var spotifyRouter = require('./routes/spotify');
+var libraryRouter = require('./routes/library');
 
 // Setup view engine pug
 app.set('views', path.join(__dirname, 'views'));
@@ -72,6 +73,7 @@ app.use('/security', securityRouter);
 app.use('/settings', settingsRouter);
 app.use('/stats', statsRouter);
 app.use('/spotify', spotifyRouter);
+app.use('/library', libraryRouter);
 
 // If no route is found create a 404
 app.use(function(req, res, next) {

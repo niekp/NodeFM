@@ -43,26 +43,30 @@ include ../../node_modules/jade-bootstrap/components/images
 //- Including Bootswatch theme mixins
 include ../../node_modules/jade-bootstrap/components/bootswatch
 
-doctype html
-html(lang="en")
-	head
-		meta(charset="UTF-8")
-		meta(http-equiv="X-UA-Compatible", content="IE=edge")
-		meta(name="viewport",content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no")
-		meta(name="description",content="")
-		meta(name="author",content="")
-		link(rel="icon",href="/favicon.ico")
-		title= title
-		block styles
-			link(rel='stylesheet', href='/vendor/css/bootstrap.min.css')
-		block scripts-head
-			script(type='text/javascript', src='/vendor/js/jquery.min.js')
+if modal
+	block body
 
-	body(data-spy="scroll",data-target=".scrollspy")
-		block body
-			// _bootstrap::body
-			
-		block scripts
-			// _bootstrap::scripts
-			script(type='text/javascript', src='/vendor/js/bootstrap.min.js')
-			script(type='text/javascript', src='https://kit.fontawesome.com/c256a85687.js')
+else
+	doctype html
+	html(lang="en")
+		head
+			meta(charset="UTF-8")
+			meta(http-equiv="X-UA-Compatible", content="IE=edge")
+			meta(name="viewport",content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no")
+			meta(name="description",content="")
+			meta(name="author",content="")
+			link(rel="icon",href="/favicon.ico")
+			title= title
+			block styles
+				link(rel='stylesheet', href='/vendor/css/bootstrap.min.css')
+			block scripts-head
+				script(type='text/javascript', src='/vendor/js/jquery.min.js')
+
+		body(data-spy="scroll",data-target=".scrollspy",class=(modal ? 'modal-mode' : undefined))
+			block body
+				// _bootstrap::body
+				
+			block scripts
+				// _bootstrap::scripts
+				script(type='text/javascript', src='/vendor/js/bootstrap.min.js')
+				script(type='text/javascript', src='https://kit.fontawesome.com/c256a85687.js')
