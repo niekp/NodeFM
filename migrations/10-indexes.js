@@ -16,7 +16,11 @@ function Migration(user) {
             CREATE INDEX Artist_id_IDX ON Artist (id);
             CREATE INDEX Album_id_IDX ON Album (id);
             CREATE INDEX Track_id_IDX ON Track (id);
-            `)
+            `).then(function() {
+                resolve();
+            }).catch(function() {
+                resolve();
+            });
 
         });
     }
