@@ -117,7 +117,7 @@ function setDefaultDate(req, res, startdate = null, enddate = null) {
 		req.query.filter = [];
 	}
 
-	if (datefilter = req.cookies['datefilter']) {
+	if (datefilter = req.cookies['datefilter'] && startdate === null) {
 		let offset = datefilter.split(' ');
 		let offsetAmount = parseInt(offset[0]);
 		let offsetUnit = offset[1];
@@ -379,7 +379,7 @@ module.exports = {
 	 */
 	getBlastsFromThePast: function(req, res) {
 		setDefaultDate(req, res, 
-			null,
+			'',
 			req.app.locals.moment().subtract(1, 'year').format('L'));
 
 		let where = prepareUtcWhere(req, res, 'WHERE S.utc >= ${start-date} AND utc <= ${end-date}');
