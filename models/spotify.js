@@ -227,7 +227,12 @@ module.exports = {
 
     getReleases: function(req, res) {
         return new Promise((resolve, reject) => {
-            database.executeQuery(`SELECT * FROM Releases WHERE match = 1 ORDER BY release_date DESC`, res.locals.username).then(function (releases) {
+            let extra_query = '';
+            if (req.cookies['new-releases-album-only'] == '1') {
+                extra_query = " AND type = 'album'";
+            }
+
+            database.executeQuery(`SELECT * FROM Releases WHERE match = 1 ${extra_query} ORDER BY release_date DESC`, res.locals.username).then(function (releases) {
                 resolve(releases);
             }).catch(function(ex) {
                 reject(ex);

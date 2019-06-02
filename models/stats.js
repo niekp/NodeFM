@@ -117,6 +117,14 @@ function setDefaultDate(req, res, startdate = null, enddate = null) {
 		req.query.filter = [];
 	}
 
+	if (datefilter = req.cookies['datefilter']) {
+		let offset = datefilter.split(' ');
+		let offsetAmount = parseInt(offset[0]);
+		let offsetUnit = offset[1];
+
+		startdate = req.app.locals.moment().subtract(offsetAmount, offsetUnit).format('L');
+	}
+
 	if (startdate && req.query.filter['start-date'] === undefined) {
 		req.query.filter['start-date'] = startdate
 		res.locals.filter = req.query.filter;

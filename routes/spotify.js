@@ -63,7 +63,8 @@ router.get('/authenticate/unlink', function (req, res, next) {
 		 res.render('spotify/releases', {
 			 menu: 'releases',
 			 title: 'New releases',
-			 releases: releases
+			 releases: releases,
+			 album_only: req.cookies['new-releases-album-only']
 		 });
 	 });
  });

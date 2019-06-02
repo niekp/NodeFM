@@ -1,5 +1,18 @@
 extends ../masterpage/layout-list
 
+append scripts
+	script(type='text/javascript', src='../js/filters.js')
+
+prepend content
+	block filter
+		label 
+			input(
+				type='checkbox'
+				data-toggle='album-only'
+				checked=(album_only ? "checked" : undefined)
+			)
+			| &nbsp;Only show albums
+
 append table-content
 	// releases::table-content
 	thead
