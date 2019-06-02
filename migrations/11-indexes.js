@@ -18,10 +18,10 @@ function Migration(user) {
             promises.push(migration_helper.executeQuery(`CREATE INDEX Track_id_IDX ON Track (id)`));
             promises.push(migration_helper.executeQuery(`CREATE INDEX Artist_name_IDX ON Artist(name)`));
             promises.push(migration_helper.executeQuery(`CREATE INDEX Album_name_IDX ON Album(name)`));
-            
+
             Promise.all(promises).then(function () {
                 resolve();
-            }).then(function () {
+            }).catch(function () {
                 resolve();
             })
         });

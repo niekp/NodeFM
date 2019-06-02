@@ -10,6 +10,7 @@
     $(window).scroll(function () {
         if ($(window).scrollTop() + $(window).height() > $(document).height() - 100) {
             if (next && !timeout) {
+                console.log('Trigger loadpage', timeout)
                 timeout = true;
                 loadPage(next);
             }
@@ -49,7 +50,7 @@
 
             page = json.pagination.current;
             next = json.pagination.next;
-
+            console.log('set next: ', next);
             let items, max_scrobbles;
 
             if ('artists' in json) {
