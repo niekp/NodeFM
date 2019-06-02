@@ -203,9 +203,12 @@ form.datefilter, form.datefilter .input-group.date {
   width: 90%;
 }
 
-[data-search='artist'] {
+[data-search='artist'], .artist {
   cursor: pointer;
 }
 [data-search='artist']:hover {
   color: rgb(109, 109, 109);
+}
+.artist:hover {
+  color: black;
 }
