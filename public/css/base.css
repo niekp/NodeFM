@@ -147,9 +147,9 @@ form.datefilter, form.datefilter .input-group.date {
   display: block;
   padding: 2px 0 2px 0;
 }
-.spotify-player .album {
-  font-style: italic;
-  color: rgb(85, 85, 85);
+.spotify-player .album, .spotify-player .artist {
+  color: rgb(109, 109, 109);
+  font-size: 0.9em;
 }
 
 .spotify-player .controls {
@@ -188,4 +188,5 @@ form.datefilter, form.datefilter .input-group.date {
 }
 .play-button {
   display: none;
+  color: rgb(109, 109, 109);
 }
