@@ -99,7 +99,7 @@ function getSearchResult(api, type, artist, album, track) {
  * @param {string} username 
  */
 function getNowPlaying(now_playing, username) {
-    if (now_playing) {
+    if (Object.keys(now_playing).length) {
         let progress = now_playing.progress_ms;
         let duration = now_playing.item.duration_ms;
 
