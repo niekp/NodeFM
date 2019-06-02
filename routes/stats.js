@@ -17,7 +17,7 @@ router.get('/*', function (req, res, next) {
 
 router.get('/', 
 	function (req, res, next) {cache_helper.setCacheName(req, res, next);}, 
-	cache.route(cache_helper.getExpires('5min')), 
+	cache.route(cache_helper.getExpires('1min')), 
 	function (req, res, next) {
 	stats.getRecentTracks(req, res).then(function (data) {
 		data = {
