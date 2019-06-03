@@ -22,7 +22,10 @@
             $('body').append(data);
             $('.modal').modal('show')
             $('body').trigger('modal:loaded');
-        });
+        }).fail(function () {
+            $(".loader, .loader-bg").remove();
+            alert('Loading the artist data failed :(');
+        })
     }
     
 })(jQuery);
