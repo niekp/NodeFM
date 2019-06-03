@@ -16,7 +16,7 @@
 
     function loadModal(element) {
         $('.modal').remove();
-        $.get('/library/artist/' + encodeURI(($(element).text())) + '?modal=1', function (data) {
+        $.get('/library/artist/' + encodeURIComponent(($(element).text())) + '?modal=1', function (data) {
             $('body').append(data);
             $('.modal').modal('show')
             $('body').trigger('modal:loaded');

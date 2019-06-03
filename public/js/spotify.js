@@ -58,9 +58,9 @@
         // Execute the play command
         fetch('/spotify/control/play?type='
             + encodeURI(type)
-            + '&artist=' + encodeURI(artist)
-            + '&album=' + encodeURI(album)
-            + '&track=' + encodeURI(track)).then(res => res.json()).then(function (data) {
+            + '&artist=' + encodeURIComponent(artist)
+            + '&album=' + encodeURIComponent(album)
+            + '&track=' + encodeURIComponent(track)).then(res => res.json()).then(function (data) {
                 if (!data.success && data.error) {
                     console.error(data.error)
                     alert("Something went wrong.");
