@@ -212,3 +212,37 @@ form.datefilter, form.datefilter .input-group.date {
 .artist:hover {
   color: black;
 }
+
+.loader {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  margin-left: -60px;
+  margin-top: -60px;
+  border-top: 16px solid blue;
+  border-right: 16px solid green;
+  border-bottom: 16px solid red;
+  border-left: 16px solid pink;
+  border-radius: 50%;
+  width: 120px;
+  height: 120px;
+  animation: spin 2s linear infinite;
+  z-index: 1045;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loader-bg {
+  background: black;
+  opacity: 0.1;
+  position:fixed;
+  left:0;
+  top: 0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  z-index: 1040;
+}
