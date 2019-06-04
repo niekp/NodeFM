@@ -198,36 +198,55 @@ function getAlbum(api, username, artist, album, artist_id, album_id) {
 	});
 }
 
+var timeouts = [];
+function clearTimeouts() {
+	timeouts.forEach(function(timeout) {
+		clearTimeout(timeout);
+	});
+	timeouts = [];
+}
+
 /**
  * Call the get and save release functions for all pages
  * @param {string} username 
  */
 function fillSpotifyMetadata(username, api) {
 	return new Promise((resolve, reject) => {
-		let timeout = 1000;
-		let total = 1000;
-		let done = 0;
-
+		let timeout = 1000,
+			total = 1000,
+			done = 0,
+			errors = 0,
+			canceled = false;
+		
 		database.executeQuery(`SELECT Album.id as album_id, 
 									Album.name AS album, 
 									Artist.id AS artist_id,
 									Artist.name AS artist
 									FROM Album 
 									INNER JOIN Artist ON Artist.id = Album.artist_id 
-									WHERE Album.last_api_search IS NULL 
+									WHERE Album.id = 'mbid:08175774-9e7f-30f1-93a8-3946968c6e86'
 									LIMIT 0, ${total}`, username
 		).then(function (albums) {
 			albums.forEach(album => {
-				setTimeout(function () {
-					getAlbum(api, username, album.artist, album.album, album.artist_id, album.album_id).catch(function (ex) {
-						console.error('Error getting album: ', album.artist, album.album, ex)
-					});
-					done++;
+				timeouts.push(setTimeout(function () {
+					if (!canceled) {
+						getAlbum(api, username, album.artist, album.album, album.artist_id, album.album_id).catch(function (ex) {
+							errors++;
+							console.error('Error getting album: ', album.artist, album.album, ex)
 
+							if (errors > 10) {
+								clearTimeouts();
+								canceled = true;
+								reject('To many errors :(');
+							}
+						});
+					}
+
+					done++;
 					if (done >= total) {
 						resolve();
 					}
-				}, timeout);
+				}, timeout));
 				timeout += 2000;
 			})
 
@@ -243,6 +262,7 @@ module.exports = {
 
 	run: function () {
 		running = true;
+		clearTimeouts();
 		// Loop through all users
 		fs.readdir(database_folder, function (error, files) {
 			if (error) {
@@ -263,7 +283,10 @@ module.exports = {
 									fillSpotifyMetadata(username, api).then(function () {
 										running = false;
 										console.log('done!')
-									})
+									}).catch(function (ex) {
+										console.error('Done with errors:', ex);
+										running = false;
+									});
 								});
 							}
 						});
