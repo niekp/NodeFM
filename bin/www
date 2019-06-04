@@ -46,13 +46,15 @@ cron.schedule('0 * * * *', () => {
   cron_timeline.run();
 });
 
-cron.schedule('0 1 * * *', () => {
+cron.schedule('0 * * * *', () => {
   cron_spotify_releases.run();
 });
 
 // testing..
-cron.schedule('30 22 * * *', () => {
-  cron_spotify_metadata.run();
+cron.schedule('10 * * * *', () => {
+  if (!cron_spotify_metadata.isRunning()) {
+    cron_spotify_metadata.run();
+  }
 });
 
 /**
