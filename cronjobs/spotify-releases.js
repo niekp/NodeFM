@@ -50,7 +50,9 @@ function saveReleases(items, username) {
                     release.album_type,
                     release.release_date,
                     results[0].id
-                ]);
+                ]).catch(function(ex) {
+                    console.error('Error updating', ex);
+                })
             } else {
                 database.executeQuery(`INSERT INTO Releases (artist, album, image, type, uri, release_date) VALUES (?, ?, ?, ?, ?, ?)`, username, [
                     release.artists[0].name,
@@ -59,8 +61,12 @@ function saveReleases(items, username) {
                     release.album_type,
                     release.uri,
                     release.release_date,
-                ]);
+                ]).catch(function (ex) {
+                    console.error('Error inserting', ex);
+                })
             }
+        }).catch(function (ex) {
+            console.error('Error looking up release', ex);
         })
     });
 }
@@ -110,9 +116,15 @@ function saveMatches(username) {
                 database.executeQuery(`UPDATE Releases SET Match = ? WHERE id = ?`, username, [
                     (result.length ? 1 : 0),
                     release.id
-                ]);
+                ]).catch(function (ex) {
+                    console.error('Error saving the match', ex);
+                })
+            }).catch(function (ex) {
+                console.error('Error trying to match', ex);
             })
         });
+    }).catch(function (ex) {
+        console.error('Error getting releases to match', ex);
     })
 }
 
@@ -121,7 +133,9 @@ function saveMatches(username) {
  * @param {string} username 
  */
 function cleanupReleases(username) {
-    database.executeQuery(`DELETE FROM Releases WHERE release_date < date('now', '-180 day') AND match = 0`);
+    database.executeQuery(`DELETE FROM Releases WHERE release_date < date('now', '-180 day') AND match = 0`, username).catch(function (ex) {
+        console.error('Error cleaning up', ex);
+    });
 }
 
 module.exports = {
@@ -140,7 +154,7 @@ module.exports = {
                 if (username) {
                     database.connect(username, sqlite3.OPEN_READWRITE).then(function () {
                         spotify_helper.getValue('username', username).then(function(spotify_username) {
-                            if (spotify_username.length) {
+                            if (spotify_username && spotify_username.length) {
                                 // Download and save the new releases
                                 updateNewReleases(username);
                                 // Remove old non-matches
