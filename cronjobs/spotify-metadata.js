@@ -224,7 +224,7 @@ function fillSpotifyMetadata(username, api) {
 									Artist.name AS artist
 									FROM Album 
 									INNER JOIN Artist ON Artist.id = Album.artist_id 
-									WHERE Album.id = 'mbid:08175774-9e7f-30f1-93a8-3946968c6e86'
+									WHERE Album.last_api_search IS NULL
 									LIMIT 0, ${total}`, username
 		).then(function (albums) {
 			albums.forEach(album => {
