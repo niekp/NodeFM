@@ -63,6 +63,10 @@ function injectLocal(req, res, next){
   })
 };
 
+process.on('unhandledRejection', (reason, p) => {
+  console.log('Unhandled Rejection at: Promise', p, 'reason:', reason);
+});
+
 // First inject variables
 app.get('/*', injectLocal);
 app.post('/*', injectLocal);

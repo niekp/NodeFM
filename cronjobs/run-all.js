@@ -6,6 +6,9 @@
 
 // 1. Migrations
 //require('../cronjobs/migration.js');
+process.on('unhandledRejection', (reason, p) => {
+    console.log('Unhandled Rejection at: Promise', p, 'reason:', reason);
+});
 
 // 2. Timeline
 require('./spotify-metadata.js').run();
