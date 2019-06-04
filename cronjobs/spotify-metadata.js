@@ -20,7 +20,6 @@ function getPromiseTimeout(ms){
 	})
 }
 
-
 /**
  * Save the album to the DB
  * @param {JSON} body The API result
@@ -79,9 +78,8 @@ function saveArtist(data, username, artist_id) {
 function saveTracks(tracks, username, artist_id, album_id) {
 	return new Promise((resolve, reject) => {
 		let promises = [];
-
+		
 		promises.push(getPromiseTimeout(2000));
-
 		database.executeQuery(`SELECT id, name FROM Track WHERE artist_id = ? AND album_id = ?`, username, [
 			artist_id, album_id
 		]).then(function(db_tracks) {
@@ -128,9 +126,6 @@ function saveTracks(tracks, username, artist_id, album_id) {
 			reject(ex);
 		})
 	});
-	/**
-
-	 */
 }
 
 /**
@@ -139,6 +134,7 @@ function saveTracks(tracks, username, artist_id, album_id) {
 function normalize(text) {
 	text = text.toLowerCase().trim();
 	text = text.normalize('NFD').replace(/[\u0300-\u036f]/g, "")
+	text = text.replace(/\W+/g, '');
 	return text;
 }
 
@@ -162,7 +158,6 @@ function getAlbum(api, username, artist, album, artist_id, album_id) {
 					if (body.artists[0]) {
 						promises.push(saveArtist(body, username, artist_id));
 					}
-
 					if (body.tracks.items) {
 						promises.push(saveTracks(body.tracks.items, username, artist_id, album_id));						
 					}
