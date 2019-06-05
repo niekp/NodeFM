@@ -32,6 +32,7 @@ function saveAlbum(data, username, album_id) {
 	} else if (data.release_date_precision == 'month') {
 		release_date += '-01';
 	}
+	console.log('Saving album', body.name)
 
 	return database.executeQuery(`UPDATE Album SET 
 		spotify_uri = ?,
@@ -210,14 +211,14 @@ function clearTimeouts() {
  * Call the get and save release functions for all pages
  * @param {string} username 
  */
-function fillSpotifyMetadata(username, api) {
+function fillSpotifyMetadata(username) {
 	return new Promise((resolve, reject) => {
 		let timeout = 1000,
 			total = 1000,
 			done = 0,
 			errors = 0,
 			canceled = false;
-		
+		fillSpotifyMetadata
 		database.executeQuery(`SELECT Album.id as album_id, 
 									Album.name AS album, 
 									Artist.id AS artist_id,
@@ -230,15 +231,17 @@ function fillSpotifyMetadata(username, api) {
 			albums.forEach(album => {
 				timeouts.push(setTimeout(function () {
 					if (!canceled) {
-						getAlbum(api, username, album.artist, album.album, album.artist_id, album.album_id).catch(function (ex) {
-							errors++;
-							console.error('Error getting album: ', album.artist, album.album, ex)
+						spotify.getApi(username).then(function (api) {
+							getAlbum(api, username, album.artist, album.album, album.artist_id, album.album_id).catch(function (ex) {
+								errors++;
+								console.error('Error getting album: ', album.artist, album.album, ex)
 
-							if (errors > 10) {
-								clearTimeouts();
-								canceled = true;
-								reject('To many errors :(');
-							}
+								if (errors > 10) {
+									clearTimeouts();
+									canceled = true;
+									reject('To many errors :(');
+								}
+							});
 						});
 					}
 
@@ -279,14 +282,13 @@ module.exports = {
 					database.connect(username, sqlite3.OPEN_READWRITE).then(function () {
 						spotify_helper.getValue('username', username).then(function (spotify_username) {
 							if (spotify_username.length) {
-								spotify.getApi(username).then(function (api) {
-									fillSpotifyMetadata(username, api).then(function () {
-										running = false;
-										console.log('done!')
-									}).catch(function (ex) {
-										console.error('Done with errors:', ex);
-										running = false;
-									});
+								// TODO: Dit gaat fout. Als de token halverwege het proces verloopt krijg je fouten.
+								fillSpotifyMetadata(username).then(function () {
+									running = false;
+									console.log('done!')
+								}).catch(function (ex) {
+									console.error('Done with errors:', ex);
+									running = false;
 								});
 							}
 						});
