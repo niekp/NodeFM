@@ -1,4 +1,7 @@
 {
   "database_folder": "/path/to/folder/",
-  "locale": "en_GB"
+  "locale": "en_GB",
+  "spotify_client": "",
+  "spotify_secret": "",
+  "spotify_redirect_uri": "http://localhost:3000/spotify/authenticate/callback"
 }
