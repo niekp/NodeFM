@@ -277,27 +277,25 @@ module.exports = {
 				if (user_file.indexOf('.db') > 0) {
 					username = user_file.replace('.db', '');
 				}
-// testing.. only run for 1 user.
-				if (username.indexOf('nok') >= 0) {
-					database.connect(username, sqlite3.OPEN_READWRITE).then(function () {
-						spotify_helper.getValue('username', username).then(function (spotify_username) {
-							if (spotify_username.length) {
-								// TODO: Dit gaat fout. Als de token halverwege het proces verloopt krijg je fouten.
-								fillSpotifyMetadata(username).then(function () {
-									running = false;
-									console.log('done!')
-								}).catch(function (ex) {
-									console.error('Done with errors:', ex);
-									running = false;
-								});
-							}
-						});
 
-					}).catch(function (error) {
-						console.error(error);
+				database.connect(username, sqlite3.OPEN_READWRITE).then(function () {
+					spotify_helper.getValue('username', username).then(function (spotify_username) {
+						if (spotify_username.length) {
+							// TODO: Dit gaat fout. Als de token halverwege het proces verloopt krijg je fouten.
+							fillSpotifyMetadata(username).then(function () {
+								running = false;
+								console.log('done!')
+							}).catch(function (ex) {
+								console.error('Done with errors:', ex);
+								running = false;
+							});
+						}
 					});
 
-				}
+				}).catch(function (error) {
+					console.error(error);
+				});
+
 			});
 		});
 	},
