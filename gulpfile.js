@@ -20,13 +20,13 @@ const browserSyncWatchFiles = [
 
 
 gulp.task('sass', function() {
-	return gulp.src('public/scss/**/*.scss') // Gets all files ending with .scss in app/scss and children dirs
+	return gulp.src('public/scss/**/*.scss') // Gets all files ending with .scss in public/scss and children dirs
 	.pipe(plumber())
 	.pipe(sass.sync())
 	.pipe(concat('styles.css'))
 	.pipe(cssnano())
 	.pipe(plumber.stop())
-	.pipe(gulp.dest('app/css'))
+	.pipe(gulp.dest('public/css'))
 	.pipe(browserSync.reload({
 		stream: true
 	}))
@@ -47,18 +47,6 @@ gulp.task('serve', function() {
 	//1. serve with default settings
 	var server = gls('bin/www', { env: { DEFAULT: 'development' } });
     server.start();
-
-	//use gulp.watch to trigger server actions(notify, start or stop)
-    gulp.watch(['public/**/*.css', 'static/**/*.html'], function (file) {
-        server.notify.apply(server, [file]);
-    });
-	
-    gulp.watch('app.js', server.start.bind(server)); //restart my server
-
-    // Note: try wrapping in a function if getting an error like `TypeError: Bad argument at TypeError (native) at ChildProcess.spawn`
-    gulp.watch('app.js', function () {
-        server.start.bind(server)()
-    });
 });
 
 

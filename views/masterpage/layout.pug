@@ -2,7 +2,7 @@ extends _bootstrap
 
 append styles
 	// layout::styles
-	link(href='/css/base.css', rel='stylesheet')
+	link(href='/css/styles.css', rel='stylesheet')
 
 block body
 	// layout::body
@@ -15,18 +15,18 @@ block body
 						block modal-title
 				.modal-body
 					block content
-	else			
+	else
 		nav.navbar.navbar-inverse.navbar-fixed-top
 			.container-fluid
 				include ../navigation/navbar-top.pug
-					
+
 		.container-fluid
 			.row
 				.col-sm-3.col-md-2.sidebar
 					include ../navigation/navbar-side.pug
 					include ../spotify/player.pug
 
-			
+
 				.col-sm-9.col-sm-offset-3.col-md-10.col-md-offset-2.main
 					block content
 						// layout::content
