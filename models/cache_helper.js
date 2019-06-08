@@ -89,6 +89,8 @@ module.exports = {
      */
     save: function (key, value, expire = (60 * 60 * 24), type = 'String') {
         let cache = require('express-redis-cache')({ prefix: this.getPrefix() });
+        cache.on('error', function (error) { });
+
         cache.get(key, function (error, entries) {
             if (type == 'json') {
                 value = JSON.stringify(value);
@@ -106,6 +108,8 @@ module.exports = {
     get: function(key) {
         return new Promise((resolve, reject) => {
             let cache = require('express-redis-cache')({ prefix: this.getPrefix() });
+            cache.on('error', function (error) { });
+
             cache.get(key, function (error, entries) {
                 if (entries.length && entries[0].body) {
                     if (entries[0].type === 'json') {

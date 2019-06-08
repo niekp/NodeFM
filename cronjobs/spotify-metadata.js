@@ -178,6 +178,10 @@ function getAlbum(api, username, artist, album, artist_id, album_id) {
 
 		}).catch(function (ex) {
 			if (ex.indexOf('No results') >= 0) {
+
+				// TODO: Zoek op artiest, lus door alle albums en probeer te matchen.
+				// Bijv. Sufjan Stevens - Illinoise = Illinois. En alle 'deluxe edition' toestand moet dan ook gefixt zijn.
+
 				promises.push(database.executeQuery(`UPDATE Album SET 
 					last_api_search = datetime('now')
 					WHERE id = ?`, username, [
@@ -218,7 +222,7 @@ function fillSpotifyMetadata(username) {
 			done = 0,
 			errors = 0,
 			canceled = false;
-		fillSpotifyMetadata
+		
 		database.executeQuery(`SELECT Album.id as album_id, 
 									Album.name AS album, 
 									Artist.id AS artist_id,
@@ -254,6 +258,8 @@ function fillSpotifyMetadata(username) {
 			})
 
 		});
+
+		// TODO: artiesten ook matchen. Niet elke artiest staat op spotify
 	});
 }
 

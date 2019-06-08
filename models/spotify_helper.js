@@ -5,6 +5,7 @@ var cache_helper = require('./cache_helper.js');
 var security = require('./security.js')
 var cache = require('express-redis-cache')({ prefix: cache_helper.getPrefix() });
 var uuid = require("uuid");
+cache.on('error', function (error) { });
 
 /**
  * Set a value to the spotify settings table
