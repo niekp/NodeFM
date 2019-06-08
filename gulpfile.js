@@ -9,7 +9,7 @@ const autoprefixer = require('gulp-autoprefixer');
 const gls = require('gulp-live-server');
 
 const browserSyncOptions = {
-	proxy: "http://localhost:3000", // lokale locatie van het project
+	proxy: "http://localhost:5000", // lokale locatie van het project
 	notify: false
 };
 
