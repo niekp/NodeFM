@@ -1,93 +1,75 @@
+const gulp = require('gulp');
+const sass = require('gulp-sass');
+const browserSync = require('browser-sync').create();
+const uglify = require('gulp-uglify');
+const cssnano = require('gulp-cssnano');
+const concat = require('gulp-concat');
+const plumber = require('gulp-plumber');
+const autoprefixer = require('gulp-autoprefixer');
+const gls = require('gulp-live-server');
 
-var gulp = require("gulp"),
-    sass = require("gulp-sass"),
-    postcss = require("gulp-postcss"),
-    autoprefixer = require("autoprefixer"),
-    cssnano = require("cssnano"),
-    sourcemaps = require("gulp-sourcemaps"),
-    browserSync = require("browser-sync").create();
-
-var paths = {
-    styles: {
-        // By using styles/**/*.sass we're telling gulp to check all folders for any sass file
-        src: "public/scss/*.scss",
-        // Compiled files will end up in whichever folder it's found in (partials are not compiled)
-        dest: "public/css"
-    }
-
-    // Easily add additional paths
-    // ,html: {
-    //  src: '...',
-    //  dest: '...'
-    // }
+const browserSyncOptions = {
+	proxy: "http://localhost:3000", // lokale locatie van het project
+	notify: false
 };
 
-function style() {
-    return gulp
-        .src(paths.styles.src)
-        // Initialize sourcemaps before compilation starts
-        .pipe(sourcemaps.init())
-        .pipe(sass())
-        .on("error", sass.logError)
-        // Use postcss with autoprefixer and compress the compiled file using cssnano
-        .pipe(postcss([autoprefixer(), cssnano()]))
-        // Now add/write the sourcemaps
-        .pipe(sourcemaps.write())
-        .pipe(gulp.dest(paths.styles.dest))
-        // Add browsersync stream pipe after compilation
-        .pipe(browserSync.stream());
-}
+const browserSyncWatchFiles = [
+	'public/scss/**/*.css',
+	'public/js/functions.js',
+];
 
 
+gulp.task('sass', function() {
+	return gulp.src('public/scss/**/*.scss') // Gets all files ending with .scss in app/scss and children dirs
+	.pipe(plumber())
+	.pipe(sass.sync())
+	.pipe(concat('styles.css'))
+	.pipe(cssnano())
+	.pipe(plumber.stop())
+	.pipe(gulp.dest('app/css'))
+	.pipe(browserSync.reload({
+		stream: true
+	}))
+});
+
+gulp.task('compress', function () {
+	return gulp.src('public/js/functions.js')
+	.pipe(uglify())
+	.pipe(concat('functions.min.js'))
+	.pipe(gulp.dest('public/js'))
+	.pipe(browserSync.reload({
+		stream: true
+	}))
+});
 
 
-// A simple task to reload the page
-function reload() {
-    browserSync.reload();
-}
+gulp.task('serve', function() {
+	//1. serve with default settings
+	var server = gls('bin/www', { env: { DEFAULT: 'development' } });
+    server.start();
 
-// Add browsersync initialization at the start of the watch task
-function watch() {
-    browserSync.init({
-        // You can tell browserSync to use this directory and serve it as a mini-server
-        server: {
-            baseDir: "./src"
-        }
-        // If you are already serving your website locally using something like apache
-        // You can use the proxy setting to proxy that instead
-        // proxy: "yourlocal.dev"
+	//use gulp.watch to trigger server actions(notify, start or stop)
+    gulp.watch(['public/**/*.css', 'static/**/*.html'], function (file) {
+        server.notify.apply(server, [file]);
     });
-    gulp.watch(paths.styles.src, style);
-    // We should tell gulp which files to watch to trigger the reload
-    // This can be html or whatever you're using to develop your website
-    // Note -- you can obviously add the path to the Paths object
-    //gulp.watch("src/*.html", reload);
-    gulp.watch("src/*.html").on('change', browserSync.reload);
-}
+	
+    gulp.watch('app.js', server.start.bind(server)); //restart my server
 
-// We don't have to expose the reload function
-// It's currently only useful in other functions
+    // Note: try wrapping in a function if getting an error like `TypeError: Bad argument at TypeError (native) at ChildProcess.spawn`
+    gulp.watch('app.js', function () {
+        server.start.bind(server)()
+    });
+});
 
 
-// Don't forget to expose the task!
-exports.watch = watch
+// Gulp watch syntax
+gulp.task('watch', ['serve', 'browserSync'], function (){
+	gulp.watch('public/scss/**/*.scss', ['sass']);
+	// Reloads the browser whenever JS files change
+	gulp.watch('public/js/functions.js', ['compress'], browserSync.reload);
+});
 
-// Expose the task by exporting it
-// This allows you to run it from the commandline using
-// $ gulp style
-exports.style = style;
 
-/*
- * Specify if tasks run in series or parallel using `gulp.series` and `gulp.parallel`
- */
-var build = gulp.parallel(style, watch);
-
-/*
- * You can still use `gulp.task` to expose tasks
- */
-//gulp.task('build', build);
-
-/*
- * Define default task that can be called by just running `gulp` from cli
- */
-gulp.task('default', build);
+gulp.task('browserSync', function() {
+	browserSync.init(browserSyncWatchFiles, browserSyncOptions);
+});
