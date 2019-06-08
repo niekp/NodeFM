@@ -1,21 +1,23 @@
 // navbar-side::root
 block nav
-  - var active = (menu ? menu : "index")
+	- var active = (menu ? menu : "index")
 
 if loggedIn
-    ul.nav.nav-sidebar
-        li(class=(active === "recent" ? "active" : undefined))
-            a(href='/stats') Recent tracks 
-        li(class=(active.substr(0, 4) === 'top-' ? "active" : undefined))
-            a(href='/stats/artists') Top scrobbles
-        li(class=(active.indexOf('discoveries') >= 0 ? "active" : undefined))
-            a(href='/stats/artist-discoveries') Top discoveries
-        if spotify_username
-            li(class=(active.indexOf('releases') >= 0 ? "active" : undefined))
-                a(href='/spotify/releases') New releases
-        li(class=(active.substr(0, 13) === "scrobbles-per" ? "active" : undefined))
-            a(href='/stats/scrobbles-per-hour') Scrobbles per
-        li(class=(active === "blasts-from-the-past" ? "active" : undefined))
-            a(href='/stats/blasts-from-the-past') Blasts from the past        
-        li(class=(active.substr(0, 8) === "timeline" ? "active" : undefined))
-            a(href='/stats/timeline-month') Timeline of top artists
+	ul.nav.nav-sidebar
+		li(class=('title'))
+			a(href='/') NodeFM
+		li(class=(active === "recent" ? "active" : undefined))
+			a(href='/stats') Recent tracks 
+		li(class=(active.substr(0, 4) === 'top-' ? "active" : undefined))
+			a(href='/stats/artists') Top scrobbles
+		li(class=(active.indexOf('discoveries') >= 0 ? "active" : undefined))
+			a(href='/stats/artist-discoveries') Top discoveries
+		if spotify_username
+			li(class=(active.indexOf('releases') >= 0 ? "active" : undefined))
+				a(href='/spotify/releases') New releases
+		li(class=(active.substr(0, 13) === "scrobbles-per" ? "active" : undefined))
+			a(href='/stats/scrobbles-per-hour') Scrobbles per
+		li(class=(active === "blasts-from-the-past" ? "active" : undefined))
+			a(href='/stats/blasts-from-the-past') Blasts from the past        
+		li(class=(active.substr(0, 8) === "timeline" ? "active" : undefined))
+			a(href='/stats/timeline-month') Timeline of top artists

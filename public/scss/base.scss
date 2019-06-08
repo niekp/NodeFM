@@ -1,249 +1,243 @@
-/*
- * Base structure
- */
-
-/* Move down content because we have a fixed navbar that is 50px tall */
-body {
-  padding-top: 50px;
-
-}
-
-body.modal-mode {
-  padding-top: 0;
-}
-
-/*
-  * Global add-ons
-  */
-
-.sub-header {
-  padding-bottom: 10px;
-  border-bottom: 1px solid #eee;
-}
-
-/*
-  * Top navigation
-  * Hide default border to remove 1px line.
-  */
-.navbar-fixed-top {
-  border: 0;
-}
-
-/*
-  * Sidebar
-  */
-
-@media (max-width: 768px) {
-  .sidebar {
-    overflow-x: hidden; /** The menu is 1px to wide so keep it in bounds.. */
-  }
-}
-
-@media (min-width: 768px) {
-  .sidebar {
-    position: fixed;
-    top: 51px;
-    bottom: 0;
-    left: 0;
-    z-index: 1000;
-    display: block;
-    padding: 20px;
-    overflow-x: hidden;
-    overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
-    background-color: #f5f5f5;
-    border-right: 1px solid #eee;
-  }
-}
-
-/* Sidebar navigation */
-.nav-sidebar {
-  margin-right: -21px; /* 20px padding + 1px border */
-  margin-bottom: 20px;
-  margin-left: -20px;
-}
-.nav-sidebar > li > a {
-  padding-right: 20px;
-  padding-left: 20px;
-}
-.nav-sidebar > .active > a,
-.nav-sidebar > .active > a:hover,
-.nav-sidebar > .active > a:focus {
-  color: #fff;
-  background-color: #428bca;
-}
-
-
-/*
-  * Main content
-  */
-
-.main {
-  padding: 20px;
-}
-@media (min-width: 768px) {
-  .main {
-    padding-right: 40px;
-    padding-left: 40px;
-  }
-}
-.main .page-header {
-  margin-top: 0;
-}
-
-
-/*
-  * Placeholder dashboard ideas
-  */
-
-.placeholders {
-  margin-bottom: 30px;
-  text-align: center;
-}
-.placeholders h4 {
-  margin-bottom: 0;
-}
-.placeholder {
-  margin-bottom: 20px;
-}
-.placeholder img {
-  display: inline-block;
-  border-radius: 50%;
-}
-
-/*
-* Progress bar
-*/
-td.progress-td {
-  width: 30%
-}
-
-.progress {
-  margin-bottom: 0;
-}
-
-.progress-bar {
-  text-align: left;
-  padding-left: 5px;
-  min-width: 35px; /* Otherwise the scrobble count isn't visible */
-}
-
-form.datefilter, form.datefilter .input-group.date {
-  margin-bottom: 15px;
-}
-
-.table-responsive table td {
-  max-width: 300px;
-}
-
-.fa-play-circle {
-  cursor: pointer;
-}
-
-/** Spotify **/
-.album-art, .album-art img {
-  width: 100%;
-}
-.spotify-player {
-  text-align: center;
-  display:none;
-}
-.spotify-player span {
-  display: block;
-  padding: 2px 0 2px 0;
-}
-.spotify-player .album, .spotify-player .artist {
-  color: rgb(109, 109, 109);
-  font-size: 0.9em;
-}
-
-.spotify-player .controls {
-  font-size: 1.5em;
-  padding-top: 4px;
-  position: relative;
-  top: -30px;
-}
-.fas {
-  cursor: pointer;
-}
-.spotify-player .controls i {
-
-   -webkit-text-stroke-width: 2px;
-   -webkit-text-stroke-color: white;
-}
-.spotify-player .controls i:first-child  {
-  float:left;
-  margin-left:10px;
-}
-.spotify-player .controls i:last-child  {
-  float:right;
-  margin-right:10px;
-}
-
-@media only screen and (max-width: 576px) {
-  .spotify-player .album-art {
-    display: none;
-  }
-  .spotify-player .artist, .spotify-player .album {
-    display: none;
-  }
-  .spotify-player .controls {
-    top: 0;
-  }
-}
-.play-button {
-  display: none;
-  color: rgb(109, 109, 109);
-}
-
-.hidden {
-  display:none;
-}
-
-.modal-dialog {
-  background: white;
-  width: 90%;
-}
-
-[data-search='artist'], .artist {
-  cursor: pointer;
-}
-[data-search='artist']:hover {
-  color: rgb(109, 109, 109);
-}
-.artist:hover {
-  color: black;
-}
-
-.loader {
-  position: fixed;
-  left: 50%;
-  top: 50%;
-  margin-left: -60px;
-  margin-top: -60px;
-  border-top: 16px solid blue;
-  border-right: 16px solid green;
-  border-bottom: 16px solid red;
-  border-left: 16px solid pink;
-  border-radius: 50%;
-  width: 120px;
-  height: 120px;
-  animation: spin 2s linear infinite;
-  z-index: 1045;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.loader-bg {
-  background: black;
-  opacity: 0.1;
-  position:fixed;
-  left:0;
-  top: 0;
-  width:100%;
-  height:100%;
-  overflow:hidden;
-  z-index: 1040;
-}
+// /*
+//  * Base structure
+//  */
+//
+// body.modal-mode {
+//   padding-top: 0;
+// }
+//
+// /*
+//   * Global add-ons
+//   */
+//
+// .sub-header {
+//   padding-bottom: 10px;
+//   border-bottom: 1px solid #eee;
+// }
+//
+// /*
+//   * Top navigation
+//   * Hide default border to remove 1px line.
+//   */
+// .navbar-fixed-top {
+//   border: 0;
+// }
+//
+// /*
+//   * Sidebar
+//   */
+//
+// // @media (max-width: 768px) {
+// //   .sidebar {
+// //     overflow-x: hidden; /** The menu is 1px to wide so keep it in bounds.. */
+// //   }
+// }
+//
+// // @media (min-width: 768px) {
+// //   .sidebar {
+// //     position: fixed;
+// //     top: 51px;
+// //     bottom: 0;
+// //     left: 0;
+// //     z-index: 1000;
+// //     display: block;
+// //     padding: 20px;
+// //     overflow-x: hidden;
+// //     overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
+// //     background-color: #f5f5f5;
+// //     border-right: 1px solid #eee;
+// //   }
+// // }
+// //
+// // /* Sidebar navigation */
+// // .nav-sidebar {
+// //   margin-right: -21px; /* 20px padding + 1px border */
+// //   margin-bottom: 20px;
+// //   margin-left: -20px;
+// // }
+// // .nav-sidebar > li > a {
+// //   padding-right: 20px;
+// //   padding-left: 20px;
+// // }
+// // .nav-sidebar > .active > a,
+// // .nav-sidebar > .active > a:hover,
+// // .nav-sidebar > .active > a:focus {
+// //   color: #fff;
+// //   background-color: #428bca;
+// // }
+//
+//
+// /*
+//   * Main content
+//   */
+//
+// .main {
+//   padding: 20px;
+// }
+// @media (min-width: 768px) {
+//   .main {
+//     padding-right: 40px;
+//     padding-left: 40px;
+//   }
+// }
+// .main .page-header {
+//   margin-top: 0;
+// }
+//
+//
+// /*
+//   * Placeholder dashboard ideas
+//   */
+//
+// .placeholders {
+//   margin-bottom: 30px;
+//   text-align: center;
+// }
+// .placeholders h4 {
+//   margin-bottom: 0;
+// }
+// .placeholder {
+//   margin-bottom: 20px;
+// }
+// .placeholder img {
+//   display: inline-block;
+//   border-radius: 50%;
+// }
+//
+// /*
+// * Progress bar
+// */
+// td.progress-td {
+//   width: 30%
+// }
+//
+// .progress {
+//   margin-bottom: 0;
+// }
+//
+// .progress-bar {
+//   text-align: left;
+//   padding-left: 5px;
+//   min-width: 35px; /* Otherwise the scrobble count isn't visible */
+// }
+//
+// form.datefilter, form.datefilter .input-group.date {
+//   margin-bottom: 15px;
+// }
+//
+// .table-responsive table td {
+//   max-width: 300px;
+// }
+//
+// .fa-play-circle {
+//   cursor: pointer;
+// }
+//
+// /** Spotify **/
+// .album-art, .album-art img {
+//   width: 100%;
+// }
+// .spotify-player {
+//   text-align: center;
+//   display:none;
+// }
+// .spotify-player span {
+//   display: block;
+//   padding: 2px 0 2px 0;
+// }
+// .spotify-player .album, .spotify-player .artist {
+//   color: rgb(109, 109, 109);
+//   font-size: 0.9em;
+// }
+//
+// .spotify-player .controls {
+//   font-size: 1.5em;
+//   padding-top: 4px;
+//   position: relative;
+//   top: -30px;
+// }
+// .fas {
+//   cursor: pointer;
+// }
+// .spotify-player .controls i {
+//
+//    -webkit-text-stroke-width: 2px;
+//    -webkit-text-stroke-color: white;
+// }
+// .spotify-player .controls i:first-child  {
+//   float:left;
+//   margin-left:10px;
+// }
+// .spotify-player .controls i:last-child  {
+//   float:right;
+//   margin-right:10px;
+// }
+//
+// @media only screen and (max-width: 576px) {
+//   .spotify-player .album-art {
+//     display: none;
+//   }
+//   .spotify-player .artist, .spotify-player .album {
+//     display: none;
+//   }
+//   .spotify-player .controls {
+//     top: 0;
+//   }
+// }
+// .play-button {
+//   display: none;
+//   color: rgb(109, 109, 109);
+// }
+//
+// .hidden {
+//   display:none;
+// }
+//
+// .modal-dialog {
+//   background: white;
+//   width: 90%;
+// }
+//
+// [data-search='artist'], .artist {
+//   cursor: pointer;
+// }
+// [data-search='artist']:hover {
+//   color: rgb(109, 109, 109);
+// }
+// .artist:hover {
+//   color: black;
+// }
+//
+// .loader {
+//   position: fixed;
+//   left: 50%;
+//   top: 50%;
+//   margin-left: -60px;
+//   margin-top: -60px;
+//   border-top: 16px solid blue;
+//   border-right: 16px solid green;
+//   border-bottom: 16px solid red;
+//   border-left: 16px solid pink;
+//   border-radius: 50%;
+//   width: 120px;
+//   height: 120px;
+//   animation: spin 2s linear infinite;
+//   z-index: 1045;
+// }
+//
+// @keyframes spin {
+//   0% { transform: rotate(0deg); }
+//   100% { transform: rotate(360deg); }
+// }
+//
+// .loader-bg {
+//   background: black;
+//   opacity: 0.1;
+//   position:fixed;
+//   left:0;
+//   top: 0;
+//   width:100%;
+//   height:100%;
+//   overflow:hidden;
+//   z-index: 1040;
+// }

@@ -1,0 +1,121 @@
+/*============================================
+*
+* Mixins
+*
+=============================================*/
+
+// Shadow
+@mixin shadow {
+	box-shadow: 0 .5rem 1.2rem -1.2rem rgba(0,0,0,.75);
+}
+@mixin shadow-for-small {
+	box-shadow: 0 .3rem 1rem -0.3rem rgba(0,0,0,.5)
+}
+
+@mixin shadow-input {
+	box-shadow: 0 .2rem .3rem -.15rem rgba(#E7E7E7, .5);
+}
+
+// Transition with base custom easing
+@mixin transition($transition-property, $transition-time ) {
+	-webkit-transition: $transition-property $transition-time cubic-bezier(0.295, 0.755, 0.310, 1);
+	-moz-transition: $transition-property $transition-time cubic-bezier(0.295, 0.755, 0.310, 1);
+	-ms-transition: $transition-property $transition-time cubic-bezier(0.295, 0.755, 0.310, 1);
+	-o-transition: $transition-property $transition-time cubic-bezier(0.295, 0.755, 0.310, 1);
+	transition: $transition-property $transition-time cubic-bezier(0.295, 0.755, 0.310, 1);
+}
+
+// Placeholder for global input placeholders
+@mixin placeholder {
+  @include optional-at-root('::-webkit-input-placeholder') {
+    @content;
+  }
+  @include optional-at-root(':-moz-placeholder') {
+    @content;
+  }
+  @include optional-at-root('::-moz-placeholder') {
+    @content;
+  }
+  @include optional-at-root(':-ms-input-placeholder') {
+    @content;
+  }
+}
+
+// Mixin for icon usage
+@mixin icon-font ($character) {
+	&::after {
+		font-family: "progento" !important;
+		content: $character;
+		font-style: normal !important;
+		font-weight: normal !important;
+		font-variant: normal !important;
+		text-transform: none !important;
+		speak: none;
+		line-height: 1;
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+	}
+}
+
+// Mixin to clean unordered lists
+@mixin clean-ul {
+	list-style: none;
+	padding-left: 0;
+	margin-bottom: 0;
+}
+
+// Mixin to place any object in center with position absolute // Note: needs position relative!
+@mixin absolute-center {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+}
+@mixin absolute-center-y {
+	position: absolute;
+	top: 50%;
+	transform: translateY(-50%);
+}
+
+/*============================================
+*
+* Padding mixins
+*
+=============================================*/
+
+@mixin padding-bottom {
+	padding-bottom: $global-space;
+
+	@media (min-width: $col-sm) {
+		padding-bottom: $global-space*1.5;
+	}
+
+	@media (min-width: $col-lg) {
+		padding-bottom: $global-space*2;
+	}
+}
+
+@mixin padding-top {
+	padding-top: $global-space;
+
+	@media (min-width: $col-sm) {
+		padding-top: $global-space*1.5;
+	}
+
+	@media (min-width: $col-lg) {
+		padding-top: $global-space*2;
+	}
+}
+
+
+@mixin padding-large {
+	padding: $global-space 0;
+
+	@media (min-width: $col-sm) {
+		padding: $global-space*2 0;
+	}
+
+	@media (min-width: $col-lg) {
+		padding: $global-space*3.5 0;
+	}
+}

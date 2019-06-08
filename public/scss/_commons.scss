@@ -1,0 +1,24 @@
+/*============================================
+*
+* Commons
+*
+=============================================*/
+
+// Global font-size
+html {
+	font-size: 14px;
+}
+
+// Global font
+body {
+    font-family: 'Montserrat', sans-serif;
+	font-weight: normal;
+	font-style: normal;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+// Apply mixin via class
+.clean-ul {
+	@include clean-ul;
+}

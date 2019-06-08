@@ -3,6 +3,9 @@ extends _bootstrap
 append styles
 	// layout::styles
 	link(href='/css/styles.css', rel='stylesheet')
+	link(href='https://fonts.googleapis.com/css?family=Montserrat:500,600,700&display=swap', rel='stylesheet')
+
+
 
 block body
 	// layout::body
@@ -16,9 +19,9 @@ block body
 				.modal-body
 					block content
 	else
-		nav.navbar.navbar-inverse.navbar-fixed-top
-			.container-fluid
-				include ../navigation/navbar-top.pug
+		//- nav.navbar.navbar-inverse.navbar-fixed-top
+		//- 	.container-fluid
+		//- 		include ../navigation/navbar-top.pug
 
 		.container-fluid
 			.row

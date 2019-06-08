@@ -1,15 +1,15 @@
 // shared::progress
 if (value && total)
-    - var percentage = Math.round(value/total*100)
+	- var percentage = Math.round(value/total*100)
 
-    .progress
-        .progress-bar(
-            role="progressbar",
-            aria-valuenow=percentage,
-            aria-valuemin="0" ,
-            aria-valuemax="100",
-            style="width:" + percentage + "%"
-        )
-            | #{value}
+	.progress
+		.progress-bar(
+			role="progressbar",
+			aria-valuenow=percentage,
+			aria-valuemin="0" ,
+			aria-valuemax="100",
+			style="width:" + percentage + "%"
+		)
+			| #{value}
 else
-    | #{value}
+	| #{value}

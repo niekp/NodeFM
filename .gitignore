@@ -2,5 +2,3 @@ node_modules
 config/development.json
 config/default.json
 config/production.json
-
-/public/scss-insp

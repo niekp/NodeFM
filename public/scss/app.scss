@@ -1,0 +1,37 @@
+/*============================================
+*
+* Main styles
+*
+=============================================*/
+
+// Import global settings
+// @import "settings";
+
+// Import utilities
+// @import "util/fonts";
+@import "util/mixins";
+
+//Import commons
+@import "commons";
+
+// Import custom components
+// @import "components/background";
+// @import "components/button";
+// @import "components/contactfield";
+// @import "components/footer";
+// @import "components/forms";
+// @import "components/hero";
+// @import "components/inputs";
+// @import "components/link";
+// @import "components/navbar";
+// @import "components/overview";
+// @import "components/paragraph";
+// @import "components/shape";
+// @import "components/social";
+// @import "components/typography";
+
+// Import layout
+@import "layout/navigation"
+
+// Import page-styles
+// @import "page/404"
