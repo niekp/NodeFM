@@ -89,16 +89,17 @@
         let url = '/spotify/control/nowplaying';
         if (force)
             url += '?force=1';
-            
+
 
         fetch(url).then(res => res.json()).then(function(now_playing) {
             $(".play-button").show();
             $(".spotify-player").show();
-            
+
             now_playing = JSON.parse(now_playing);
 
             let $player = $(".spotify-player");
             $player.find(".album-art").html("<img src='" + now_playing.image + "' />");
+            $(".navbar-bg-inner").css("background-image", "url(" + now_playing.image + ")");
             $player.find(".artist").text(now_playing.artist);
             $player.find(".track").text(now_playing.track);
             $player.find(".album").text(now_playing.album);

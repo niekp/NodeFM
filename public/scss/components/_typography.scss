@@ -1,0 +1,25 @@
+/*============================================
+*
+* typography
+*
+=============================================*/
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	color: white;
+}
+
+p,
+a,
+td {
+	font-size: $font-95;
+}
+
+h1 {
+	font-size: $font-200;
+	font-weight: $font-weight-bold
+}

@@ -12,10 +12,12 @@ html {
 // Global font
 body {
     font-family: 'Montserrat', sans-serif;
-	font-weight: normal;
+	font-weight: $font-weight-normal;
 	font-style: normal;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
+	display: flex;
+	background: $darkgray;
 }
 
 // Apply mixin via class

@@ -1,0 +1,63 @@
+/*============================================
+*
+* Player
+*
+=============================================*/
+
+.spotify-player {
+	position: relative;
+	z-index: 3;
+	width: $app-side-nav-width;
+
+	.album-art {
+		margin-left: $global-space*.75;
+		width: $app-side-nav-width;
+	}
+
+	img {
+		@include transition(all, .5s);
+		@include shadow-for-small;
+		border-radius: $global-radius;
+		width: 100%;
+		pointer-events: none;
+	}
+
+	.controls {
+		@include transition(all, .5s);
+		border-radius: $global-radius;
+		width: $app-side-nav-width;
+		height: $app-side-nav-width;
+		background-color: rgba(#000,.7);
+		z-index: 4;
+		position: absolute;
+		left: $global-space*.75;
+		top: 0;
+		opacity: 0;
+	}
+
+	.album-art:hover + .controls {
+		opacity: 1;
+	}
+
+	.currently-playing {
+		padding: $global-space/2 0;
+		overflow: scroll;
+		white-space: nowrap;
+
+		.currently-playing-title {
+			font-size: $font-75;
+			margin-bottom: $global-space/8;
+			padding-left: $global-space;
+			color: rgba(white,.7);
+			display: block;
+			font-weight: $font-weight-normal;
+		}
+
+		span {
+			content: '-';
+			margin-right: $global-space/4;
+			color: white;
+			font-weight: $font-weight-bold;
+		}
+	}
+}

@@ -1,0 +1,42 @@
+/*============================================
+*
+* Table
+*
+=============================================*/
+
+.table {
+	margin-top: $global-space;
+}
+
+th {
+	color: rgba(white,.5);
+	font-size: $font-95;
+	font-weight: $font-weight-normal;
+	border-bottom: none!important;
+}
+
+tr {
+	padding: $global-space/4 $global-space/2 !important;
+	background-color: transparent !important;
+}
+
+td {
+	border-top: 1px solid rgba(white,.05) !important;
+	font-size: $font-95;
+	color: white;
+	vertical-align: middle !important;
+
+	&[data-play-button] {
+		cursor: pointer;
+
+		i {
+			opacity: 0;
+			pointer-events: none;
+		}
+	}
+}
+
+tr:hover td[data-play-button] i {
+	opacity: 1;
+	pointer-events: none;
+}

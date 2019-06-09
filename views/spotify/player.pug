@@ -1,13 +1,15 @@
 block spotify-player
 	.spotify-player
 		.album-art
-		
+			
 		.controls
 			i.fas.fa-backward(data-toggle='prev')
 			i.fas.fa-forward(data-toggle='next')
 
-		span.track
-		span.artist
-		span.album
-
-		
+		.currently-playing
+			span.currently-playing-title Playing now
+			marquee(direction="left" behavior="scroll" scrollamount="3")
+				span.artist
+				span -
+				span.track
+				

@@ -6,10 +6,10 @@
 
 // Shadow
 @mixin shadow {
-	box-shadow: 0 .5rem 1.2rem -1.2rem rgba(0,0,0,.75);
+	box-shadow: 0 0 .75rem 0 rgba(0,0,0,.25);
 }
 @mixin shadow-for-small {
-	box-shadow: 0 .3rem 1rem -0.3rem rgba(0,0,0,.5)
+	box-shadow: 0 0 1rem -.3rem rgba(0,0,0,.5)
 }
 
 @mixin shadow-input {

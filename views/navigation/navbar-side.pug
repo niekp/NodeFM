@@ -3,7 +3,11 @@ block nav
 	- var active = (menu ? menu : "index")
 
 if loggedIn
-	ul.nav.nav-sidebar
+	
+	.navbar-bg
+		.navbar-bg-inner
+		
+	ul.nav-sidebar
 		li(class=('title'))
 			a(href='/') NodeFM
 		li(class=(active === "recent" ? "active" : undefined))

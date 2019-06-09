@@ -1,0 +1,55 @@
+/*============================================
+*
+* Settings for project
+*
+=============================================*/
+
+// Default spacing;
+$global-space: 					2rem;
+$global-radius:					.7rem;
+
+// Screensizes - Corralating with Bootstrap breakpoints
+$col-sm:      					 576px;
+$col-md:       					 768px;
+$col-lg:       					 992px;
+$col-xl:        				 1200px;
+$col-xxl:       				 1600px;
+
+$navbar-switch-width:			$col-lg;
+
+// Colors
+$black:                     	#000;
+$darkgray:                     	#222;
+$textblack:                 	#4A4A4A;
+$wildsand:	                  	#F6F6F6;
+$dusty:                     	#979797;
+
+// Font size
+$font-75: 						75%; 		// ~10px
+$font-95: 						95%; 		// 13px
+$font-100: 						100%; 		// 14px
+$font-115: 						114.3%; 	// ~16px - default
+$font-130: 						128.5%;		// ~18px
+$font-150: 						150%;	 	// 21px
+$font-180: 						180%;	 	// 28px
+$font-200: 						200%;	 	// 28px
+
+// Font weights
+$font-weight-normal: 			500;
+$font-weight-semibold:			600;
+$font-weight-bold:				700;
+
+// Fonts sizing
+$global-font-size:				$font-115;
+$global-h1-size:				$font-180;
+$global-h2-size:				$font-130;
+$microcopy-size:				$font-100;
+
+// Logo
+$navbar-logo-size: 				3rem;
+$footer-logo-size: 				2.4rem;
+
+// Elements
+$app-side-nav-width:			220px;
+$navbar-height:					6rem;
+$offcanvas-panel-width:			20rem;

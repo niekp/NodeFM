@@ -1,0 +1,21 @@
+/*============================================
+*
+* Progress bar
+*
+=============================================*/
+
+.progress {
+	background: transparent;
+	height: auto;
+	margin-bottom: 0;
+}
+
+.progress-bar {
+	box-shadow: 0 0 1rem 0rem rgba(0,0,0,1);
+	background: linear-gradient(90deg, #724172 0%, #AF5C83 49.09%, #D57B86 100%);
+	border-radius: 10px;
+	padding: $global-space/8 $global-space/2;
+	font-size: $font-100;
+	font-weight: $font-weight-bold;
+	text-align: left;
+}
