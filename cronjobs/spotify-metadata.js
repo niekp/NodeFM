@@ -218,7 +218,7 @@ module.exports = {
 
 				database.connect(username, sqlite3.OPEN_READWRITE).then(function () {
 					spotify_helper.getValue('username', username).then(function (spotify_username) {
-						if (spotify_username.length) {
+						if (spotify_username && spotify_username.length) {
 							// TODO: Dit gaat fout. Als de token halverwege het proces verloopt krijg je fouten.
 							fillSpotifyMetadata(username).then(function () {
 								running = false;

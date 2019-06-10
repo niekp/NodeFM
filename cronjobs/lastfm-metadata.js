@@ -90,7 +90,7 @@ async function parseAlbum(username, album) {
  * @param {string} username 
  */
 async function fillMetadata(username) {
-	let total = 10;
+	let total = 1000;
 
 	try {
 		albums = await database.executeQuery(`SELECT Album.id as album_id, 
@@ -101,7 +101,7 @@ async function fillMetadata(username) {
 					FROM Album 
 					INNER JOIN Artist ON Artist.id = Album.artist_id 
 					WHERE Album.lastfm_last_search IS NULL
-					LIMIT 0, 1`, username
+					LIMIT 0, ${total}`, username
 		);
 
 		for (const album of albums) {
