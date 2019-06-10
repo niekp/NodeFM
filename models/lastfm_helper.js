@@ -103,7 +103,9 @@ function setupVariables(username) {
                 // If this is the first run, don't set the syncdate to now but to the last scrobble. That way we don't miss stuff if the first sync takes a couple of days
                 if (lastSync == 0) {
                     getLastScrobbleTimestamp(username).then(function (timestamp) {
-                        startSync = timestamp;
+                        if (timestamp) {
+                            startSync = timestamp;
+                        }
                         resolve();
                     }).catch(function (ex) {
                         reject(ex);
@@ -132,7 +134,7 @@ function setupVariables(username) {
     });
 }
 
-function getPage(username, pagenumber, lastSync) {
+function getPage(username, pagenumber) {
     return lastFm.userGetRecentTracks({
         "user": username,
         "page": pagenumber,
@@ -305,6 +307,7 @@ async function parsePage(username, page) {
 
     return changesDetected;
 }
+
 
 function recursiveSync(username, pagenumber) {
     getPage(username, pagenumber).then(function (result) {
