@@ -143,7 +143,6 @@ function getPage(username, pagenumber, lastSync) {
 }
 
 function resetSyncDate(username, table, id) {
-    console.log('reset', table, id)
     database.executeQuery(`UPDATE ${table} SET spotify_last_search = NULL, lastfm_last_search = NULL WHERE id = ${id}`, username);
 }
 
