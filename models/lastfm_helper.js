@@ -142,6 +142,11 @@ function getPage(username, pagenumber, lastSync) {
     })
 }
 
+function resetSyncDate(username, table, id) {
+    console.log('reset', table, id)
+    database.executeQuery(`UPDATE ${table} SET spotify_last_search = NULL, lastfm_last_search = NULL WHERE id = ${id}`, username);
+}
+
 function getArtistId(username, artist, artist_mbid) {
     return new Promise((resolve, reject) => {
         // Lookup existing ID
@@ -174,6 +179,7 @@ function getAlbumId(username, artist_id, album, album_mbid) {
                 // Add new album
                 database.executeQuery('INSERT INTO Album (artist_id, name, mbid) VALUES (?, ?, ?)', username, [artist_id, album, album_mbid]).then(function () {
                     database.executeQuery('SELECT id FROM Album WHERE artist_id = ? AND name = ?', username, [artist_id, album]).then(function (data) {
+                        resetSyncDate(username, 'artist', artist_id);
                         resolve(data[0].id);
                     }).catch(function (ex) {
                         reject('Error getting album last_inserted_rowid: ' + ex);
@@ -196,6 +202,9 @@ function getTrackId(username, artist_id, album_id, track, track_mbid) {
                 // Add new track
                 database.executeQuery('INSERT INTO Track (artist_id, album_id, name, mbid) VALUES (?, ?, ?, ?)', username, [artist_id, album_id, track, track_mbid]).then(function () {
                     database.executeQuery('SELECT id FROM Track WHERE artist_id = ? AND album_id = ? AND name = ?', username, [artist_id, album_id, track]).then(function (data) {
+                        resetSyncDate(username, 'artist', artist_id);
+                        resetSyncDate(username, 'album', album_id);
+
                         resolve(data[0].id);
                     }).catch(function (ex) {
                         reject('Error getting track last_inserted_rowid: ' + ex);
@@ -260,6 +269,7 @@ function scrobbleLastFmTrack(username, track) {
 
                     scrobbleTrack(username, artist_id, album_id, track_id, timestamp).then(function (changes) {
                         resolve(changes);
+
                     }).catch(function (ex) {
                         reject('Error inserting scrobble: ' + ex);
                     })
