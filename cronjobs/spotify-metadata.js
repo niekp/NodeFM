@@ -34,13 +34,21 @@ function saveAlbum(data, username, album_id) {
 	}
 	console.log('Saving album', body.name)
 
+	database.executeQuery(`UPDATE Album SET 
+		image = ?,
+		spotify_last_search = datetime('now') 
+		WHERE id = ? AND image IS NULL AND lastfm_last_search IS NOT NULL`, username, [
+			(data.images[1] ? data.images[1].url : ''),
+			album_id
+		]
+	);
+
 	return database.executeQuery(`UPDATE Album SET 
 		spotify_uri = ?,
 		spotify_id = ?,
 		type = ?,
 		release_date = ?,
 		total_tracks = ?,
-		image = ?,
 		spotify_last_search = datetime('now') 
 		WHERE id = ?`, username, [
 			data.uri,
@@ -48,7 +56,6 @@ function saveAlbum(data, username, album_id) {
 			data.album_type,
 			release_date,
 			data.total_tracks,
-			(data.images[1] ? data.images[1].url : ''),
 			album_id
 		]
 	);
