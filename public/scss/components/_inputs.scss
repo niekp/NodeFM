@@ -1,0 +1,21 @@
+/*============================================
+*
+* Inputs
+*
+=============================================*/
+
+.input-group {
+	margin-bottom: $global-space;
+	max-width: 500px;
+}
+
+.form-control,
+.input-group-addon {
+	background-color: transparent;
+	color: white;
+	border: none;
+}
+
+.form-control {
+	border-bottom: 4px solid $darkblue;
+}

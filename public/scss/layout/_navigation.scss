@@ -29,18 +29,35 @@
 
 	// Menu item
 	a {
-		@include transition(all, 2s);
+		@include transition(all, .3s);
 		display: block;
-		color: rgba(white, .7);
+		color: white;
 		padding-top: $global-space/2;
 		padding-bottom: $global-space/2;
+		position: relative;
+
+		&::before{
+			@include transition(all, .3s);
+			content: '';
+			position: absolute;
+			background: $darkblue;
+			left: -$global-space*.5;
+			top: 50%;
+			transform: translateY(-50%);
+			width: $global-space*.5;
+			height: 3px;
+			opacity: 0;
+		}
 
 		&:focus,
 		&:hover {
-			@include transition(all, .3s);
-			color: white;
-			background-color: rgba(white, .05);
+			background-color: rgba($darkblue, .25);
 			text-decoration: none;
+
+			&::before{
+				left: 0;
+				opacity: 1;
+			}
 		}
 	}
 
@@ -64,8 +81,6 @@
 
 		&:focus,
 		&:hover {
-			@include transition(all, .3s);
-			color: white;
 			background-color: transparent;
 		}
 	}

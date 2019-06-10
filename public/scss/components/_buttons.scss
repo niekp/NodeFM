@@ -1,0 +1,18 @@
+/*============================================
+*
+* Inputs
+*
+=============================================*/
+
+.btn {
+	@include transition(all, .3s);
+	color: white !important;
+	background-color: $darkblue;
+	border: none;
+
+	&:hover,
+	&:focus {
+		background-color: darken($darkblue, 10%);
+
+	}
+}
