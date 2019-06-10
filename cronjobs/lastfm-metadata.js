@@ -71,7 +71,7 @@ async function parseAlbum(username, album) {
 			mbid = ?
 			WHERE id = ?`, username, [
 				image,
-				(data.album['tracks'] ? data.album['tracks']['track'].length : null),
+				('tracks' in data.album ? data.album['tracks']['track'].length : null),
 				(data.mbid ? data.mbid : album.mbid),
 				album.album_id
 			]
