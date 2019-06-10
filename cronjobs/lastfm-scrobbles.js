@@ -2,7 +2,7 @@ var database = require('../db.js')
 const sqlite3 = require('sqlite3');
 const config = require('config');
 const fs = require('fs');
-const lastfm_helper = require('../models/lastfm_helper');
+const lastfm_helper = require('../models/lastfm_helper.js');
 
 let database_folder = config.get('database_folder');
 
@@ -23,7 +23,7 @@ module.exports = {
 				if (user_file.indexOf('.db') > 0) {
 					username = user_file.replace('.db', '');
 				}
-				
+
 				if (username) {
 					lastfm_helper.syncLastFm(username);
 				}
@@ -31,5 +31,3 @@ module.exports = {
 		});
 	},
 }
-
-module.exports.run();

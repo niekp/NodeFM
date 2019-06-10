@@ -72,64 +72,6 @@ function saveArtist(data, username, artist_id) {
 }
 
 /**
- * Save the tracks to the DB
- * @param {JSON} body The API result
- * @param {string} username 
- */
-function saveTracks(tracks, username, artist_id, album_id) {
-	return new Promise((resolve, reject) => {
-		let promises = [];
-		
-		promises.push(getPromiseTimeout(2000));
-		database.executeQuery(`SELECT id, name FROM Track WHERE artist_id = ? AND album_id = ?`, username, [
-			artist_id, album_id
-		]).then(function(db_tracks) {
-			db_tracks.forEach(db_track => {
-				// Match each DB track with a spotify track
-				tracks.forEach(track => {
-					let normalized_name = normalize(track.name),
-						normalized_db_name = normalize(db_track.name);
-					
-					// Fuzzy match the track
-					if (normalized_name == normalized_db_name
-						|| normalized_name.indexOf(normalized_db_name) >= 0
-						|| normalized_db_name.indexOf(normalized_name) >= 0) {
-						promises.push(database.executeQuery(`UPDATE Track SET 
-							spotify_uri = ?,
-							spotify_id = ?,
-							milliseconds = ?,
-							track_number = ?
-							WHERE id = ?`, username, [
-								track.uri,
-								track.id,
-								track.duration_ms,
-								track.track_number,
-								db_track.id
-							]
-						));
-					}
-					
-				});
-
-				promises.push(database.executeQuery(`UPDATE Track SET 
-						spotify_last_search = datetime('now')
-						WHERE id = ?`, username, [
-						db_track.id
-					]
-				));
-
-			});
-		});
-
-		Promise.all(promises).then(function() {
-			resolve();
-		}).catch(function (ex) {
-			reject(ex);
-		})
-	});
-}
-
-/**
  * @var {string} text
  */
 function normalize(text) {
@@ -159,9 +101,6 @@ function getAlbum(api, username, artist, album, artist_id, album_id) {
 					if (body.artists[0]) {
 						promises.push(saveArtist(body, username, artist_id));
 					}
-					if (body.tracks.items) {
-						promises.push(saveTracks(body.tracks.items, username, artist_id, album_id));						
-					}
 
 				}).catch(function (ex) {
 					reject(ex);
@@ -175,13 +114,8 @@ function getAlbum(api, username, artist, album, artist_id, album_id) {
 				));
 			}
 			
-
 		}).catch(function (ex) {
 			if (ex.indexOf('No results') >= 0) {
-
-				// TODO: Zoek op artiest, lus door alle albums en probeer te matchen.
-				// Bijv. Sufjan Stevens - Illinoise = Illinois. En alle 'deluxe edition' toestand moet dan ook gefixt zijn.
-
 				promises.push(database.executeQuery(`UPDATE Album SET 
 					spotify_last_search = datetime('now')
 					WHERE id = ?`, username, [
@@ -258,8 +192,6 @@ function fillSpotifyMetadata(username) {
 			})
 
 		});
-
-		// TODO: artiesten ook matchen. Niet elke artiest staat op spotify
 	});
 }
 

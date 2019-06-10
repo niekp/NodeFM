@@ -3,7 +3,6 @@ const sqlite3 = require('sqlite3');
 const config = require('config');
 const fs = require('fs');
 const LastFm = require("lastfm-node-client");
-const crypto = require('crypto');
 
 let database_folder = config.get('database_folder');
 
@@ -152,7 +151,7 @@ function getArtistId(username, artist, artist_mbid) {
             } else {
                 // Add new artist
                 database.executeQuery('INSERT INTO Artist (name, mbid) VALUES (?, ?)', username, [artist, artist_mbid]).then(function () {
-                    database.executeQuery('SELECT last_insert_rowid() AS id', username).then(function (data) {
+                    database.executeQuery('SELECT id FROM Artist WHERE name = ?', username, [artist]).then(function (data) {
                         resolve(data[0].id);
                     }).catch(function (ex) {
                         reject('Error getting artist last_inserted_rowid: ' + ex);
@@ -174,7 +173,7 @@ function getAlbumId(username, artist_id, album, album_mbid) {
             } else {
                 // Add new album
                 database.executeQuery('INSERT INTO Album (artist_id, name, mbid) VALUES (?, ?, ?)', username, [artist_id, album, album_mbid]).then(function () {
-                    database.executeQuery('SELECT last_insert_rowid() AS id', username).then(function (data) {
+                    database.executeQuery('SELECT id FROM Album WHERE artist_id = ? AND name = ?', username, [artist_id, album]).then(function (data) {
                         resolve(data[0].id);
                     }).catch(function (ex) {
                         reject('Error getting album last_inserted_rowid: ' + ex);
@@ -196,7 +195,7 @@ function getTrackId(username, artist_id, album_id, track, track_mbid) {
             } else {
                 // Add new track
                 database.executeQuery('INSERT INTO Track (artist_id, album_id, name, mbid) VALUES (?, ?, ?, ?)', username, [artist_id, album_id, track, track_mbid]).then(function () {
-                    database.executeQuery('SELECT last_insert_rowid() AS id', username).then(function (data) {
+                    database.executeQuery('SELECT id FROM Track WHERE artist_id = ? AND album_id = ? AND name = ?', username, [artist_id, album_id, track]).then(function (data) {
                         resolve(data[0].id);
                     }).catch(function (ex) {
                         reject('Error getting track last_inserted_rowid: ' + ex);
@@ -335,7 +334,6 @@ function recursiveSync(username, pagenumber) {
                     pagenumber++;
                     recursiveSync(username, pagenumber);
                 }
-
 
             }).catch(function (ex) {
                 stop = true;

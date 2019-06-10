@@ -20,7 +20,7 @@ function Migration(user) {
             // Track fields
             promises.push(migration_helper.addColumn('Track', 'musicbrainz_last_search', 'datetime'));
             promises.push(migration_helper.addColumn('Track', 'mbid', 'text'));
-            promises.push(migration_helper.addColumn('Track', 'milliseconds', 'int'));
+            promises.push(migration_helper.addColumn('Track', 'duration', 'int'));
             promises.push(migration_helper.addColumn('Track', 'track_number', 'int'));
             
             // Artist fields

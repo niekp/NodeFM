@@ -128,12 +128,12 @@ module.exports = {
                                                         database.executeQuery(`UPDATE Track SET 
                                                             musicbrainz_last_search = CURRENT_TIMESTAMP,
                                                             mbid = ?,
-                                                            milliseconds = ?,
+                                                            duration = ?,
                                                             track_number = ?
                                                             WHERE id = ?`, username,
                                                             [
                                                                 track_mb.id,
-                                                                track_mb.length,
+                                                                Math.round(track_mb.length / 1000),
                                                                 track_mb.position,
                                                                 track_result.id
                                                             ]).catch(function(error) {
