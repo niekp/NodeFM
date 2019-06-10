@@ -5,7 +5,6 @@
 =============================================*/
 
 .sidebar {
-	@include shadow;
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
@@ -16,36 +15,16 @@
 	// overflow: scroll;
 	-webkit-overflow-scrolling: touch;
 
-	&:before {
-		content: '';
-		position: absolute;
-		top: 0;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		z-index: 1;
-		background-color: rgba($darkgray, .4);
-	}
-
 	ul {
 		@include clean-ul;
 		position: relative;
 		z-index: 2;
+	}
 
-		// Stripe on bottom of anchors
-		li:not(:first-child):not(:last-child) {
-			position: relative;
-
-			&:before {
-				content: '';
-				position: absolute;
-				bottom: 0;
-				height: 1px;
-				left: $global-space;
-				right: $global-space;
-				background-color: rgba(white, .05);
-			}
-		}
+	.title,
+	a {
+		padding-left: $global-space;
+		text-align: left;
 	}
 
 	// Menu item
@@ -53,8 +32,8 @@
 		@include transition(all, 2s);
 		display: block;
 		color: rgba(white, .7);
-		text-align: center;
-		padding: $global-space/2;
+		padding-top: $global-space/2;
+		padding-bottom: $global-space/2;
 
 		&:focus,
 		&:hover {
@@ -65,12 +44,23 @@
 		}
 	}
 
-	.title a {
+	.title {
+		margin-top: $global-space;
+		margin-bottom: $global-space/4;
+		font-size: $font-75;
+		color: $darkblue;
+		text-transform: uppercase;
+		font-weight: $font-weight-semibold;
+	}
+
+	// logo
+	.logo a {
 		font-size: $font-130;
 		font-weight: $font-weight-bold;
 		padding: $global-space 0 $global-space/1.5;
 		color: white;
 		text-transform: lowercase;
+		text-align: center;
 
 		&:focus,
 		&:hover {
@@ -78,35 +68,5 @@
 			color: white;
 			background-color: transparent;
 		}
-	}
-
-	// Background image and overlay
-	.navbar-bg {
-		position: absolute;
-		top: 0;
-		bottom: 0;
-		left: 0;
-		right: 0;
-		overflow: hidden;
-	}
-
-	// -inner because jQuery cant change ::before image
-	.navbar-bg-inner {
-		// TODO: Define fallback when no song is playing
-		@include transition(all, 3s);
-		overflow: hidden;
-		position: absolute;
-		top: -$global-radius;
-		right: -$global-radius;
-		left: -$global-radius;
-		bottom: -$global-radius;
-		overflow: hidden;
-		border-radius: 0 $global-radius $global-radius 0;
-		background-image: url('../img/placeholder.png');
-		background-position: center;
-		background-repeat: no-repeat;
-		background-size: cover;
-		filter: blur(50px);
-		-webkit-filter: blur(50px);
 	}
 }

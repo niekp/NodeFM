@@ -6,6 +6,21 @@
 
 .main {
 	width: 100%;
+
+
 	margin-left: $app-side-nav-width;
 	padding: $global-space $global-space $global-space $global-space*2;
+
+	&:before {
+		content: '';
+		position: fixed;
+		z-index: -1;
+		top: 0;
+		bottom: 0;
+		left: $app-side-nav-width;
+		right: 0;
+		border-top-left-radius: $global-radius;
+		border-bottom-left-radius: $global-radius;
+		background: linear-gradient(134.59deg, #353B43 -1.1%, #061018 98.9%);
+	};
 }
