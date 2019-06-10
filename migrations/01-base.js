@@ -35,7 +35,12 @@ function Migration(user) {
 
             promises.push(migration_helper.addTable('Status',
                 'CREATE TABLE Status (lastsync datetime, page int)'));
-                
+               
+            Promise.all(promises).then(function () {
+                resolve();
+            }).catch(function (ex) {
+                reject(ex);
+            })
         });
     }
 };

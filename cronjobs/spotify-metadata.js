@@ -41,7 +41,7 @@ function saveAlbum(data, username, album_id) {
 		release_date = ?,
 		total_tracks = ?,
 		image = ?,
-		last_api_search = datetime('now') 
+		spotify_last_search = datetime('now') 
 		WHERE id = ?`, username, [
 			data.uri,
 			data.id,
@@ -112,7 +112,7 @@ function saveTracks(tracks, username, artist_id, album_id) {
 				});
 
 				promises.push(database.executeQuery(`UPDATE Track SET 
-						last_api_search = datetime('now')
+						spotify_last_search = datetime('now')
 						WHERE id = ?`, username, [
 						db_track.id
 					]
@@ -168,7 +168,7 @@ function getAlbum(api, username, artist, album, artist_id, album_id) {
 				});
 			} else {
 				promises.push(database.executeQuery(`UPDATE Album SET 
-						last_api_search = datetime('now')
+						spotify_last_search = datetime('now')
 						WHERE id = ?`, username, [
 						album_id
 					]
@@ -183,7 +183,7 @@ function getAlbum(api, username, artist, album, artist_id, album_id) {
 				// Bijv. Sufjan Stevens - Illinoise = Illinois. En alle 'deluxe edition' toestand moet dan ook gefixt zijn.
 
 				promises.push(database.executeQuery(`UPDATE Album SET 
-					last_api_search = datetime('now')
+					spotify_last_search = datetime('now')
 					WHERE id = ?`, username, [
 						album_id
 					]
@@ -229,7 +229,7 @@ function fillSpotifyMetadata(username) {
 									Artist.name AS artist
 									FROM Album 
 									INNER JOIN Artist ON Artist.id = Album.artist_id 
-									WHERE Album.last_api_search IS NULL
+									WHERE Album.spotify_last_search IS NULL
 									LIMIT 0, ${total}`, username
 		).then(function (albums) {
 			albums.forEach(album => {
