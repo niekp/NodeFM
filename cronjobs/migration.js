@@ -47,56 +47,61 @@ function hasMigrationRun(user, migration_file) {
     });
 }
 
-fs.readdir(migrationsFolder, function (error, files) {
-    if (error) {
-        return console.error('Unable to scan migrations: ' + error);
-    }
+let timeout = 0;
 
-    // Loop through all migrations
-    files.forEach(function (migration_file) {
-        if (blacklist.indexOf(migration_file) >= 0) {
-            return;
-        }
+// Loop through all users
+fs.readdir(database_folder, function (error, files) {
+	if (error) {
+		return console.error('Unable to scan users: ' + error);
+	}
 
-        let migration = require(path.join(__dirname, '../migrations/', migration_file));
+	files.forEach(function (user_file) {
 
-        // Loop through all users
-        fs.readdir(database_folder, function (error, files) {
-            if (error) {
-                return console.error('Unable to scan users: ' + error);
-            }
+		let user = '';
+		if (user_file.indexOf('.db') > 0) {
+			user = user_file.replace('.db', '');
+		}
+		if (user) {
 
-            files.forEach(function (user_file) {
-                let user = '';
-                if (user_file.indexOf('.db') > 0) {
-                    user = user_file.replace('.db', '');
-                }
-                if (user) {
-                    database.connect(user, sqlite3.OPEN_READWRITE).then(function () {
-                        hasMigrationRun(user, migration_file).then(function (has_run) {
-                            if (!has_run) {
-                                console.log('Run', migration_file, user);
-                                let runner = new migration(user);
-    
-                                runner.run().then(function () {
-                                    setStatus(user, migration_file, 'SUCCESS');
-                                }).catch(function (error) {
-                                    console.error(error);
-                                    setStatus(user, migration_file, 'FAIL');
-                                });  
-                            }
-                        }).catch(function(error) {
-                            console.error(error);
-                        });
-                    }).catch(function(error) {
-                        console.error(error);
-                    });
-                }
+			database.connect(user, sqlite3.OPEN_READWRITE).then(function () {
 
-            });
+				fs.readdir(migrationsFolder, function (err, files) {
+					files.sort(function (a, b) {
+						return a < b ? -1 : 1;
+					}).forEach(function (migration_file, key) {
+						let migration = require(path.join(__dirname, '../migrations/', migration_file));
+						
+						if (blacklist.indexOf(migration_file) >= 0) {
+							return;
+						}
 
-        });
+						hasMigrationRun(user, migration_file).then(function (has_run) {
+							if (!has_run) {
+								let runner = new migration(user);
 
+								timeout += 1000;
+								setTimeout(function (runner, migration_file, user) {
+									console.log('Run', migration_file, user);
+									runner.run().then(function () {
+										setStatus(user, migration_file, 'SUCCESS');
+									}).catch(function (error) {
+										console.error(error);
+										setStatus(user, migration_file, 'FAIL');
+									});
+								}, timeout, runner, migration_file, user);
+							}
+						}).catch(function(error) {
+							console.error(error);
+						});
+						
+
+					});
+
+				});
+			}).catch(function (error) {
+				console.error(error);
+			});
+		}
         
     });
 });

@@ -34,21 +34,28 @@ function saveAlbum(data, username, album_id) {
 	}
 	console.log('Saving album', body.name)
 
+	database.executeQuery(`UPDATE Album SET 
+		image = ?,
+		spotify_last_search = datetime('now') 
+		WHERE id = ? AND image IS NULL AND lastfm_last_search IS NOT NULL`, username, [
+			(data.images[1] ? data.images[1].url : ''),
+			album_id
+		]
+	);
+
 	return database.executeQuery(`UPDATE Album SET 
 		spotify_uri = ?,
 		spotify_id = ?,
 		type = ?,
 		release_date = ?,
 		total_tracks = ?,
-		image = ?,
-		last_api_search = datetime('now') 
+		spotify_last_search = datetime('now') 
 		WHERE id = ?`, username, [
 			data.uri,
 			data.id,
 			data.album_type,
 			release_date,
 			data.total_tracks,
-			(data.images[1] ? data.images[1].url : ''),
 			album_id
 		]
 	);
@@ -69,64 +76,6 @@ function saveArtist(data, username, artist_id) {
 			artist_id
 		]
 	);
-}
-
-/**
- * Save the tracks to the DB
- * @param {JSON} body The API result
- * @param {string} username 
- */
-function saveTracks(tracks, username, artist_id, album_id) {
-	return new Promise((resolve, reject) => {
-		let promises = [];
-		
-		promises.push(getPromiseTimeout(2000));
-		database.executeQuery(`SELECT id, name FROM Track WHERE artist_id = ? AND album_id = ?`, username, [
-			artist_id, album_id
-		]).then(function(db_tracks) {
-			db_tracks.forEach(db_track => {
-				// Match each DB track with a spotify track
-				tracks.forEach(track => {
-					let normalized_name = normalize(track.name),
-						normalized_db_name = normalize(db_track.name);
-					
-					// Fuzzy match the track
-					if (normalized_name == normalized_db_name
-						|| normalized_name.indexOf(normalized_db_name) >= 0
-						|| normalized_db_name.indexOf(normalized_name) >= 0) {
-						promises.push(database.executeQuery(`UPDATE Track SET 
-							spotify_uri = ?,
-							spotify_id = ?,
-							milliseconds = ?,
-							track_number = ?
-							WHERE id = ?`, username, [
-								track.uri,
-								track.id,
-								track.duration_ms,
-								track.track_number,
-								db_track.id
-							]
-						));
-					}
-					
-				});
-
-				promises.push(database.executeQuery(`UPDATE Track SET 
-						last_api_search = datetime('now')
-						WHERE id = ?`, username, [
-						db_track.id
-					]
-				));
-
-			});
-		});
-
-		Promise.all(promises).then(function() {
-			resolve();
-		}).catch(function (ex) {
-			reject(ex);
-		})
-	});
 }
 
 /**
@@ -159,31 +108,23 @@ function getAlbum(api, username, artist, album, artist_id, album_id) {
 					if (body.artists[0]) {
 						promises.push(saveArtist(body, username, artist_id));
 					}
-					if (body.tracks.items) {
-						promises.push(saveTracks(body.tracks.items, username, artist_id, album_id));						
-					}
 
 				}).catch(function (ex) {
 					reject(ex);
 				});
 			} else {
 				promises.push(database.executeQuery(`UPDATE Album SET 
-						last_api_search = datetime('now')
+						spotify_last_search = datetime('now')
 						WHERE id = ?`, username, [
 						album_id
 					]
 				));
 			}
 			
-
 		}).catch(function (ex) {
 			if (ex.indexOf('No results') >= 0) {
-
-				// TODO: Zoek op artiest, lus door alle albums en probeer te matchen.
-				// Bijv. Sufjan Stevens - Illinoise = Illinois. En alle 'deluxe edition' toestand moet dan ook gefixt zijn.
-
 				promises.push(database.executeQuery(`UPDATE Album SET 
-					last_api_search = datetime('now')
+					spotify_last_search = datetime('now')
 					WHERE id = ?`, username, [
 						album_id
 					]
@@ -229,7 +170,7 @@ function fillSpotifyMetadata(username) {
 									Artist.name AS artist
 									FROM Album 
 									INNER JOIN Artist ON Artist.id = Album.artist_id 
-									WHERE Album.last_api_search IS NULL
+									WHERE Album.spotify_last_search IS NULL
 									LIMIT 0, ${total}`, username
 		).then(function (albums) {
 			albums.forEach(album => {
@@ -258,8 +199,6 @@ function fillSpotifyMetadata(username) {
 			})
 
 		});
-
-		// TODO: artiesten ook matchen. Niet elke artiest staat op spotify
 	});
 }
 
@@ -286,7 +225,7 @@ module.exports = {
 
 				database.connect(username, sqlite3.OPEN_READWRITE).then(function () {
 					spotify_helper.getValue('username', username).then(function (spotify_username) {
-						if (spotify_username.length) {
+						if (spotify_username && spotify_username.length) {
 							// TODO: Dit gaat fout. Als de token halverwege het proces verloopt krijg je fouten.
 							fillSpotifyMetadata(username).then(function () {
 								running = false;

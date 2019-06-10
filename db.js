@@ -72,6 +72,10 @@ var database = (function () {
 	 */
 	this.executeQuery = function(query, username, params = []) {
 		return new Promise((resolve, reject) => {
+			if (!username) {
+				reject('DB name not set');
+			}
+			
 			if (this.isConnected(username)) {
 				// Execute the query
 				database[username].serialize(() => {
