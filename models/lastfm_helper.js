@@ -19,8 +19,11 @@ if (apikey = config.get('lastfm_apikey')) {
 
 const limit = 20;
 
-// Array of running status per username
-let running = [];
+// Variables per username
+var running = [],
+    lastSync = [],
+    pagenumber = [],
+    startSync = [];
 
 /**
  * Get a value from the status table
@@ -81,15 +84,11 @@ function getLastScrobbleTimestamp(username) {
     });
 }
 
-let lastSync = 0;
-let pagenumber = 1;
-
-// Keep the start timestamp of the sync. If the sync is done, save this as the startpoint for the next sync.
-// Get the time 10 minutes before the sync so we don't miss scrobbles.
-startSync = Math.round(new Date().getTime() / 1000) - (10 * 60);
-
 function setupVariables(username) {
     return new Promise((resolve, reject) => {
+        // Keep the start timestamp of the sync. If the sync is done, save this as the startpoint for the next sync.
+        // Get the time 10 minutes before the sync so we don't miss scrobbles.
+        startSync[username] = Math.round(new Date().getTime() / 1000) - (10 * 60);
 
         // Get the timestamp of the last sync
         p1 = new Promise((resolve, reject) => {
@@ -98,14 +97,12 @@ function setupVariables(username) {
                     result = 0;
                 }
 
-                lastSync = result;
+                lastSync[username] = result;
 
                 // If this is the first run, don't set the syncdate to now but to the last scrobble. That way we don't miss stuff if the first sync takes a couple of days
-                if (lastSync == 0) {
+                if (lastSync[username] == 0) {
                     getLastScrobbleTimestamp(username).then(function (timestamp) {
-                        if (timestamp) {
-                            startSync = timestamp;
-                        }
+                        startSync[username] = timestamp;
                         resolve();
                     }).catch(function (ex) {
                         reject(ex);
@@ -122,7 +119,7 @@ function setupVariables(username) {
             if (!result) {
                 result = 1;
             }
-            pagenumber = result;
+            pagenumber[username] = result;
         });
 
 
@@ -138,7 +135,7 @@ function getPage(username, pagenumber) {
     return lastFm.userGetRecentTracks({
         "user": username,
         "page": pagenumber,
-        "from": lastSync,
+        "from": lastSync[username],
         "limit": limit,
         "format": "json"
     })
@@ -333,7 +330,7 @@ function recursiveSync(username, pagenumber) {
 
                 if (pagenumber >= totalPages) {
                     // Save the time of the sync as startpoint for the next sync
-                    setStatus("lastsync", startSync, username)
+                    setStatus("lastsync", startSync[username], username)
                     setStatus("page", 1, username)
 
                     stop = true;
@@ -375,7 +372,7 @@ module.exports = {
                 
                 setupVariables(username).then(function () {
                     console.log('Start sync', username);
-                    recursiveSync(username, pagenumber);
+                    recursiveSync(username, pagenumber[username]);
                 }).catch(function(ex) {
                     running[username] = false;
                     console.error(ex.stack);
