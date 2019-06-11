@@ -44,6 +44,10 @@ let cron_spotify_releases = require('../cronjobs/spotify-releases.js');
 let cron_lastfm_metadata = require('../cronjobs/lastfm-metadata.js');
 let cron_spotify_metadata = require('../cronjobs/spotify-metadata.js');
 
+cron.schedule('* * * * *', () => {
+	lastfm_scrobbles.run();
+});
+
 cron.schedule('* */3 * * *', () => {
   cron_timeline.run();
 });
