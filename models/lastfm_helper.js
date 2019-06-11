@@ -23,7 +23,8 @@ const limit = 20;
 var running = [],
     lastSync = [],
     pagenumber = [],
-    startSync = [];
+    startSync = [],
+    big_sync = [];
 
 /**
  * Get a value from the status table
@@ -89,6 +90,7 @@ function setupVariables(username) {
         // Keep the start timestamp of the sync. If the sync is done, save this as the startpoint for the next sync.
         // Get the time 10 minutes before the sync so we don't miss scrobbles.
         startSync[username] = Math.round(new Date().getTime() / 1000) - (10 * 60);
+        big_sync[username] = false;
 
         // Get the timestamp of the last sync
         p1 = new Promise((resolve, reject) => {
@@ -326,6 +328,7 @@ function recursiveSync(username, pagenumber) {
 
         // Print progress
         if ((limit * totalPages) > 300) {
+            big_sync[username] = true;
             console.log(username, ': ', pagenumber, ' / ', totalPages);
         }
 
@@ -339,6 +342,11 @@ function recursiveSync(username, pagenumber) {
 
                     stop = true;
                     running[username] = false;
+
+                    // If this was a big sync, reset the cronjobs so they run again.
+                    if (big_sync[username]) {
+                        database.executeQuery('DELETE FROM Cronjob', username);
+                    }
                 } else {
                     setStatus("page", pagenumber, username)
                 }
