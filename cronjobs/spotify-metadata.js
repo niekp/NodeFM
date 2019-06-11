@@ -1,5 +1,4 @@
 var database = require('../db.js')
-const config = require('config');
 const spotify = require('../models/spotify.js');
 const spotify_helper = require('../models/spotify_helper.js');
 var SpotifyWebApi = require('spotify-web-api-node');
@@ -226,7 +225,6 @@ module.exports = {
 
 				spotify_helper.getValue('username', username).then(function (spotify_username) {
 					if (spotify_username && spotify_username.length) {
-						// TODO: Dit gaat fout. Als de token halverwege het proces verloopt krijg je fouten.
 						fillSpotifyMetadata(username).then(function () {
 							running = false;
 							console.log('done!')

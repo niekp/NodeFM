@@ -113,6 +113,8 @@ var self = module.exports = {
 						} else {
 							reject('No results');
 						}
+					}).catch(function (ex) {
+						reject(ex);
 					})
 				} else if (type == 'artist') {
 					api.searchArtists(getSearchQuery(artist), { limit: 1 }).then(function (results) {
@@ -122,6 +124,8 @@ var self = module.exports = {
 						} else {
 							reject('No results');
 						}
+					}).catch(function (ex) {
+						reject(ex);
 					})
 				}
 			});
@@ -138,8 +142,12 @@ var self = module.exports = {
 		} catch (ex) { }
 
 		if (!data) {
-			data = await api.getAlbum(id);
-			cache_helper.save(cache_key, data, cache_expire, 'json');
+			try {
+				data = await api.getAlbum(id);
+				cache_helper.save(cache_key, data, cache_expire, 'json');
+			} catch (ex) {
+				throw ex;
+			}
 		}
 		
 		return data;
@@ -176,7 +184,11 @@ var self = module.exports = {
 	 */
 	next: function (req, res) {
 		getSpotifyApi(res.locals.username).then(function (api) {
-			api.skipToNext();
+			api.skipToNext().catch(function(ex) {
+				console.error(ex);
+			});
+		}).catch(function (ex) {
+			console.error(ex);
 		});
 	},
 
@@ -187,7 +199,11 @@ var self = module.exports = {
 	 */
 	prev: function (req, res) {
 		getSpotifyApi(res.locals.username).then(function (api) {
-			api.skipToPrevious();
+			api.skipToPrevious().catch(function (ex) {
+				console.error(ex);
+			});
+		}).catch(function (ex) {
+			console.error(ex);
 		});
 	},
 
@@ -241,6 +257,8 @@ var self = module.exports = {
 					});
 
 				}
+			}).catch(function (ex) {
+				console.error(ex);
 			});
 		});
 	},
