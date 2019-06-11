@@ -56,7 +56,7 @@ cron.schedule('0 7 * * *', () => {
 	cron_spotify_releases.run();
 });
 
-cron.schedule('0 * * * *', () => {
+cron.schedule('*/15 * * * *', () => {
 	cron_lastfm_metadata.run();
 
 	if (!cron_spotify_metadata.isRunning()) {
