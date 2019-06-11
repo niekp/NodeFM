@@ -49,28 +49,32 @@ async function parseAlbum(username, album) {
 	});
 
 	if ('album' in data) {
-		let image = '';
 
-		// Get the image
-		if ('image' in data.album) {
-			data.album.image.forEach(function (img) {
-				if (img['#text'].indexOf('300x300') >= 0) {
-					image = img['#text'];
-				}
-			})
+		// Save the images
+		if ('image' in data.album && data.album.image.length > 0) {
 
-			if (!image) {
-				image = data.album.image.pop()['#text'];
+			await database.executeQuery(`DELETE FROM Images 
+					WHERE source = 'lastfm' AND type = 'album' AND link_id = ?`, username,
+				[album.album_id]);
+
+			for (let img of data.album.image) {
+
+				await database.executeQuery(`INSERT INTO Images (source, type, link_id, url, key)
+					VALUES (?, ?, ?, ?, ?)`, username, [
+						'lastfm',
+						'album',
+						album.album_id,
+						img['#text'],
+						img['size']
+					]);
 			}
 		}
 
 		await database.executeQuery(`UPDATE Album SET 
 			lastfm_last_search = datetime('now'),
-			image = ?,
 			total_tracks = ?,
 			mbid = ?
 			WHERE id = ?`, username, [
-				image,
 				('tracks' in data.album ? data.album['tracks']['track'].length : null),
 				(data.mbid ? data.mbid : album.mbid),
 				album.album_id

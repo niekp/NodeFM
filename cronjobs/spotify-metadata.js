@@ -25,7 +25,7 @@ function getPromiseTimeout(ms){
  * @param {JSON} body The API result
  * @param {string} username 
  */
-function saveAlbum(data, username, album_id) {
+async function saveAlbum(data, username, album_id) {
 	let release_date = data.release_date;
 	if (data.release_date_precision == 'year') {
 		release_date += '-01-01';
@@ -33,16 +33,26 @@ function saveAlbum(data, username, album_id) {
 		release_date += '-01';
 	}
 
-	database.executeQuery(`UPDATE Album SET 
-		image = ?,
-		spotify_last_search = datetime('now') 
-		WHERE id = ? AND image IS NULL AND lastfm_last_search IS NOT NULL`, username, [
-			(data.images[1] ? data.images[1].url : ''),
-			album_id
-		]
-	);
+	// Save the images
+	if ('images' in data) {
+		await database.executeQuery(`DELETE FROM Images 
+					WHERE source = 'spotify' AND type = 'album' AND link_id = ?`, username,
+			[album_id]);
 
-	return database.executeQuery(`UPDATE Album SET 
+		for (let img of data.images) {
+			console.log('Add', img.url)
+			await database.executeQuery(`INSERT INTO Images (source, type, link_id, url, key)
+					VALUES (?, ?, ?, ?, ?)`, username, [
+					'spotify',
+					'album',
+					album_id,
+					img.url,
+					(img.width + 'x' + img.height)
+				]);
+		}
+	}
+
+	await database.executeQuery(`UPDATE Album SET 
 		spotify_uri = ?,
 		spotify_id = ?,
 		type = ?,
@@ -58,6 +68,8 @@ function saveAlbum(data, username, album_id) {
 			album_id
 		]
 	);
+
+	return true;
 }
 
 /**
