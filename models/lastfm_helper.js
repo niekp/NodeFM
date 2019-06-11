@@ -300,12 +300,16 @@ async function parsePage(username, page) {
         throw 'No tracks found in page';
     }
 
-    for (const track of page["recenttracks"]["track"]) {
-        await scrobbleLastFmTrack(username, track).then(function (changes) {
-            if (changes) {
-                changesDetected = true;
-            }
-        });
+    try {
+        for (const track of page["recenttracks"]["track"]) {
+            await scrobbleLastFmTrack(username, track).then(function (changes) {
+                if (changes) {
+                    changesDetected = true;
+                }
+            });
+        }
+    } catch (ex) {
+        throw ex;
     }
 
     return changesDetected;
@@ -353,7 +357,12 @@ function recursiveSync(username, pagenumber) {
 
                 if (!stop) {
                     pagenumber++;
-                    recursiveSync(username, pagenumber);
+                    recursiveSync(username, pagenumber).catch(function(ex) {
+                        stop = true;
+                        running[username] = false;
+                        console.error('Error syncing page', ex);
+                        throw 'Error syncing page';
+                    });
                 }
 
             }).catch(function (ex) {
@@ -383,7 +392,10 @@ module.exports = {
             database.connect(username, sqlite3.OPEN_READWRITE).then(function () {
                 
                 setupVariables(username).then(function () {
-                    recursiveSync(username, pagenumber[username]);
+                    recursiveSync(username, pagenumber[username]).catch(function (ex) {
+                        running[username] = false;
+                        console.error(ex);
+                    })
                 }).catch(function(ex) {
                     running[username] = false;
                     console.error(ex.stack);
