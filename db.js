@@ -114,6 +114,8 @@ var database = (function () {
 						} else {
 							reject('Database closed. Reopening failed');
 						}
+					}).catch(function (ex) {
+						reject(ex);
 					})
 				} else {
 					reject('Database closed.');

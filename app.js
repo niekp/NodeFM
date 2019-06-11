@@ -42,25 +42,28 @@ app.locals.moment = require('moment');
 app.locals.moment.locale(config.has('locale') ? config.get('locale') : 'en_GB');
 
 // Inject local variables and connect the DB
-function injectLocal(req, res, next){
-  let promises = [];
-  user.injectLocalVariables(req, res);
-  promises.push(spotify_helper.injectLocalVariables(req, res));
+async function injectLocal(req, res, next){
+	user.injectLocalVariables(req, res);
+	try {
+		await spotify_helper.injectLocalVariables(req, res);
+	} catch(ex) {
+		next(createError(500, ex));      
+	}
 
-  if (req.query.filter)
-    res.locals.filter = req.query.filter;
-  
-  // Connect to the DB if it's closed.
-  let username = user.getUsername(req);
-  if (username && !db.isConnected(username)) {
-    promises.push(db.connect(username))
-  }
+	if (req.query.filter)
+	res.locals.filter = req.query.filter;
 
-  Promise.all(promises).then(function (values) {
-    next();
-  }).catch(function() {
-    next();
-  })
+	// Connect to the DB if it's closed.
+	let username = user.getUsername(req);
+	if (username && !db.isConnected(username)) {
+		try {
+			await db.connect(username)
+		} catch (ex) {
+			next(createError(500, ex));      
+		}
+	}
+
+	next();
 };
 
 process.on('unhandledRejection', (reason, p) => {

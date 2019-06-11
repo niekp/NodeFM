@@ -54,7 +54,10 @@ module.exports = {
 
         try {
             if (fs.existsSync(database_path)) {
-                db.connect(user);
+                db.connect(user).catch(function (ex) {
+                    console.error('Error connecting while checking login', ex);
+                    return false;
+                })
 
                 return true;
             }

@@ -1,16 +1,9 @@
 var database = require('../db.js')
-const sqlite3 = require('sqlite3');
 const config = require('config');
-var fs = require('graceful-fs')
 const spotify = require('../models/spotify.js');
 const spotify_helper = require('../models/spotify_helper.js');
 var SpotifyWebApi = require('spotify-web-api-node');
-
-let database_folder = config.get('database_folder');
-
-if (database_folder.substr(0, database_folder - 1) !== '/') {
-	database_folder += '/';
-}
+var helper = require('./helper.js');
 
 function getPromiseTimeout(ms){
 	return new Promise((resolve, reject) => {
@@ -216,45 +209,36 @@ function fillSpotifyMetadata(username) {
 }
 
 var running = false;
+
 module.exports = {
 	isRunning: function () {
 		return running;
 	},
 
-	run: function () {
+	run: async function () {
 		running = true;
 		clearTimeouts();
-		// Loop through all users
-		fs.readdir(database_folder, function (error, files) {
-			if (error) {
-				return console.error('Unable to scan users: ' + error);
-			}
 
-			files.forEach(function (user_file) {
-				let username = '';
-				if (user_file.indexOf('.db') > 0) {
-					username = user_file.replace('.db', '');
-				}
+		try {
+			users = await helper.getUsers();
+			for (username of users) {
+				await helper.connect(username);
 
-				database.connect(username, sqlite3.OPEN_READWRITE).then(function () {
-					spotify_helper.getValue('username', username).then(function (spotify_username) {
-						if (spotify_username && spotify_username.length) {
-							// TODO: Dit gaat fout. Als de token halverwege het proces verloopt krijg je fouten.
-							fillSpotifyMetadata(username).then(function () {
-								running = false;
-								console.log('done!')
-							}).catch(function (ex) {
-								console.error('Done with errors:', ex);
-								running = false;
-							});
-						}
-					});
-
-				}).catch(function (error) {
-					console.error(error);
+				spotify_helper.getValue('username', username).then(function (spotify_username) {
+					if (spotify_username && spotify_username.length) {
+						// TODO: Dit gaat fout. Als de token halverwege het proces verloopt krijg je fouten.
+						fillSpotifyMetadata(username).then(function () {
+							running = false;
+							console.log('done!')
+						}).catch(function (ex) {
+							console.error('Done with errors:', ex);
+							running = false;
+						});
+					}
 				});
-
-			});
-		});
+			}
+		} catch (ex) {
+			console.error('spotify-metadata', ex);
+		}
 	},
 }

@@ -1,15 +1,8 @@
 var database = require('../db.js')
-const sqlite3 = require('sqlite3');
 const config = require('config');
-var fs = require('graceful-fs')
 const LastFm = require("lastfm-node-client");
 var cache_helper = require('../models/cache_helper.js');
-
-let database_folder = config.get('database_folder');
-
-if (database_folder.substr(0, database_folder - 1) !== '/') {
-	database_folder += '/';
-}
+var helper = require('./helper.js');
 
 var lastFm = null;
 if (apikey = config.get('lastfm_apikey')) {
@@ -135,46 +128,33 @@ async function fillMetadata(username) {
 let running = [];
 
 module.exports = {
-	run: function () {
-		// Loop through all users
-		fs.readdir(database_folder, function (error, files) {
-			if (error) {
-				return console.error('Unable to scan users: ' + error);
-			}
-
-			files.forEach(function (user_file) {
-				let username = '';
-				if (user_file.indexOf('.db') > 0) {
-					username = user_file.replace('.db', '');
-				}
-
-				if (username) {
-
-					if (!running[username]) {
-						if (!lastFm) {
-							console.error('Last.fm API-key not found');
-							return;
-						}
-						running[username] = true;
-
-						database.connect(username, sqlite3.OPEN_READWRITE).then(function () {
-							fillMetadata(username).then(function () {
-								running[username] = false;
-							}).catch(function (ex) {
-								console.error(ex.stack);
-								running[username] = false;
-							});
-						}).catch(function(ex) {
-							console.error(ex.stack);
-							running[username] = false;
-						});
-					} else {
-						console.log(username, 'Lastfm metadata already running');
+	run: async function () {
+		try {
+			users = await helper.getUsers();
+			for (username of users) {
+				if (!running[username]) {
+					if (!lastFm) {
+						console.error('Last.fm API-key not found');
+						return;
 					}
+					running[username] = true;
 
+					await helper.connect(user);
 
+					fillMetadata(username).then(function () {
+						running[username] = false;
+					}).catch(function (ex) {
+						console.error(ex.stack);
+						running[username] = false;
+					});
+
+				} else {
+					console.log(username, 'Lastfm metadata already running');
 				}
-			});
-		});
+			}
+		} catch (ex) {
+			running[username] = [];			
+			console.error('lastfm-metadata', ex);
+		}
 	},
 }

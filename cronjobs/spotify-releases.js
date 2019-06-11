@@ -1,16 +1,9 @@
 var database = require('../db.js')
-const sqlite3 = require('sqlite3');
 const config = require('config');
-var fs = require('graceful-fs')
 const spotify = require('../models/spotify.js');
 const spotify_helper = require('../models/spotify_helper.js');
 var cache_helper = require('../models/cache_helper.js');
-
-let database_folder = config.get('database_folder');
-
-if (database_folder.substr(0, database_folder -1) !== '/') {
-    database_folder += '/';
-}
+var helper = require('./helper.js');
 
 /**
  * Get the new releases from the spotify API
@@ -138,38 +131,27 @@ function cleanupReleases(username) {
     });
 }
 
+
 module.exports = {
-    run: function() {
-        // Loop through all users
-        fs.readdir(database_folder, function (error, files) {
-            if (error) {
-                return console.error('Unable to scan users: ' + error);
+    run: async function () {
+        try {
+            users = await helper.getUsers();
+            for (username of users) {
+                await helper.connect(username);
+
+                spotify_helper.getValue('username', username).then(function (spotify_username) {
+                    if (spotify_username && spotify_username.length) {
+                        // Download and save the new releases
+                        updateNewReleases(username);
+                        // Remove old non-matches
+                        cleanupReleases(username);
+                        // A bit arbitrary, but wait for a bit before processing the releases
+                        setTimeout(saveMatches, 30000, username);
+                    }
+                });
             }
-
-            files.forEach(function (user_file) {
-                let username = '';
-                if (user_file.indexOf('.db') > 0) {
-                    username = user_file.replace('.db', '');
-                }
-                if (username) {
-                    database.connect(username, sqlite3.OPEN_READWRITE).then(function () {
-                        spotify_helper.getValue('username', username).then(function(spotify_username) {
-                            if (spotify_username && spotify_username.length) {
-                                // Download and save the new releases
-                                updateNewReleases(username);
-                                // Remove old non-matches
-                                cleanupReleases(username);
-                                // A bit arbitrary, but wait for a bit before processing the releases
-                                setTimeout(saveMatches, 30000, username);
-                            }
-                        });
-
-                    }).catch(function(error) {
-                        console.error(error);
-                    });
-
-                }
-            });
-        });
+        } catch (ex) {
+            console.error('spotify-releases', ex);
+        }
     },
 }
