@@ -12,15 +12,11 @@ function Migration(user) {
 
             migration_helper.addTable('Images',
                 'CREATE TABLE Images (id INTEGER PRIMARY KEY AUTOINCREMENT, type string, link_id int, source string, url string, key string)'
-            ).then(function () {
-                migration_helper.executeQuery('UPDATE Album SET spotify_last_search = NULL, lastfm_last_search = null').then(function() {
+                ).then(function () {
                     resolve();
-                }).catch(function (ex) {
-                    reject(ex);
+                }).catch(function (error) {
+                    reject(error);
                 })
-            }).catch(function (ex) {
-                reject(ex);
-            })
         });
     }
 };
