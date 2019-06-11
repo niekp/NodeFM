@@ -3,6 +3,7 @@ const sqlite3 = require('sqlite3');
 const config = require('config');
 var fs = require('graceful-fs')
 const LastFm = require("lastfm-node-client");
+var cache_helper = require('../models/cache_helper.js');
 
 let database_folder = config.get('database_folder');
 
@@ -42,11 +43,23 @@ async function saveTrackData(username, album, track) {
 }
 
 async function parseAlbum(username, album) {
-	data = await lastFm.albumGetInfo({
-		"artist": album.artist,
-		"album": album.album,
-		"autocorrect": 1
-	});
+	let cache_key = 'lastfm_' + album.artist + '_' + album.album;
+	let cache_expire = cache_helper.getExpiresSeconds('month');
+	let data;
+	
+	try {
+		data = await cache_helper.get(cache_key);
+	} catch (ex) {}
+
+	if (!data) {
+		data = await lastFm.albumGetInfo({
+			"artist": album.artist,
+			"album": album.album,
+			"autocorrect": 1
+		});
+
+		cache_helper.save(cache_key, data, cache_expire, 'json');
+	}
 
 	if ('album' in data) {
 

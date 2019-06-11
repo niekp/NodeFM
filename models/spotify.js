@@ -128,6 +128,23 @@ var self = module.exports = {
 		});
 	},
 
+	getAlbum: async function(api, id) {
+		let cache_key = 'spotify_album_' + id;
+		let cache_expire = cache_helper.getExpiresSeconds('month');
+		let data;
+
+		try {
+			data = await cache_helper.get(cache_key);
+		} catch (ex) { }
+
+		if (!data) {
+			data = await api.getAlbum(id);
+			cache_helper.save(cache_key, data, cache_expire, 'json');
+		}
+		
+		return data;
+	},
+
 	/**
 	 * Get the spotify API
 	 * @param {string} username 

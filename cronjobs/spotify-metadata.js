@@ -112,8 +112,7 @@ function getAlbum(api, username, artist, album, artist_id, album_id) {
 
 		spotify.getSearchResult(api, 'album', artist, album).then(function (album_data) {
 			if (Object.keys(album_data).length) {
-				api.getAlbum(album_data.id).then(function (album_data_extended) {
-
+				spotify.getAlbum(api, album_data.id).then(function (album_data_extended) {
 					body = album_data_extended.body;
 					promises.push(saveAlbum(body, username, album_id));
 					if (body.artists[0]) {
