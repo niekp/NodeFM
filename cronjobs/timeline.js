@@ -1,8 +1,7 @@
 var database = require('../db.js')
 const sqlite3 = require('sqlite3');
 const config = require('config');
-const fs = require('fs');
-
+var fs = require('graceful-fs')
 
 let CRONJOB_KEY = 'timeline';
 

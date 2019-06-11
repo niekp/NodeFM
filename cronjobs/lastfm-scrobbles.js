@@ -1,5 +1,3 @@
-var database = require('../db.js')
-const sqlite3 = require('sqlite3');
 const config = require('config');
 var fs = require('graceful-fs')
 const lastfm_helper = require('../models/lastfm_helper.js');

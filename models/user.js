@@ -1,6 +1,6 @@
 const config = require('config');
 const db = require('../db.js');
-const fs = require('fs')
+var fs = require('graceful-fs')
 
 let database_folder = config.get('database_folder');
 

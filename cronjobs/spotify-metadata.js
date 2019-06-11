@@ -1,7 +1,7 @@
 var database = require('../db.js')
 const sqlite3 = require('sqlite3');
 const config = require('config');
-const fs = require('fs');
+var fs = require('graceful-fs')
 const spotify = require('../models/spotify.js');
 const spotify_helper = require('../models/spotify_helper.js');
 var SpotifyWebApi = require('spotify-web-api-node');
@@ -32,7 +32,6 @@ function saveAlbum(data, username, album_id) {
 	} else if (data.release_date_precision == 'month') {
 		release_date += '-01';
 	}
-	console.log('Saving album', body.name)
 
 	database.executeQuery(`UPDATE Album SET 
 		image = ?,
@@ -181,13 +180,17 @@ function fillSpotifyMetadata(username) {
 								errors++;
 								console.error('Error getting album: ', album.artist, album.album, ex)
 
-								if (errors > 10) {
+								if (errors > 3) {
 									clearTimeouts();
 									canceled = true;
 									reject('To many errors :(');
 								}
 							});
-						});
+						}).catch(function(ex) {
+							errors++;
+							canceled = true;
+							reject('Error getting spotify API. Canceling job' + ex);
+						})
 					}
 
 					done++;

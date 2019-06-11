@@ -294,6 +294,10 @@ async function parsePage(username, page) {
     let promises = [];
     promises.push(new Promise(r => setTimeout(r, 5000)));
 
+    if (!page['recenttracks'] || !page['recenttracks']['track']) {
+        throw 'No tracks found in page';
+    }
+
     for (const track of page["recenttracks"]["track"]) {
         await scrobbleLastFmTrack(username, track).then(function (changes) {
             if (changes) {
@@ -371,7 +375,6 @@ module.exports = {
             database.connect(username, sqlite3.OPEN_READWRITE).then(function () {
                 
                 setupVariables(username).then(function () {
-                    console.log('Start sync', username);
                     recursiveSync(username, pagenumber[username]);
                 }).catch(function(ex) {
                     running[username] = false;
@@ -383,9 +386,8 @@ module.exports = {
                 console.error(error.stack);
             });
 
-            
         } else {
-            console.log('Already running sync', running);
+            console.log('Already running sync', username);
         }
     }
 }

@@ -1,7 +1,7 @@
 var database = require('../db.js')
 const sqlite3 = require('sqlite3');
 const config = require('config');
-const fs = require('fs');
+var fs = require('graceful-fs')
 const LastFm = require("lastfm-node-client");
 
 let database_folder = config.get('database_folder');
@@ -77,7 +77,7 @@ async function parseAlbum(username, album) {
 			]
 		);
 
-		if ('tracks' in data.album) {
+		if (data.album && 'tracks' in data.album) {
 			for (const track of data.album['tracks']['track']) {
 				await saveTrackData(username, album, track);
 			}

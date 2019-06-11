@@ -111,7 +111,7 @@ module.exports = {
             cache.on('error', function (error) { });
 
             cache.get(key, function (error, entries) {
-                if (entries.length && entries[0].body) {
+                if (entries && entries.length && entries[0].body) {
                     if (entries[0].type === 'json') {
                         resolve(JSON.parse(entries[0].body));
                     } else {

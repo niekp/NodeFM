@@ -1,6 +1,6 @@
 const config = require('config');
 const sqlite3 = require('sqlite3');
-const fs = require('fs')
+var fs = require('graceful-fs')
 
 var database = (function () {
 

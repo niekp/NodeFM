@@ -1,4 +1,4 @@
-const fs = require('fs');
+var fs = require('graceful-fs')
 const path = require('path');
 const config = require('config');
 var database = require('../db.js');
