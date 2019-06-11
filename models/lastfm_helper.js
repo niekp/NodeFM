@@ -357,12 +357,7 @@ function recursiveSync(username, pagenumber) {
 
                 if (!stop) {
                     pagenumber++;
-                    recursiveSync(username, pagenumber).catch(function(ex) {
-                        stop = true;
-                        running[username] = false;
-                        console.error('Error syncing page', ex);
-                        throw 'Error syncing page';
-                    });
+                    recursiveSync(username, pagenumber);
                 }
 
             }).catch(function (ex) {
@@ -392,10 +387,7 @@ module.exports = {
             database.connect(username, sqlite3.OPEN_READWRITE).then(function () {
                 
                 setupVariables(username).then(function () {
-                    recursiveSync(username, pagenumber[username]).catch(function (ex) {
-                        running[username] = false;
-                        console.error(ex);
-                    })
+                    recursiveSync(username, pagenumber[username]);
                 }).catch(function(ex) {
                     running[username] = false;
                     console.error(ex.stack);
