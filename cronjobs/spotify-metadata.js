@@ -40,7 +40,6 @@ async function saveAlbum(data, username, album_id) {
 			[album_id]);
 
 		for (let img of data.images) {
-			console.log('Add', img.url)
 			await database.executeQuery(`INSERT INTO Images (source, type, link_id, url, key)
 					VALUES (?, ?, ?, ?, ?)`, username, [
 					'spotify',
