@@ -33,27 +33,26 @@ function setStatus(user, migration_file, status) {
  * @param {string} migration_file 
  * @return {Promise} boolean
  */
-function hasMigrationRun(user, migration_file) {
-    return new Promise((resolve, reject) => {
-        database.executeQuery(`SELECT name FROM Migration WHERE name = '${migration_file}' AND status = 'SUCCESS'`, user).then(function (data) {
-            resolve(data.length > 0)
-        }).catch(function(error) {
-            if (error.toString().indexOf('no such table: Migration') >= 0) {
-                resolve(false);
-            } else {
-                reject(error);
-            }
-        });
-    });
+async function hasMigrationRun(user, migration_file) {
+	try {
+		let data = await database.executeQuery(`SELECT name FROM Migration WHERE name = '${migration_file}' AND status = 'SUCCESS'`, user);
+		return data.length > 0;
+	} catch (error) {
+		if (error.toString().indexOf('no such table: Migration') >= 0) {
+			return false;
+		} else {
+			throw error;
+		}
+	}
 }
-
-let timeout = 0;
 
 // Loop through all users
 fs.readdir(database_folder, function (error, files) {
 	if (error) {
 		return console.error('Unable to scan users: ' + error);
 	}
+
+	let migrations = [];
 
 	files.forEach(function (user_file) {
 
@@ -62,41 +61,44 @@ fs.readdir(database_folder, function (error, files) {
 			user = user_file.replace('.db', '');
 		}
 		if (user) {
+			migrations.push(user);
+			migrations[user] = [];
 
 			database.connect(user, sqlite3.OPEN_READWRITE).then(function () {
-
-				fs.readdir(migrationsFolder, function (err, files) {
+				fs.readdir(migrationsFolder, async function (err, files) {
+					// Build file list
 					files.sort(function (a, b) {
 						return a < b ? -1 : 1;
 					}).forEach(function (migration_file, key) {
-						let migration = require(path.join(__dirname, '../migrations/', migration_file));
-						
 						if (blacklist.indexOf(migration_file) >= 0) {
 							return;
 						}
-
-						hasMigrationRun(user, migration_file).then(function (has_run) {
-							if (!has_run) {
-								let runner = new migration(user);
-
-								timeout += 1000;
-								setTimeout(function (runner, migration_file, user) {
-									console.log('Run', migration_file, user);
-									runner.run().then(function () {
-										setStatus(user, migration_file, 'SUCCESS');
-									}).catch(function (error) {
-										console.error(error);
-										setStatus(user, migration_file, 'FAIL');
-									});
-								}, timeout, runner, migration_file, user);
-							}
-						}).catch(function(error) {
-							console.error(error);
-						});
-						
-
+						migrations[user].push(migration_file);
 					});
 
+					// Execute migrations
+					for (migration_file of migrations[user]) {
+
+						try {
+							var has_run = await hasMigrationRun(user, migration_file);
+							if (!has_run) {
+								let migration = require(path.join(__dirname, '../migrations/', migration_file));
+								let runner = new migration(user);
+
+								try {
+									console.log('Run migration', user, migration_file)
+									await runner.run();
+									setStatus(user, migration_file, 'SUCCESS');
+								} catch (error) {
+									console.error(error);
+									setStatus(user, migration_file, 'FAIL');
+								}
+							}
+						} catch (ex) {
+							console.error(ex);
+						}
+
+					}
 				});
 			}).catch(function (error) {
 				console.error(error);
