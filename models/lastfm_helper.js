@@ -59,7 +59,7 @@ function setStatus(key, value, username) {
             database.executeQuery(`INSERT INTO status (${key}) VALUES (?)`, username, [
                 value
             ]).catch(function (ex) {
-                console.error(error.stack);
+                console.error(ex.stack);
             });
         } else {
             database.executeQuery(`UPDATE status SET ${key} = ?`, username, [
@@ -290,14 +290,14 @@ function scrobbleLastFmTrack(username, track) {
 }
 
 
+const isIterable = object =>
+    object != null && typeof object[Symbol.iterator] === 'function'
+
 async function parsePage(username, page) {
     let changesDetected = false;
 
-    let promises = [];
-    promises.push(new Promise(r => setTimeout(r, 5000)));
-
-    if (!page['recenttracks'] || !page['recenttracks']['track']) {
-        throw 'No tracks found in page';
+    if (!page['recenttracks'] || !page['recenttracks']['track'] || !isIterable(page['recenttracks']['track'])) {
+        throw 'Invalid page: ' + page;
     }
 
     try {
@@ -394,7 +394,7 @@ module.exports = {
                     })
                 } catch (ex) {
                     running[username] = false;
-                    console.error(error.stack);
+                    console.error(ex.stack);
                 }
                 
             }).catch(function (error) {
@@ -402,8 +402,6 @@ module.exports = {
                 console.error(error.stack);
             });
 
-        } else {
-            console.log('Already running sync', username);
         }
     }
 }

@@ -147,9 +147,6 @@ module.exports = {
 						console.error(ex.stack);
 						running[username] = false;
 					});
-
-				} else {
-					console.log(username, 'Lastfm metadata already running');
 				}
 			}
 		} catch (ex) {

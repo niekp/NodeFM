@@ -227,7 +227,6 @@ module.exports = {
 					if (spotify_username && spotify_username.length) {
 						fillSpotifyMetadata(username).then(function () {
 							running = false;
-							console.log('done!')
 						}).catch(function (ex) {
 							console.error('Done with errors:', ex);
 							running = false;

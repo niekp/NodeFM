@@ -78,27 +78,23 @@ function getTopArtist(period, username, format) {
 	});
 }
 
-function saveTopArtist(topArtistPromise, period, username, format) {
+function saveTopArtist(artist, period, username, format) {
 	return new Promise((resolve, reject) => {
 
-		topArtistPromise.then(function (artist) {
-			if (artist) {
-				database.executeQuery(`DELETE FROM ArtistTimeline WHERE format = '${format}' AND period = '${period}'`, username).then(function () {
-					database.executeQuery(`INSERT INTO ArtistTimeline (artist, period, scrobbles, format) VALUES (?, ?, ?, ?)`, username, [artist.name, period, artist.count, format]).then(function() {
-						resolve();
-					}).catch(function (error) {
-						console.error(error);
-						reject(error);
-					});
-
+		if (artist) {
+			database.executeQuery(`DELETE FROM ArtistTimeline WHERE format = '${format}' AND period = '${period}'`, username).then(function () {
+				database.executeQuery(`INSERT INTO ArtistTimeline (artist, period, scrobbles, format) VALUES (?, ?, ?, ?)`, username, [artist.name, period, artist.count, format]).then(function() {
+					resolve();
 				}).catch(function (error) {
 					console.error(error);
 					reject(error);
 				});
-			}
-		}).catch(function (error) {
-			reject(error);
-		});
+
+			}).catch(function (error) {
+				console.error(error);
+				reject(error);
+			});
+		}
 		
 	});
 }
@@ -114,59 +110,49 @@ module.exports = {
 				await helper.connect(username);
 				promises[username] = [];
 
-				[['%Y-%m', 12], ['%Y-%W', 53]].forEach(function (format) {
-					getPeriod(username, format[0]).then(function (period) {
-						let done = false;
-						let start, end, current;
+				for (format of [['%Y-%m', 12], ['%Y-%W', 53]]) {
+					let period = await getPeriod(username, format[0]);
 
-						if (!period[0]['start'] || !period[0]['end']) {
+					let done = false;
+					let start, end, current;
+
+					if (!period[0]['start'] || !period[0]['end']) {
+						done = true;
+					} else {
+						start = period[0]['start'];
+						end = period[0]['end'];
+						current = start;
+					}
+
+					while (!done) {
+						// Setup this period
+						let year = current.split('-')[0];
+						let month = current.split('-')[1];
+
+						let top_artists = await getTopArtist(current, username, format[0])
+						await saveTopArtist(top_artists, current, username, format[0]);
+
+						// Check if done
+						if (getMonthTotalFromPeriod(current, format[1]) >= getMonthTotalFromPeriod(end, format[1])) {
 							done = true;
-						} else {
-							start = period[0]['start'];
-							end = period[0]['end'];
-							current = start;
 						}
 
-						while (!done) {
-							// Setup this period
-							let year = current.split('-')[0];
-							let month = current.split('-')[1];
-
-							promises[username].push(saveTopArtist(getTopArtist(current, username, format[0]), current, username, format[0]));
-
-							// Check if done
-							if (getMonthTotalFromPeriod(current, format[1]) >= getMonthTotalFromPeriod(end, format[1])) {
-								done = true;
-							}
-
-							// Setup next period
-							month++;
-							if (month > format[1]) {
-								month = 1;
-								year++;
-							}
-
-							current = year + '-' + month.toString().padStart(2, '0');
+						// Setup next period
+						month++;
+						if (month > format[1]) {
+							month = 1;
+							year++;
 						}
 
-						Promise.all(promises[username]).then(function () {
-							database.executeQuery(
-								`INSERT INTO Cronjob (key, status) VALUES ('${CRONJOB_KEY}', 'SUCCESS')`,
-								username
-							);
-						}).catch(function (error) {
-							database.executeQuery(
-								`INSERT INTO Cronjob (key, status, info) VALUES ('${CRONJOB_KEY}', 'FAIL', '${error}')`,
-								username
-							).catch(function () {
-								console.error(error)
-							});
-						})
+						current = year + '-' + month.toString().padStart(2, '0');
+					}
 
-					}).catch(function (error) {
-						console.error(error)
-					})
-				});
+					await database.executeQuery(
+						`INSERT INTO Cronjob (key, status) VALUES ('${CRONJOB_KEY}', 'SUCCESS')`,
+						username
+					);
+
+				}
 			}
 		} catch (ex) {
 			console.error('timeline', ex);
