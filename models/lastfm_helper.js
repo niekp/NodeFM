@@ -290,13 +290,16 @@ function scrobbleLastFmTrack(username, track) {
 }
 
 
-const isIterable = object =>
-    object != null && typeof object[Symbol.iterator] === 'function'
-
 async function parsePage(username, page) {
     let changesDetected = false;
 
-    if (!page['recenttracks'] || !page['recenttracks']['track'] || !isIterable(page['recenttracks']['track'])) {
+    try {
+        if (page['recenttracks']['@attr']['total'] == '0') {
+            return false;
+        }
+    } catch (ex) {}
+
+    if (!page['recenttracks'] || !page['recenttracks']['track']) {
         logger.log(logger.WARN, `Invalid page ${JSON.stringify(page)}`);
         throw 'Invalid page';
     }
