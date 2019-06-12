@@ -141,6 +141,8 @@ module.exports = {
 
                 spotify_helper.getValue('username', username).then(function (spotify_username) {
                     if (spotify_username && spotify_username.length) {
+                        logger.log(logger.INFO, `Spotify - ${username} - get newest releases`);
+
                         // Download and save the new releases
                         updateNewReleases(username);
                         // Remove old non-matches

@@ -8,6 +8,8 @@ module.exports = {
             users = await helper.getUsers();
             for (username of users) {
                 await helper.connect(username);
+                logger.log(logger.INFO, `Image helper - start job ${username}`);
+
                 database.executeQuery(`
 UPDATE Album SET 
     image = (

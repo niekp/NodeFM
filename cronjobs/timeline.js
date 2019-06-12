@@ -102,6 +102,8 @@ module.exports = {
 			for (let username of users) {
 				await helper.connect(username);
 
+				logger.log(logger.INFO, `Timeline - ${username} - run cronjob`);
+
 				for (let format of [['%Y-%W', 53], ['%Y-%m', 12]]) {
 					let period = await getPeriod(username, format[0]);
 

@@ -139,6 +139,7 @@ module.exports = {
 						return;
 					}
 					running[username] = true;
+					logger.log(logger.INFO, `Lastfm metadata - ${username} - start running`);
 
 					await helper.connect(user);
 
@@ -148,6 +149,8 @@ module.exports = {
 						logger.log(logger.ERROR, `lastfm-metadata`, ex);
 						running[username] = false;
 					});
+				} else {
+					logger.log(logger.INFO, `Lastfm metadata - ${username} - already running`);
 				}
 			}
 		} catch (ex) {

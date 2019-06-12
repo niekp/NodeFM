@@ -1,3 +1,5 @@
+const logger = require('./logger.js');
+
 /*
 Usage:
 var cache_helper = require('../models/cache_helper.js')
@@ -97,6 +99,8 @@ module.exports = {
      * @param {string} type - see Redis Express docs for allowed types
      */
     save: function (key, value, expire = (60 * 60 * 24), type = 'String') {
+        logger.log(logger.INFO, `Saving to cache: ${key}`);
+
         let cache = this.getRedis();
         cache.on('error', function (error) { });
 
@@ -115,6 +119,8 @@ module.exports = {
      * @returns {Promise<string|object|PromiseRejectionEvent>} The result. Reject when the key is not found.
      */
     get: function(key) {
+        logger.log(logger.INFO, `Getting from cache: ${key}`);
+
         return new Promise((resolve, reject) => {
             let cache = this.getRedis();
             cache.on('error', function (error) { });
@@ -127,6 +133,7 @@ module.exports = {
                         resolve(entries[0].body);
                     }
                 } else {
+                    logger.log(logger.INFO, `Cache key not found: ${key}`);
                     reject('Not found');
                 }
             });

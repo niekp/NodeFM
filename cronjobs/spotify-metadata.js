@@ -26,6 +26,8 @@ async function saveAlbum(data, username, album_id) {
 		release_date += '-01';
 	}
 
+	logger.log(logger.INFO, `Spotify - ${username} - save metadata ${album_id}`);
+
 	// Save the images
 	if ('images' in data) {
 		await database.executeQuery(`DELETE FROM Images 
@@ -70,6 +72,8 @@ async function saveAlbum(data, username, album_id) {
  * @param {string} username 
  */
 function saveArtist(data, username, artist_id) {
+	logger.log(logger.INFO, `Spotify - ${username} - save artist ${artist_id}`);
+
 	return database.executeQuery(`UPDATE Artist SET 
 		spotify_uri = ?,
 		spotify_id = ?
@@ -188,6 +192,8 @@ function fillSpotifyMetadata(username) {
 				timeouts.push(setTimeout(function () {
 					if (!canceled) {
 						spotify.getApi(username).then(function (api) {
+							logger.log(logger.INFO, `Spotify - ${username} - get metadata ${album.artist} - ${album.album}`);
+
 							getAlbum(api, username, album.artist, album.album, album.artist_id, album.album_id).catch(function (ex) {
 								errors++;
 								logger.log(logger.ERROR, `Spotify - error getting abum ${album.artist} - ${album.album}`, ex);
@@ -235,6 +241,8 @@ module.exports = {
 				
 				spotify_helper.getValue('username', username).then(function (spotify_username) {
 					if (spotify_username && spotify_username.length) {
+						logger.log(logger.INFO, `Spotify - start getting metadata ${username}`);
+
 						fillSpotifyMetadata(username).then(function () {
 							running = false;
 						}).catch(function (ex) {

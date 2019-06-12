@@ -383,6 +383,8 @@ module.exports = {
             }
             running[username] = true;
 
+            logger.log(logger.INFO, `Scrobbler - ${username} - start sync`);
+
             database.connect(username, sqlite3.OPEN_READWRITE).then(function () {
                 try {
                     setupVariables(username).then(function () {
@@ -400,7 +402,8 @@ module.exports = {
                 running[username] = false;
                 logger.log(logger.ERROR, `Error connecting to DB`, ex);
             });
-
+        } else {
+            logger.log(logger.INFO, `Scrobbler - ${username} - already running`);
         }
     }
 }
