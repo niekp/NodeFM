@@ -297,7 +297,8 @@ async function parsePage(username, page) {
     let changesDetected = false;
 
     if (!page['recenttracks'] || !page['recenttracks']['track'] || !isIterable(page['recenttracks']['track'])) {
-        throw 'Invalid page: ' + page;
+        logger.log(logger.WARN, `Invalid page ${JSON.stringify(page)}`);
+        throw 'Invalid page';
     }
 
     try {
