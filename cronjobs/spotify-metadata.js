@@ -123,7 +123,14 @@ function getAlbum(api, username, artist, album, artist_id, album_id) {
 			}
 			
 		}).catch(function (ex) {
-			if (ex.indexOf('No results') >= 0) {
+			let msg;
+			if (ex && typeof (ex) == 'object' && ex.message) {
+				msg = ex.message;
+			} else {
+				msg = ex;
+			}
+
+			if (msg.indexOf('No results') >= 0) {
 				promises.push(database.executeQuery(`UPDATE Album SET 
 					spotify_last_search = datetime('now')
 					WHERE id = ?`, username, [
@@ -222,7 +229,7 @@ module.exports = {
 			users = await helper.getUsers();
 			for (username of users) {
 				await helper.connect(username);
-
+				
 				spotify_helper.getValue('username', username).then(function (spotify_username) {
 					if (spotify_username && spotify_username.length) {
 						fillSpotifyMetadata(username).then(function () {

@@ -26,7 +26,7 @@ module.exports = {
                 }
 
                 files.forEach(function (user_file) {
-                    if (user_file.indexOf('.db') > 0 && user_file.indexOf('-journal.db') < 0) {
+                    if (user_file.indexOf('.db') > 0 && user_file.indexOf('db-journal') < 0) {
                         username = user_file.replace('.db', '');
                         users.push(username);
                     }

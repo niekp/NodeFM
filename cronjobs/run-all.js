@@ -11,7 +11,7 @@ process.on('unhandledRejection', (reason, p) => {
 });
 
 // 2. Timeline
-require('./timeline.js').run();
+require('./spotify-metadata.js').run();
 
 // 3. Musicbrainz
 //require('./musicbrainz.js').run();
