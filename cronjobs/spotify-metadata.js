@@ -130,7 +130,9 @@ function getAlbum(api, username, artist, album, artist_id, album_id) {
 				msg = ex;
 			}
 
-			if (msg.indexOf('No results') >= 0) {
+			// Don't search for a while.
+			// Also the 'Bad Gateway' error is persistent and i can't find a good reason, so mark the album as done for now
+			if (msg.indexOf('No results') >= 0 || msg.indexOf('Bad Gateway') >= 0) {
 				promises.push(database.executeQuery(`UPDATE Album SET 
 					spotify_last_search = datetime('now')
 					WHERE id = ?`, username, [
