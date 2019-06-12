@@ -59,14 +59,17 @@ cron.schedule('0 7 * * *', () => {
 	cron_spotify_releases.run();
 });
 
+cron.schedule('0 3 * * *', () => {
+	// Very heavy job at the moment.
+	cron_image_helperfields.run();
+});
+
 cron.schedule('*/15 * * * *', () => {
 	cron_lastfm_metadata.run();
 
 	if (!cron_spotify_metadata.isRunning()) {
 		cron_spotify_metadata.run();
 	}
-
-	cron_image_helperfields.run();
 });
 
 /**
