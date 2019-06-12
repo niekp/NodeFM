@@ -56,6 +56,7 @@ async function parseAlbum(username, album) {
 	}
 
 	if ('album' in data) {
+		logger.log(logger.INFO, `Lastfm metadata - ${username} saving album ${album.artist} - ${album.album}`);
 
 		// Save the images
 		if ('image' in data.album && data.album.image.length > 0) {
@@ -93,6 +94,15 @@ async function parseAlbum(username, album) {
 				await saveTrackData(username, album, track);
 			}
 		}
+	} else {
+		logger.log(logger.INFO, `Lastfm metadata - ${username} no results for ${album.artist} - ${album.album}`);
+
+		await database.executeQuery(`UPDATE Album SET 
+			lastfm_last_search = datetime('now'),
+			WHERE id = ?`, username, [
+				album.album_id
+			]
+		);
 	}
 }
 
@@ -116,6 +126,8 @@ async function fillMetadata(username) {
 		);
 
 		for (const album of albums) {
+			logger.log(logger.INFO, `Lastfm metadata - ${username} get album ${album.artist} - ${album.album}`);
+
 			await parseAlbum(username, album);
 		}
 
