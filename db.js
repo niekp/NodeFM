@@ -49,7 +49,7 @@ var database = (function () {
 					if (fs.existsSync(database_path)) {
 						database[username] = new sqlite3.Database(database_path, mode, (error) => {
 							if (error) {
-								reject("Error connecting to the database", error);
+								reject("Error connecting to the database:" + error);
 							}
 
 							resolve(true);
@@ -58,7 +58,7 @@ var database = (function () {
 						reject("Database not found", error);
 					}
 				} catch(error) {
-					reject("Error connecting to the database", error);
+					reject("Error connecting to the database:" + error);
 				}
 			}
 		});
