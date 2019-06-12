@@ -98,7 +98,7 @@ async function parseAlbum(username, album) {
 		logger.log(logger.INFO, `Lastfm metadata - ${username} no results for ${album.artist} - ${album.album}`);
 
 		await database.executeQuery(`UPDATE Album SET 
-			lastfm_last_search = datetime('now'),
+			lastfm_last_search = datetime('now')
 			WHERE id = ?`, username, [
 				album.album_id
 			]
