@@ -3,7 +3,7 @@ var SpotifyWebApi = require('spotify-web-api-node');
 var config = require('config');
 var cache_helper = require('./cache_helper.js');
 var security = require('./security.js')
-var cache = require('express-redis-cache')({ prefix: cache_helper.getPrefix() });
+var cache = cache_helper.getRedis();
 var uuid = require("uuid");
 cache.on('error', function (error) { });
 

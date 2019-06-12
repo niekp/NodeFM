@@ -12,6 +12,8 @@ router.get('/route',
 );
 */
 
+let redis;
+
 module.exports = {
     getPrefix: function() {
         return 'nodefm'
@@ -52,7 +54,7 @@ module.exports = {
         let seconds = this.getExpiresSeconds(duration);
         return {expire: { 200: seconds, 500: 1, xxx: 30}}
     },
-
+    
     /**
      * Get the automatic cache-key name based on request information
      * @param {Request} req 
@@ -79,6 +81,13 @@ module.exports = {
             next();
         }
     },
+
+    getRedis: function() {
+        if (!redis) {
+            redis = require('express-redis-cache')({ prefix: this.getPrefix() });
+        }
+        return redis;
+    },
     
     /**
      * Store a value in cache
@@ -88,7 +97,7 @@ module.exports = {
      * @param {string} type - see Redis Express docs for allowed types
      */
     save: function (key, value, expire = (60 * 60 * 24), type = 'String') {
-        let cache = require('express-redis-cache')({ prefix: this.getPrefix() });
+        let cache = this.getRedis();
         cache.on('error', function (error) { });
 
         cache.get(key, function (error, entries) {
@@ -107,7 +116,7 @@ module.exports = {
      */
     get: function(key) {
         return new Promise((resolve, reject) => {
-            let cache = require('express-redis-cache')({ prefix: this.getPrefix() });
+            let cache = this.getRedis();
             cache.on('error', function (error) { });
 
             cache.get(key, function (error, entries) {

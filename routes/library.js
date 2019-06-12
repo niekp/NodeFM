@@ -3,7 +3,7 @@ var router = express.Router();
 var library = require('../models/library.js');
 var createError = require('http-errors');
 var cache_helper = require('../models/cache_helper.js')
-var cache = require('express-redis-cache')({ prefix: cache_helper.getPrefix() });
+var cache = cache_helper.getRedis();
 cache.on('error', function (error) { });
 
 // Only allow logged in sessions
