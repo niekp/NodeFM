@@ -16,10 +16,7 @@ router.get('/*', function (req, res, next) {
 	}
 });
 
-router.get('/', 
-	function (req, res, next) {cache_helper.setCacheName(req, res, next);}, 
-	cache.route(cache_helper.getExpires('1min')), 
-	function (req, res, next) {
+router.get('/', function (req, res, next) {
 	stats.getRecentTracks(req, res).then(function (data) {
 		data = {
 			menu: 'recent',
@@ -343,7 +340,7 @@ router.get('/blasts-from-the-past',
 
 router.get('/timeline-month', 
 	function (req, res, next) {cache_helper.setCacheName(req, res, next);}, 
-	cache.route(cache_helper.getExpires('day')), 
+	cache.route(cache_helper.getExpires('half-day')), 
 	function (req, res, next) {
 		pagination.setLimit(200);
 
@@ -364,7 +361,7 @@ router.get('/timeline-month',
 
 router.get('/timeline-week', 
 	function (req, res, next) {cache_helper.setCacheName(req, res, next);}, 
-	cache.route(cache_helper.getExpires('day')), 
+	cache.route(cache_helper.getExpires('half-day')), 
 	function (req, res, next) {
 		pagination.setLimit(53);
 
