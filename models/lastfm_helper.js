@@ -324,7 +324,6 @@ function recursiveSync(username, pagenumber) {
             stop = true;
             running[username] = false;
             console.error('Incorrect response', result);
-            throw 'Incorrect response.';
         }
 
         // Get the totalPages from the result metadata for comparison if all results are in.
@@ -363,8 +362,7 @@ function recursiveSync(username, pagenumber) {
             }).catch(function (ex) {
                 stop = true;
                 running[username] = false;
-                console.error('Error parsing page:' + ex.stack);
-                throw 'Error parsing page';
+                console.error('Error parsing page:', ex);
             });
         }
 
