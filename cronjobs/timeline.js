@@ -34,7 +34,7 @@ function getPeriod(username, format = '%Y-%m') {
 	return new Promise((resolve, reject) => {
 		getLastRun(username).then(function (last_run) {
 			last_run = (new Date(last_run).getTime() / 1000) - (30 * 24 * 60 * 60);
-
+			
 			database.executeQuery(`
 			SELECT MIN(STRFTIME('${format}', DATETIME(utc, 'unixepoch'))) AS start, 
 			MAX(STRFTIME('${format}', DATETIME(utc, 'unixepoch'))) as end 
@@ -75,28 +75,22 @@ function getTopArtist(period, username, format) {
 	});
 }
 
-function saveTopArtist(topArtistPromise, period, username, format) {
+function saveTopArtist(artist, period, username, format) {
 	return new Promise((resolve, reject) => {
-
-		topArtistPromise.then(function (artist) {
-			if (artist) {
-				database.executeQuery(`DELETE FROM ArtistTimeline WHERE format = '${format}' AND period = '${period}'`, username).then(function () {
-					database.executeQuery(`INSERT INTO ArtistTimeline (artist, period, scrobbles, format) VALUES (?, ?, ?, ?)`, username, [artist.name, period, artist.count, format]).then(function () {
-						resolve();
-					}).catch(function (error) {
-						console.error(error);
-						reject(error);
-					});
-
+		if (artist) {
+			database.executeQuery(`DELETE FROM ArtistTimeline WHERE format = '${format}' AND period = '${period}'`, username).then(function () {
+				database.executeQuery(`INSERT INTO ArtistTimeline (artist, period, scrobbles, format) VALUES (?, ?, ?, ?)`, username, [artist.name, period, artist.count, format]).then(function () {
+					resolve();
 				}).catch(function (error) {
 					console.error(error);
 					reject(error);
 				});
-			}
-		}).catch(function (error) {
-			reject(error);
-		});
 
+			}).catch(function (error) {
+				console.error(error);
+				reject(error);
+			});
+		}
 	});
 }
 
@@ -104,66 +98,55 @@ function saveTopArtist(topArtistPromise, period, username, format) {
 module.exports = {
 	run: async function () {
 		try {
-			let promises = [];
-
 			users = await helper.getUsers();
-			for (username of users) {
+			for (let username of users) {
 				await helper.connect(username);
-				promises[username] = [];
 
-				[['%Y-%m', 12], ['%Y-%W', 53]].forEach(function (format) {
-					getPeriod(username, format[0]).then(function (period) {
-						let done = false;
-						let start, end, current;
+				for (let format of [['%Y-%W', 53], ['%Y-%m', 12]]) {
+					let period = await getPeriod(username, format[0]);
 
-						if (!period[0]['start'] || !period[0]['end']) {
-							done = true;
-						} else {
-							start = period[0]['start'];
-							end = period[0]['end'];
-							current = start;
+					let start, end, current;
+
+					if (!period[0]['start'] || !period[0]['end']) {
+						done = true;
+					} else {
+						start = period[0]['start'];
+						end = period[0]['end'];
+						current = start;
+					}
+
+					while (true) {
+						// Setup this period
+						let year = current.split('-')[0];
+						let month = current.split('-')[1];
+
+						try {
+							let artist = await getTopArtist(current, username, format[0]);
+							saveTopArtist(artist, current, username, format[0])
+						} catch (ex) {
+							console.error('Error saving timeline period:', ex);
 						}
 
-						while (!done) {
-							// Setup this period
-							let year = current.split('-')[0];
-							let month = current.split('-')[1];
-
-							promises[username].push(saveTopArtist(getTopArtist(current, username, format[0]), current, username, format[0]));
-
-							// Check if done
-							if (getMonthTotalFromPeriod(current, format[1]) >= getMonthTotalFromPeriod(end, format[1])) {
-								done = true;
-							}
-
-							// Setup next period
-							month++;
-							if (month > format[1]) {
-								month = 1;
-								year++;
-							}
-
-							current = year + '-' + month.toString().padStart(2, '0');
+						// Check if done
+						if (getMonthTotalFromPeriod(current, format[1]) >= getMonthTotalFromPeriod(end, format[1])) {
+							break;
 						}
 
-						Promise.all(promises[username]).then(function () {
-							database.executeQuery(
-								`INSERT INTO Cronjob (key, status) VALUES ('${CRONJOB_KEY}', 'SUCCESS')`,
-								username
-							);
-						}).catch(function (error) {
-							database.executeQuery(
-								`INSERT INTO Cronjob (key, status, info) VALUES ('${CRONJOB_KEY}', 'FAIL', '${error}')`,
-								username
-							).catch(function () {
-								console.error(error)
-							});
-						})
+						// Setup next period
+						month++;
+						if (month > format[1]) {
+							month = 1;
+							year++;
+						}
 
-					}).catch(function (error) {
-						console.error(error)
-					})
-				});
+						current = year + '-' + month.toString().padStart(2, '0');
+					}
+				}
+
+				database.executeQuery(
+					`INSERT INTO Cronjob (key, status) VALUES ('${CRONJOB_KEY}', 'SUCCESS')`,
+					username
+				);
 			}
 		} catch (ex) {
 			console.error('timeline', ex);
