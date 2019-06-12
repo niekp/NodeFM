@@ -385,14 +385,18 @@ module.exports = {
             running[username] = true;
 
             database.connect(username, sqlite3.OPEN_READWRITE).then(function () {
-                
-                setupVariables(username).then(function () {
-                    recursiveSync(username, pagenumber[username]);
-                }).catch(function(ex) {
+                try {
+                    setupVariables(username).then(function () {
+                        recursiveSync(username, pagenumber[username]);
+                    }).catch(function (ex) {
+                        running[username] = false;
+                        console.error(ex.stack);
+                    })
+                } catch (ex) {
                     running[username] = false;
-                    console.error(ex.stack);
-                })
-
+                    console.error(error.stack);
+                }
+                
             }).catch(function (error) {
                 running[username] = false;
                 console.error(error.stack);
