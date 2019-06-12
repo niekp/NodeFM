@@ -3,6 +3,7 @@ const spotify = require('../models/spotify.js');
 const spotify_helper = require('../models/spotify_helper.js');
 var SpotifyWebApi = require('spotify-web-api-node');
 var helper = require('./helper.js');
+var logger = require('../models/logger.js');
 
 function getPromiseTimeout(ms){
 	return new Promise((resolve, reject) => {
@@ -187,7 +188,7 @@ function fillSpotifyMetadata(username) {
 						spotify.getApi(username).then(function (api) {
 							getAlbum(api, username, album.artist, album.album, album.artist_id, album.album_id).catch(function (ex) {
 								errors++;
-								console.error('Error getting album: ', album.artist, album.album, ex)
+								logger.log(logger.ERROR, `Spotify - error getting abum ${album.artist} - ${album.album}`, ex);
 
 								if (errors > 3) {
 									clearTimeouts();
@@ -235,14 +236,14 @@ module.exports = {
 						fillSpotifyMetadata(username).then(function () {
 							running = false;
 						}).catch(function (ex) {
-							console.error('Done with errors:', ex);
+							logger.log(logger.ERROR, `Spotify - done with errors`, ex);
 							running = false;
 						});
 					}
 				});
 			}
 		} catch (ex) {
-			console.error('spotify-metadata', ex);
+			logger.log(logger.ERROR, `Spotify metadata`, ex);
 		}
 	},
 }

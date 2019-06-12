@@ -2,6 +2,7 @@ var SpotifyWebApi = require('spotify-web-api-node');
 var database = require('../db.js')
 var spotify_helper = require('./spotify_helper.js')
 var cache_helper = require('./cache_helper.js');
+var logger = require('./logger.js');
 
 /**
  * Get the spotify API with token
@@ -185,10 +186,10 @@ var self = module.exports = {
 	next: function (req, res) {
 		getSpotifyApi(res.locals.username).then(function (api) {
 			api.skipToNext().catch(function(ex) {
-				console.error(ex);
+				logger.log(logger.ERROR, `Error skip to next`, ex);
 			});
 		}).catch(function (ex) {
-			console.error(ex);
+			logger.log(logger.ERROR, `Error getting spotify API`, ex);
 		});
 	},
 
@@ -200,10 +201,10 @@ var self = module.exports = {
 	prev: function (req, res) {
 		getSpotifyApi(res.locals.username).then(function (api) {
 			api.skipToPrevious().catch(function (ex) {
-				console.error(ex);
+				logger.log(logger.ERROR, `Error skip to previous`, ex);
 			});
 		}).catch(function (ex) {
-			console.error(ex);
+			logger.log(logger.ERROR, `Error getting spotify API`, ex);
 		});
 	},
 
@@ -258,7 +259,7 @@ var self = module.exports = {
 
 				}
 			}).catch(function (ex) {
-				console.error(ex);
+				logger.log(logger.ERROR, `Error getting spotify API`, ex);
 			});
 		});
 	},

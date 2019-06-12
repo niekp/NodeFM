@@ -8,6 +8,7 @@ var app = require('../app');
 var debug = require('debug')('nodefm:server');
 var http = require('http');
 var cron = require('node-cron');
+var logger = require('../models/logger.js');
 
 /**
  * Get port from environment and store in Express.
@@ -104,11 +105,11 @@ function onError(error) {
 	// handle specific listen errors with friendly messages
 	switch (error.code) {
 		case 'EACCES':
-			console.error(bind + ' requires elevated privileges');
+			logger.log(logger.ERROR, `${bind} requires elevated privileges`);
 			process.exit(1);
 			break;
 		case 'EADDRINUSE':
-			console.error(bind + ' is already in use');
+			logger.log(logger.ERROR, `${bind} is already in use`);
 			process.exit(1);
 			break;
 		default:

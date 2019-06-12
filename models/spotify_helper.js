@@ -5,6 +5,8 @@ var cache_helper = require('./cache_helper.js');
 var security = require('./security.js')
 var cache = cache_helper.getRedis();
 var uuid = require("uuid");
+var logger = require('./logger.js');
+
 cache.on('error', function (error) { });
 
 /**
@@ -17,8 +19,8 @@ cache.on('error', function (error) { });
 function setValue(key, value, username) {
     database.executeQuery(`UPDATE Spotify SET ${key} = ?`, username, [
         value
-    ]).catch(function (error) {
-        console.error(error);
+    ]).catch(function (ex) {
+        logger.log(logger.ERROR, `Error updating spotify value`, ex);
     });
 }
 
@@ -236,8 +238,8 @@ module.exports = {
 
                             resolve(data.body['access_token']);
                         },
-                        function (err) {
-                            console.error(err);
+                        function (ex) {
+                            logger.log(logger.ERROR, `Error refreshing access token`, ex);
                             reject('Could not refresh access token');
                         }
                     );

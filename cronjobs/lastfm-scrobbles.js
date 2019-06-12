@@ -1,5 +1,6 @@
 var helper = require('./helper.js');
 const lastfm_helper = require('../models/lastfm_helper.js');
+var logger = require('../models/logger.js');
 
 module.exports = {
 	run: async function () {
@@ -10,7 +11,7 @@ module.exports = {
 				lastfm_helper.syncLastFm(username);
 			}
 		} catch(ex) {
-			console.error('lastfm-scrobbles', ex);
+			logger.log(logger.ERROR, `lastfm-scrobbles`, ex);
 		}
 	},
 }

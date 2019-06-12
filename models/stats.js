@@ -1,7 +1,6 @@
 var database = require('../db.js')
 var pagination = require('./pagination.js')
 
-
 /**
  * Execute an select query and a count query. Return the result and a pagination object.
  * 

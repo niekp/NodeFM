@@ -1,5 +1,6 @@
 var helper = require('./helper.js');
 var database = require('../db.js')
+var logger = require('../models/logger.js');
 
 module.exports = {
     run: async function () {
@@ -38,11 +39,12 @@ UPDATE Album SET
         SELECT link_id FROM Images where type = 'album'
     );
 						`, username).catch(function (ex) {
-                    console.error(ex);
+                            logger.log(logger.ERROR, `Error saving image helperfields`, ex);
+
                 });
             }
         } catch (ex) {
-            console.error('images-helperfields', ex);
+            logger.log(logger.ERROR, `Error saving image helperfields`, ex);
         }
     },
 }

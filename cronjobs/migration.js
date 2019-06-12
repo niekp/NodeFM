@@ -1,8 +1,9 @@
 var fs = require('graceful-fs')
 const path = require('path');
-const config = require('config');
 var database = require('../db.js');
 var helper = require('./helper.js');
+var logger = require('../models/logger.js');
+var logger = require('../models/logger.js');
 
 const migrationsFolder = path.join(__dirname, '../migrations');
 
@@ -16,8 +17,9 @@ const blacklist = ['helper.js'];
  * @param {string} status 
  */
 function setStatus(user, migration_file, status) {
-    database.executeQuery(`INSERT INTO Migration (name, status, utc) VALUES('${migration_file}', '${status}', CURRENT_TIMESTAMP)`, user).catch(function(error) {
-        console.error('set status', user, error);
+    database.executeQuery(`INSERT INTO Migration (name, status, utc) VALUES('${migration_file}', '${status}', CURRENT_TIMESTAMP)`, user).catch(function(ex) {
+		logger.log(logger.ERROR, `set migration status ${user}`, ex);
+		
     });
 }
 
@@ -82,22 +84,22 @@ module.exports = {
 							let runner = new migration(user);
 
 							try {
-								console.log('Run migration', user, migration_file)
+								logger.log(logger.INFO, `Run migration\t${user}\t${migration_file}`);
 								await runner.run();
 								setStatus(user, migration_file, 'SUCCESS');
-							} catch (error) {
-								console.error('Error running migration', user, migration_file, error);
+							} catch (ex) {
+								logger.log(logger.ERROR, `error running migration ${user} ${migration_file}`, ex);
 								setStatus(user, migration_file, 'FAIL');
 							}
 						}
 					} catch (ex) {
-						console.error('Error on HasRun', user, migration_file, ex);
+						logger.log(logger.ERROR, `Error on HasRun\t${user}\t${migration_file}`, ex);
 					}
 
 				}
 			}
 		} catch (ex) {
-			console.error('migration', ex);
+			logger.log(logger.ERROR, `migration`, ex);
 		}
 	},
 }

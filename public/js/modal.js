@@ -9,7 +9,6 @@
     function setClickEvent() {
         $("[data-search='artist'], .artist").unbind('click');
         $("[data-search='artist'], .artist").on('click', function () {
-            console.log('klik!')
             loadModal(this);
         });
     }

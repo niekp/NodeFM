@@ -66,7 +66,6 @@
                     alert("Something went wrong.");
                 }
             }).then(function () {
-                console.log('force update die ding');
                 pendingTimeouts.push(setTimeout(nowPlaying, 500, true));
             })
     }

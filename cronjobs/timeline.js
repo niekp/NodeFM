@@ -1,6 +1,6 @@
-var database = require('../db.js')
-const sqlite3 = require('sqlite3');
+var database = require('../db.js');
 var helper = require('./helper.js');
+var logger = require('../models/logger.js');
 
 let CRONJOB_KEY = 'timeline';
 
@@ -81,13 +81,13 @@ function saveTopArtist(artist, period, username, format) {
 			database.executeQuery(`DELETE FROM ArtistTimeline WHERE format = '${format}' AND period = '${period}'`, username).then(function () {
 				database.executeQuery(`INSERT INTO ArtistTimeline (artist, period, scrobbles, format) VALUES (?, ?, ?, ?)`, username, [artist.name, period, artist.count, format]).then(function () {
 					resolve();
-				}).catch(function (error) {
-					console.error(error);
+				}).catch(function (EX) {
+					logger.log(logger.ERROR, `Error inserting ArtistTimeline`, ex);
 					reject(error);
 				});
 
-			}).catch(function (error) {
-				console.error(error);
+			}).catch(function (ex) {
+				logger.log(logger.ERROR, `Error deleting from ArtistTimeline`, ex);
 				reject(error);
 			});
 		}
@@ -124,7 +124,7 @@ module.exports = {
 							let artist = await getTopArtist(current, username, format[0]);
 							saveTopArtist(artist, current, username, format[0])
 						} catch (ex) {
-							console.error('Error saving timeline period:', ex);
+							logger.log(logger.ERROR, `Error saving timeline period`, ex);
 						}
 
 						// Check if done
@@ -149,7 +149,7 @@ module.exports = {
 				);
 			}
 		} catch (ex) {
-			console.error('timeline', ex);
+			logger.log(logger.ERROR, `timeline`, ex);
 		}
 	},
 }

@@ -1,9 +1,9 @@
 var database = require('../db.js')
-const config = require('config');
 const spotify = require('../models/spotify.js');
 const spotify_helper = require('../models/spotify_helper.js');
 var cache_helper = require('../models/cache_helper.js');
 var helper = require('./helper.js');
+var logger = require('../models/logger.js');
 
 /**
  * Get the new releases from the spotify API
@@ -44,7 +44,7 @@ function saveReleases(items, username) {
                     release.release_date,
                     results[0].id
                 ]).catch(function(ex) {
-                    console.error('Error updating', ex);
+                    logger.log(logger.ERROR, `Error updating releases`, ex);
                 })
             } else {
                 database.executeQuery(`INSERT INTO Releases (artist, album, image, type, uri, release_date) VALUES (?, ?, ?, ?, ?, ?)`, username, [
@@ -55,11 +55,11 @@ function saveReleases(items, username) {
                     release.uri,
                     release.release_date,
                 ]).catch(function (ex) {
-                    console.error('Error inserting', ex);
+                    logger.log(logger.ERROR, `Error inserting releases`, ex);
                 })
             }
         }).catch(function (ex) {
-            console.error('Error looking up release', ex);
+            logger.log(logger.ERROR, `Error looking up releases`, ex);
         })
     });
 }
@@ -110,14 +110,14 @@ function saveMatches(username) {
                     (result.length ? 1 : 0),
                     release.id
                 ]).catch(function (ex) {
-                    console.error('Error saving the match', ex);
+                    logger.log(logger.ERROR, `Error saving match`, ex);
                 })
             }).catch(function (ex) {
-                console.error('Error trying to match', ex);
+                logger.log(logger.ERROR, `Error trying to match`, ex);
             })
         });
     }).catch(function (ex) {
-        console.error('Error getting releases to match', ex);
+        logger.log(logger.ERROR, `Error getting releases to match`, ex);
     })
 }
 
@@ -127,7 +127,7 @@ function saveMatches(username) {
  */
 function cleanupReleases(username) {
     database.executeQuery(`DELETE FROM Releases WHERE release_date < date('now', '-180 day') AND match = 0`, username).catch(function (ex) {
-        console.error('Error cleaning up', ex);
+        logger.log(logger.ERROR, `Error cleaning up`, ex);
     });
 }
 
@@ -151,7 +151,7 @@ module.exports = {
                 });
             }
         } catch (ex) {
-            console.error('spotify-releases', ex);
+            logger.log(logger.ERROR, `spotify releases`, ex);
         }
     },
 }

@@ -4,6 +4,7 @@ var spotify_helper = require('../models/spotify_helper.js')
 var spotify = require('../models/spotify.js')
 var security = require('../models/security.js')
 var cache_helper = require('../models/cache_helper.js')
+var logger = require('../models/logger.js');
 
 // Only allow logged in sessions
 router.get('/*', function (req, res, next) {
@@ -96,7 +97,7 @@ router.get('/control/nowplaying', function (req, res, next) {
 				cache_helper.save(cache_key, data, cache_expires, 'json');
 				res.json(data);
 			}).catch(function (ex) {
-				console.error(ex);
+				logger.log(logger.ERROR, `Error in nowplaying`, ex);
 				res.json({ error: ex });
 			});
 		});

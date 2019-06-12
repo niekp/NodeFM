@@ -1,5 +1,6 @@
 var database = require('../db.js')
 const crypto = require('crypto');
+var logger = require('./logger.js');
 
 /**
  * Hash a string
@@ -44,7 +45,7 @@ module.exports = {
                     resolve(results[0].password.length > 0);
                 }
             }).catch(function(ex) {
-                console.error(ex);
+                logger.log(logger.ERROR, `Error selecting security record`, ex);
                 resolve(false);
             })
         });
@@ -74,11 +75,11 @@ module.exports = {
                             resolve(false);
                         }
                 }).catch(function(ex) {
-                    console.error(ex);
+                    logger.log(logger.ERROR, `Error checking session`, ex);
                     resolve(false);
                 });
-            }).catch(function(error) {
-                console.error(error);
+            }).catch(function(ex) {
+                logger.log(logger.ERROR, `Error checking hasPasword`, ex);
                 resolve(false);
             });
         });
@@ -130,7 +131,7 @@ module.exports = {
                     reject('Not allowed');
                 }
             }).catch(function (ex) {
-                console.error(ex);
+                logger.log(logger.ERROR, `Error getting hasPassword and isUnlocked status`, ex);
                 reject('Not allowed');
             });
         });
@@ -160,7 +161,7 @@ module.exports = {
                     }
                 }
             }).catch(function (ex) {
-                console.error(ex);
+                logger.log(logger.ERROR, `Error checkPassword`, ex);
                 resolve(false);
             })
         });

@@ -3,6 +3,7 @@ const config = require('config');
 const LastFm = require("lastfm-node-client");
 var cache_helper = require('../models/cache_helper.js');
 var helper = require('./helper.js');
+var logger = require('../models/logger.js');
 
 var lastFm = null;
 if (apikey = config.get('lastfm_apikey')) {
@@ -119,7 +120,7 @@ async function fillMetadata(username) {
 		}
 
 	} catch (ex) {
-		console.error(ex);
+		logger.log(logger.ERROR, `Error filling metadata`, ex);
 		running[username] = false;
 	}
 }
@@ -134,7 +135,7 @@ module.exports = {
 			for (username of users) {
 				if (!running[username]) {
 					if (!lastFm) {
-						console.error('Last.fm API-key not found');
+						logger.log(logger.WARN, `Last.fm API-key not found`);
 						return;
 					}
 					running[username] = true;
@@ -144,14 +145,14 @@ module.exports = {
 					fillMetadata(username).then(function () {
 						running[username] = false;
 					}).catch(function (ex) {
-						console.error(ex.stack);
+						logger.log(logger.ERROR, `lastfm-metadata`, ex);
 						running[username] = false;
 					});
 				}
 			}
 		} catch (ex) {
 			running[username] = [];			
-			console.error('lastfm-metadata', ex);
+			logger.log(logger.ERROR, `lastfm-metadata`, ex);
 		}
 	},
 }

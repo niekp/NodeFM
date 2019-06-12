@@ -1,8 +1,8 @@
 var database = require('../db.js')
 const sqlite3 = require('sqlite3');
 const config = require('config');
-const fs = require('fs');
 const LastFm = require("lastfm-node-client");
+var logger = require('./logger.js');
 
 let database_folder = config.get('database_folder');
 
@@ -59,13 +59,13 @@ function setStatus(key, value, username) {
             database.executeQuery(`INSERT INTO status (${key}) VALUES (?)`, username, [
                 value
             ]).catch(function (ex) {
-                console.error(ex.stack);
+                logger.log(logger.ERROR, `Error creating status record`, ex);
             });
         } else {
             database.executeQuery(`UPDATE status SET ${key} = ?`, username, [
                 value
-            ]).catch(function (error) {
-                console.error(error.stack);
+            ]).catch(function (ex) {
+                logger.log(logger.ERROR, `Error setting status`, ex);
             });
         }
     });
@@ -323,7 +323,7 @@ function recursiveSync(username, pagenumber) {
         if (!('recenttracks' in result)) {
             stop = true;
             running[username] = false;
-            console.error('Incorrect response', result);
+            logger.log(logger.WARN, `Incorrect lastfm response ${JSON.stringify(result)}`);
         }
 
         // Get the totalPages from the result metadata for comparison if all results are in.
@@ -332,7 +332,7 @@ function recursiveSync(username, pagenumber) {
         // Print progress
         if ((limit * totalPages) > 300) {
             big_sync[username] = true;
-            console.log(username, ': ', pagenumber, ' / ', totalPages);
+            logger.log(logger.INFO, `${username}: ${pagenumber} / ${totalPages}`);
         }
 
         if (!stop) {
@@ -362,13 +362,13 @@ function recursiveSync(username, pagenumber) {
             }).catch(function (ex) {
                 stop = true;
                 running[username] = false;
-                console.error('Error parsing page:', ex);
+                logger.log(logger.WARN, `Error parsing page`, ex);
             });
         }
 
     }).catch(function (ex) {
         running[username] = false;
-        console.error('Error getting page', ex.stack);
+        logger.log(logger.WARN, `Error getting page`, ex);
     })
 }
 
@@ -377,7 +377,7 @@ module.exports = {
     syncLastFm: function(username) {
         if (!running[username]) {
             if (!lastFm) {
-                console.error('Last.fm API-key not found');
+                logger.log(logger.WARN, `Last.fm API-key not found`, ex);
                 return;
             }
             running[username] = true;
@@ -388,16 +388,16 @@ module.exports = {
                         recursiveSync(username, pagenumber[username]);
                     }).catch(function (ex) {
                         running[username] = false;
-                        console.error(ex.stack);
+                        logger.log(logger.ERROR, `Error setting up lastfm variables`, ex);
                     })
                 } catch (ex) {
                     running[username] = false;
-                    console.error(ex.stack);
+                    logger.log(logger.ERROR, `Error syncing last.fm`, ex);
                 }
                 
             }).catch(function (error) {
                 running[username] = false;
-                console.error(error.stack);
+                logger.log(logger.ERROR, `Error connecting to DB`, ex);
             });
 
         }
