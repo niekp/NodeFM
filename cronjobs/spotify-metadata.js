@@ -239,18 +239,18 @@ module.exports = {
 			for (username of users) {
 				await helper.connect(username);
 				
-				spotify_helper.getValue('username', username).then(function (spotify_username) {
-					if (spotify_username && spotify_username.length) {
-						logger.log(logger.INFO, `Spotify - start getting metadata ${username}`);
+				let spotify_username = await spotify_helper.getValue('username', username);
 
-						fillSpotifyMetadata(username).then(function () {
-							running = false;
-						}).catch(function (ex) {
-							logger.log(logger.ERROR, `Spotify - done with errors`, ex);
-							running = false;
-						});
-					}
-				});
+				if (spotify_username && spotify_username.length) {
+					logger.log(logger.INFO, `Spotify - start getting metadata ${username}`);
+
+					fillSpotifyMetadata(username).then(function () {
+						running = false;
+					}).catch(function (ex) {
+						logger.log(logger.ERROR, `Spotify - done with errors`, ex);
+						running = false;
+					});
+				}
 			}
 		} catch (ex) {
 			logger.log(logger.ERROR, `Spotify metadata`, ex);
