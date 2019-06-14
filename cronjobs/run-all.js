@@ -13,7 +13,7 @@ process.on('unhandledRejection', (reason, p) => {
 });
 
 // 2. Timeline
-require('./spotify-metadata.js').run();
+require('./lastfm-scrobbles').run();
 
 // 3. Musicbrainz
 //require('./musicbrainz.js').run();

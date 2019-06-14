@@ -11,7 +11,7 @@ if (database_folder.substr(0, database_folder - 1) !== '/') {
 }
 
 var lastFm = null;
-if (apikey = config.get('lastfm_apikey')) {
+if (config.has('lastfm_apikey') && config.get('lastfm_apikey')) {
     lastFm = new LastFm({
         "apiKey": config.get('lastfm_apikey')
     });
@@ -381,7 +381,7 @@ module.exports = {
     syncLastFm: function(username) {
         if (!running[username]) {
             if (!lastFm) {
-                logger.log(logger.WARN, `Last.fm API-key not found`, ex);
+                logger.log(logger.WARN, `Last.fm API-key not found`);
                 return;
             }
             running[username] = true;
