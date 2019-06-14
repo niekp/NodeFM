@@ -95,20 +95,10 @@ var database = (function () {
 							database[username].serialize(() => {
 								database[username].all(query, params, (error, result) => {
 									if (error) {
-										reject('Error reopening DB: ' + error);
+										reject(error);
+									} else {
+										resolve(result);
 									}
-				
-									// Execute the query
-									database[username].serialize(() => {
-										database[username].all(query, (error, result) => {
-											if (error) {
-												reject(error);
-											}
-						
-											resolve(result);
-										});
-									});
-
 								});
 							});
 						} else {
