@@ -1,14 +1,9 @@
-const fs = require('fs');
+var fs = require('graceful-fs')
 const path = require('path');
-const config = require('config');
 var database = require('../db.js');
-const sqlite3 = require('sqlite3');
-
-let database_folder = config.get('database_folder');
-
-if (database_folder.substr(0, database_folder -1) !== '/') {
-    database_folder += '/';
-}
+var helper = require('./helper.js');
+var logger = require('../models/logger.js');
+var logger = require('../models/logger.js');
 
 const migrationsFolder = path.join(__dirname, '../migrations');
 
@@ -22,8 +17,9 @@ const blacklist = ['helper.js'];
  * @param {string} status 
  */
 function setStatus(user, migration_file, status) {
-    database.executeQuery(`INSERT INTO Migration (name, status, utc) VALUES('${migration_file}', '${status}', CURRENT_TIMESTAMP)`, user).catch(function(error) {
-        console.error('set status', user, error);
+    database.executeQuery(`INSERT INTO Migration (name, status, utc) VALUES('${migration_file}', '${status}', CURRENT_TIMESTAMP)`, user).catch(function(ex) {
+		logger.log(logger.ERROR, `set migration status ${user}`, ex);
+		
     });
 }
 
@@ -33,70 +29,77 @@ function setStatus(user, migration_file, status) {
  * @param {string} migration_file 
  * @return {Promise} boolean
  */
-function hasMigrationRun(user, migration_file) {
-    return new Promise((resolve, reject) => {
-        database.executeQuery(`SELECT name FROM Migration WHERE name = '${migration_file}' AND status = 'SUCCESS'`, user).then(function (data) {
-            resolve(data.length > 0)
-        }).catch(function(error) {
-            if (error.toString().indexOf('no such table: Migration') >= 0) {
-                resolve(false);
-            } else {
-                reject(error);
-            }
-        });
-    });
+async function hasMigrationRun(user, migration_file) {
+	try {
+		let data = await database.executeQuery(`SELECT name FROM Migration WHERE name = '${migration_file}' AND status = 'SUCCESS'`, user);
+		return data.length > 0;
+	} catch (error) {
+		if (error.toString().indexOf('no such table: Migration') >= 0) {
+			return false;
+		} else {
+			throw error;
+		}
+	}
 }
 
-fs.readdir(migrationsFolder, function (error, files) {
-    if (error) {
-        return console.error('Unable to scan migrations: ' + error);
-    }
+function getMigrationFiles() {
+	return new Promise((resolve, reject) => {
+		file_names = [];
+		fs.readdir(migrationsFolder, async function (error, files) {
+			if (error) {
+				reject('Unable to scan migrations: ' + error)
+			}
 
-    // Loop through all migrations
-    files.forEach(function (migration_file) {
-        if (blacklist.indexOf(migration_file) >= 0) {
-            return;
-        }
+			// Build file list
+			files.sort(function (a, b) {
+				return a < b ? -1 : 1;
+			}).forEach(function (migration_file, key) {
+				if (blacklist.indexOf(migration_file) >= 0) {
+					return;
+				}
+				file_names.push(migration_file);
+			});
+		});
 
-        let migration = require(path.join(__dirname, '../migrations/', migration_file));
+		resolve(file_names);
+	});
+}
 
-        // Loop through all users
-        fs.readdir(database_folder, function (error, files) {
-            if (error) {
-                return console.error('Unable to scan users: ' + error);
-            }
 
-            files.forEach(function (user_file) {
-                let user = '';
-                if (user_file.indexOf('.db') > 0) {
-                    user = user_file.replace('.db', '');
-                }
-                if (user) {
-                    database.connect(user, sqlite3.OPEN_READWRITE).then(function () {
-                        hasMigrationRun(user, migration_file).then(function (has_run) {
-                            if (!has_run) {
-                                console.log('Run', migration_file, user);
-                                let runner = new migration(user);
-    
-                                runner.run().then(function () {
-                                    setStatus(user, migration_file, 'SUCCESS');
-                                }).catch(function (error) {
-                                    console.error(error);
-                                    setStatus(user, migration_file, 'FAIL');
-                                });  
-                            }
-                        }).catch(function(error) {
-                            console.error(error);
-                        });
-                    }).catch(function(error) {
-                        console.error(error);
-                    });
-                }
+module.exports = {
+	run: async function () {
+		try {
+			migrations = await getMigrationFiles();
+			users = await helper.getUsers();
 
-            });
+			for (user of users) {
+				await helper.connect(user);
 
-        });
+				// Execute migrations
+				for (migration_file of migrations) {
+					try {
+						var has_run = await hasMigrationRun(user, migration_file);
+						if (!has_run) {
+							let migration = require(path.join(__dirname, '../migrations/', migration_file));
+							let runner = new migration(user);
 
-        
-    });
-});
+							try {
+								logger.log(logger.INFO, `Run migration\t${user}\t${migration_file}`);
+								await runner.run();
+								setStatus(user, migration_file, 'SUCCESS');
+							} catch (ex) {
+								logger.log(logger.ERROR, `error running migration ${user} ${migration_file}`, ex);
+								setStatus(user, migration_file, 'FAIL');
+							}
+						}
+					} catch (ex) {
+						logger.log(logger.ERROR, `Error on HasRun\t${user}\t${migration_file}`, ex);
+					}
+
+				}
+			}
+		} catch (ex) {
+			logger.log(logger.ERROR, `migration`, ex);
+		}
+	},
+}

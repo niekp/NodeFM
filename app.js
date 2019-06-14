@@ -3,7 +3,6 @@ var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
-var logger = require('morgan');
 var helmet = require('helmet');
 var config = require('config');
 
@@ -11,17 +10,20 @@ var config = require('config');
 var app = express();
 
 // Needed for app setup
-var db = require('./db.js');
-var user = require('./models/user.js');
-var spotify_helper = require('./models/spotify_helper.js');
+var db = require('./db.js'),
+	user = require('./models/user.js'),
+	spotify_helper = require('./models/spotify_helper.js'),
+	logger = require('./models/logger.js');
 
 // Routers
-var indexRouter = require('./routes/index');
-var securityRouter = require('./routes/security');
-var statsRouter = require('./routes/stats');
-var settingsRouter = require('./routes/settings');
-var spotifyRouter = require('./routes/spotify');
-var libraryRouter = require('./routes/library');
+var indexRouter = require('./routes/index'),
+	securityRouter = require('./routes/security'),
+	statsRouter = require('./routes/stats'),
+	settingsRouter = require('./routes/settings'),
+	spotifyRouter = require('./routes/spotify'),
+	libraryRouter = require('./routes/library'),
+	searchRouter = require('./routes/search')
+
 
 // Setup view engine pug
 app.set('views', path.join(__dirname, 'views'));
@@ -30,8 +32,13 @@ app.set('view engine', 'pug');
 // Load helmet (some protection stuff)
 app.use(helmet());
 
+// Log requests
+app.use(function (req, res, next) {
+	logger.log(logger.INFO, `${req.method}\t${req.url}`)
+	next();
+});
+
 // Setup express settings
-app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
@@ -42,29 +49,29 @@ app.locals.moment = require('moment');
 app.locals.moment.locale(config.has('locale') ? config.get('locale') : 'en_GB');
 
 // Inject local variables and connect the DB
-function injectLocal(req, res, next){
-  let promises = [];
-  user.injectLocalVariables(req, res);
-  promises.push(spotify_helper.injectLocalVariables(req, res));
+function injectLocal(req, res, next) {
+	let promises = [];
+	user.injectLocalVariables(req, res);
+	promises.push(spotify_helper.injectLocalVariables(req, res));
 
-  if (req.query.filter)
-    res.locals.filter = req.query.filter;
-  
-  // Connect to the DB if it's closed.
-  let username = user.getUsername(req);
-  if (username && !db.isConnected(username)) {
-    promises.push(db.connect(username))
-  }
+	if (req.query.filter)
+		res.locals.filter = req.query.filter;
 
-  Promise.all(promises).then(function (values) {
-    next();
-  }).catch(function() {
-    next();
-  })
+	// Connect to the DB if it's closed.
+	let username = user.getUsername(req);
+	if (username && !db.isConnected(username)) {
+		promises.push(db.connect(username))
+	}
+
+	Promise.all(promises).then(function (values) {
+		next();
+	}).catch(function () {
+		next();
+	})
 };
 
 process.on('unhandledRejection', (reason, p) => {
-  console.log('Unhandled Rejection at: Promise', p, 'reason:', reason);
+	logger.log(logger.ERROR, `Unhandled Rejection at: Promise\t${p}\treason:\t${reason}`);
 });
 
 // First inject variables
@@ -78,6 +85,7 @@ app.use('/settings', settingsRouter);
 app.use('/stats', statsRouter);
 app.use('/spotify', spotifyRouter);
 app.use('/library', libraryRouter);
+app.use('/search', searchRouter);
 
 // If no route is found create a 404
 app.use(function(req, res, next) {

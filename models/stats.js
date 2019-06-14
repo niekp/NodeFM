@@ -1,7 +1,6 @@
 var database = require('../db.js')
 var pagination = require('./pagination.js')
 
-
 /**
  * Execute an select query and a count query. Return the result and a pagination object.
  * 
@@ -46,7 +45,7 @@ function handleStatsRequest(req, res, select, from_where, group_by, order_by, se
 
 	// Execute the count query
 	let count = database.executeQuery(select_count, res.locals.username, parameters);
-
+	
 	// Execute the select query
 	let results = database.executeQuery(`
 		${select}

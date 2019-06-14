@@ -1,6 +1,6 @@
 const config = require('config');
 const sqlite3 = require('sqlite3');
-const fs = require('fs')
+var fs = require('graceful-fs')
 
 var database = (function () {
 
@@ -49,16 +49,16 @@ var database = (function () {
 					if (fs.existsSync(database_path)) {
 						database[username] = new sqlite3.Database(database_path, mode, (error) => {
 							if (error) {
-								reject("Error connecting to the database", error);
+								reject("Error connecting to the database:" + error);
 							}
 
 							resolve(true);
 						});
 					} else {
-						reject("Database not found", error);
+						reject("Database not found");
 					}
 				} catch(error) {
-					reject("Error connecting to the database", error);
+					reject("Error connecting to the database:" + error);
 				}
 			}
 		});
@@ -72,6 +72,10 @@ var database = (function () {
 	 */
 	this.executeQuery = function(query, username, params = []) {
 		return new Promise((resolve, reject) => {
+			if (!username) {
+				reject('DB name not set');
+			}
+			
 			if (this.isConnected(username)) {
 				// Execute the query
 				database[username].serialize(() => {
@@ -91,25 +95,17 @@ var database = (function () {
 							database[username].serialize(() => {
 								database[username].all(query, params, (error, result) => {
 									if (error) {
-										reject('Error reopening DB: ' + error);
+										reject(error);
+									} else {
+										resolve(result);
 									}
-				
-									// Execute the query
-									database[username].serialize(() => {
-										database[username].all(query, (error, result) => {
-											if (error) {
-												reject(error);
-											}
-						
-											resolve(result);
-										});
-									});
-
 								});
 							});
 						} else {
 							reject('Database closed. Reopening failed');
 						}
+					}).catch(function (ex) {
+						reject(ex);
 					})
 				} else {
 					reject('Database closed.');

@@ -3,8 +3,11 @@ var SpotifyWebApi = require('spotify-web-api-node');
 var config = require('config');
 var cache_helper = require('./cache_helper.js');
 var security = require('./security.js')
-var cache = require('express-redis-cache')({ prefix: cache_helper.getPrefix() });
+var cache = cache_helper.getRedis();
 var uuid = require("uuid");
+var logger = require('./logger.js');
+
+cache.on('error', function (error) { });
 
 /**
  * Set a value to the spotify settings table
@@ -16,8 +19,8 @@ var uuid = require("uuid");
 function setValue(key, value, username) {
     database.executeQuery(`UPDATE Spotify SET ${key} = ?`, username, [
         value
-    ]).catch(function (error) {
-        console.error(error);
+    ]).catch(function (ex) {
+        logger.log(logger.ERROR, `Error updating spotify value`, ex);
     });
 }
 
@@ -235,8 +238,8 @@ module.exports = {
 
                             resolve(data.body['access_token']);
                         },
-                        function (err) {
-                            console.error(err);
+                        function (ex) {
+                            logger.log(logger.ERROR, `Error refreshing access token`, ex);
                             reject('Could not refresh access token');
                         }
                     );

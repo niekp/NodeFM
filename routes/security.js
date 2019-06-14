@@ -2,7 +2,9 @@ var express = require('express');
 var router = express.Router();
 var security = require('../models/security.js');
 var cache_helper = require('../models/cache_helper.js');
-var cache = require('express-redis-cache')({ prefix: cache_helper.getPrefix() });
+var logger = require('../models/logger.js');
+var cache = cache_helper.getRedis();
+cache.on('error', function (error) {});
 
 // Only allow logged in sessions
 router.get('/*', function (req, res, next) {
@@ -35,7 +37,8 @@ router.post('/setpassword', function(req, res, next) {
 	security.setPassword(req, res, req.body.password).then(function () {
 		res.redirect('/settings');
 	}).catch(function(ex) {
-		console.error(ex)
+		logger.log(logger.ERROR, `Error setting password`, ex);
+		
 		res.render('security/set-password', {
 			success: false
 		});
@@ -78,7 +81,7 @@ router.post('/unlock', function (req, res, next) {
 					res.redirect('/settings');
 				}
 			}).catch(function (ex) {
-				console.error(ex);
+				logger.log(logger.ERROR, `Error checking password`, ex);
 				res.redirect('/settings');
 			});
 		} else {
@@ -95,7 +98,7 @@ router.get('/reset', function (req, res, next) {
 	security.reset(req, res).then(function () {
 		res.redirect('/settings');
 	}).catch(function (ex) {
-		console.error(ex);
+		logger.log(logger.ERROR, `Error resetting password`, ex);
 		res.redirect('/settings');
 	})
 });

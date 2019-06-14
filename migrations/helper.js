@@ -13,22 +13,10 @@ function MigrationHelper(user) {
      * @param {string} query
      * @return {Promise} resolve when complete
      */
-    this.addTable = function(table, query) {
-        return new Promise((resolve, reject) => {
-            tableExists(table).then(function (exists) {
-                if (!exists) {
-                    executeQuery(query).then(function () {
-                        resolve();
-                    }).catch(function (error) {
-                        reject(error);
-                    });
-                } else {
-                    resolve();
-                }
-            }).catch(function (error) {
-                reject(error);
-            });
-        });
+    this.addTable = async function(table, query) {
+        if (!await tableExists(table)) {
+            await executeQuery(query);
+        }
     }
 
      /**
@@ -38,35 +26,17 @@ function MigrationHelper(user) {
      * @param {string} type
      * @return {Promise} resolve when complete
      */
-    this.addColumn = function(table, column, type) {
-        return new Promise((resolve, reject) => {
-            tableExists(table).then(function (table_exists) {
-                if (table_exists) {
-
-                    // Check if the column exists
-                    columnExists(table, column).then(function(column_exist) {
-                        if (!column_exist) {
-                            executeQuery(`ALTER TABLE ${table} ADD COLUMN ${column} ${type}`).then(function () {
-                                resolve();
-                            }).catch(function (error) {
-                                reject(error);
-                            });
-                        } else {
-                            resolve();
-                        }
-                        
-                    }).catch(function (error) {
-                        reject(error);
-                    });
-                
-
-                } else {
-                    reject('Table doesn\'t exist');
-                }
-            }).catch(function (error) {
-                reject(error);
-            });
-        });
+    this.addColumn = async function(table, column, type) {
+        let table_exists = await tableExists(table);
+        if (table_exists) {
+            // Check if the column exists
+            let column_exists = await columnExists(table, column);
+            if (!column_exists) {
+                await executeQuery(`ALTER TABLE ${table} ADD COLUMN ${column} ${type}`);
+            }
+        } else {
+            throw 'Table doesn\'t exist';
+        }
     }
 
     /**
@@ -74,8 +44,8 @@ function MigrationHelper(user) {
      * @param {string} table 
      * @returns {Promise} resolve with the query result.
      */
-    this.executeQuery = function(query) {
-        return executeQuery(query);
+    this.executeQuery = async function(query) {
+        return await executeQuery(query);
     }
 
     /**
@@ -83,17 +53,9 @@ function MigrationHelper(user) {
      * @param {string} table 
      * @returns {Promise} resolve true if exists.
      */
-    var tableExists = function(table) {
-        return new Promise((resolve, reject) => {
-            var query = executeQuery(`SELECT name FROM sqlite_master WHERE type = 'table' AND name='${table}'`);
-    
-            query.then(function(data) {
-                resolve(data.length > 0);
-            }).catch(function(error) {
-                reject(error);
-            })
-
-        });
+    var tableExists = async function(table) {
+        var data = await executeQuery(`SELECT name FROM sqlite_master WHERE type = 'table' AND name='${table}'`);
+        return data.length > 0;
     }
 
     /**
@@ -102,24 +64,16 @@ function MigrationHelper(user) {
      * @param {string} column 
      * @returns {Promise} resolve true if exists.
      */
-    var columnExists = function(table, column) {
-        return new Promise((resolve, reject) => {
-            var query = executeQuery(`PRAGMA table_info('${table}')`);
-    
-            query.then(function(data) {
-                exists = false;
-                data.forEach(function(row) {
-                    if (row.name === column) {
-                        exists = true;
-                    }
-                });
-
-                resolve(exists);
-            }).catch(function(error) {
-                reject(error);
-            })
-
+    var columnExists = async function(table, column) {
+        let data = await executeQuery(`PRAGMA table_info('${table}')`);
+        let exists = false;
+        data.forEach(function(row) {
+            if (row.name === column) {
+                exists = true;
+            }
         });
+
+        return exists;
     }
 
     /**
@@ -127,18 +81,10 @@ function MigrationHelper(user) {
      * @param {string} table 
      * @returns {Promise} resolve with the query result.
      */
-    var executeQuery = function(query) {
-        return new Promise((resolve, reject) => {
-            database.connect(user, sqlite3.OPEN_READWRITE).then(function () {
-                database.executeQuery(query, user).then(function (data) {
-                    resolve(data);
-                }).catch(function (error) {
-                    reject(error);
-                });
-            }).catch(function (error) {
-                reject(error);
-            });
-        });
+    var executeQuery = async function(query) {
+        await database.connect(user, sqlite3.OPEN_READWRITE);
+        let data = await database.executeQuery(query, user);
+        return data;
     }
 
 }

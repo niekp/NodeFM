@@ -8,6 +8,7 @@ var app = require('../app');
 var debug = require('debug')('nodefm:server');
 var http = require('http');
 var cron = require('node-cron');
+var logger = require('../models/logger.js');
 
 /**
  * Get port from environment and store in Express.
@@ -33,27 +34,42 @@ server.on('listening', onListening);
 /**
  * Run migrations
  */
-require('../cronjobs/migration.js');
+let migrations = require('../cronjobs/migration.js');
+migrations.run();
 
 /**
  * Setup cronjobs
  */
+let lastfm_scrobbles = require('../cronjobs/lastfm-scrobbles.js');
 let cron_timeline = require('../cronjobs/timeline.js');
 let cron_spotify_releases = require('../cronjobs/spotify-releases.js');
+let cron_lastfm_metadata = require('../cronjobs/lastfm-metadata.js');
 let cron_spotify_metadata = require('../cronjobs/spotify-metadata.js');
+let cron_image_helperfields = require('../cronjobs/images-helperfields.js');
 
-cron.schedule('0 * * * *', () => {
+cron.schedule('* * * * *', () => {
+	lastfm_scrobbles.run();
+});
+
+cron.schedule('0 */3 * * *', () => {
   cron_timeline.run();
 });
 
-cron.schedule('30 1 * * *', () => {
-  cron_spotify_releases.run();
+cron.schedule('0 7 * * *', () => {
+	cron_spotify_releases.run();
 });
 
-cron.schedule('0 * * * *', () => {
-  if (!cron_spotify_metadata.isRunning()) {
-    cron_spotify_metadata.run();
-  }
+cron.schedule('0 3 * * *', () => {
+	// Very heavy job at the moment.
+	cron_image_helperfields.run();
+});
+
+cron.schedule('*/15 * * * *', () => {
+	cron_lastfm_metadata.run();
+
+	if (!cron_spotify_metadata.isRunning()) {
+		cron_spotify_metadata.run();
+	}
 });
 
 /**
@@ -61,19 +77,19 @@ cron.schedule('0 * * * *', () => {
  */
 
 function normalizePort(val) {
-  var port = parseInt(val, 10);
+	var port = parseInt(val, 10);
 
-  if (isNaN(port)) {
-    // named pipe
-    return val;
-  }
+	if (isNaN(port)) {
+		// named pipe
+		return val;
+	}
 
-  if (port >= 0) {
-    // port number
-    return port;
-  }
+	if (port >= 0) {
+		// port number
+		return port;
+	}
 
-  return false;
+	return false;
 }
 
 /**
@@ -81,27 +97,27 @@ function normalizePort(val) {
  */
 
 function onError(error) {
-  if (error.syscall !== 'listen') {
-    throw error;
-  }
+	if (error.syscall !== 'listen') {
+		throw error;
+	}
 
-  var bind = typeof port === 'string'
-    ? 'Pipe ' + port
-    : 'Port ' + port;
+	var bind = typeof port === 'string'
+		? 'Pipe ' + port
+		: 'Port ' + port;
 
-  // handle specific listen errors with friendly messages
-  switch (error.code) {
-    case 'EACCES':
-      console.error(bind + ' requires elevated privileges');
-      process.exit(1);
-      break;
-    case 'EADDRINUSE':
-      console.error(bind + ' is already in use');
-      process.exit(1);
-      break;
-    default:
-      throw error;
-  }
+	// handle specific listen errors with friendly messages
+	switch (error.code) {
+		case 'EACCES':
+			logger.log(logger.ERROR, `${bind} requires elevated privileges`);
+			process.exit(1);
+			break;
+		case 'EADDRINUSE':
+			logger.log(logger.ERROR, `${bind} is already in use`);
+			process.exit(1);
+			break;
+		default:
+			throw error;
+	}
 }
 
 /**
@@ -109,9 +125,9 @@ function onError(error) {
  */
 
 function onListening() {
-  var addr = server.address();
-  var bind = typeof addr === 'string'
-    ? 'pipe ' + addr
-    : 'port ' + addr.port;
-  debug('Listening on ' + bind);
+	var addr = server.address();
+	var bind = typeof addr === 'string'
+		? 'pipe ' + addr
+		: 'port ' + addr.port;
+	debug('Listening on ' + bind);
 }

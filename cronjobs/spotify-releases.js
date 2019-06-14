@@ -1,16 +1,9 @@
 var database = require('../db.js')
-const sqlite3 = require('sqlite3');
-const config = require('config');
-const fs = require('fs');
 const spotify = require('../models/spotify.js');
 const spotify_helper = require('../models/spotify_helper.js');
 var cache_helper = require('../models/cache_helper.js');
-
-let database_folder = config.get('database_folder');
-
-if (database_folder.substr(0, database_folder -1) !== '/') {
-    database_folder += '/';
-}
+var helper = require('./helper.js');
+var logger = require('../models/logger.js');
 
 /**
  * Get the new releases from the spotify API
@@ -51,7 +44,7 @@ function saveReleases(items, username) {
                     release.release_date,
                     results[0].id
                 ]).catch(function(ex) {
-                    console.error('Error updating', ex);
+                    logger.log(logger.ERROR, `Error updating releases`, ex);
                 })
             } else {
                 database.executeQuery(`INSERT INTO Releases (artist, album, image, type, uri, release_date) VALUES (?, ?, ?, ?, ?, ?)`, username, [
@@ -62,11 +55,11 @@ function saveReleases(items, username) {
                     release.uri,
                     release.release_date,
                 ]).catch(function (ex) {
-                    console.error('Error inserting', ex);
+                    logger.log(logger.ERROR, `Error inserting releases`, ex);
                 })
             }
         }).catch(function (ex) {
-            console.error('Error looking up release', ex);
+            logger.log(logger.ERROR, `Error looking up releases`, ex);
         })
     });
 }
@@ -117,14 +110,14 @@ function saveMatches(username) {
                     (result.length ? 1 : 0),
                     release.id
                 ]).catch(function (ex) {
-                    console.error('Error saving the match', ex);
+                    logger.log(logger.ERROR, `Error saving match`, ex);
                 })
             }).catch(function (ex) {
-                console.error('Error trying to match', ex);
+                logger.log(logger.ERROR, `Error trying to match`, ex);
             })
         });
     }).catch(function (ex) {
-        console.error('Error getting releases to match', ex);
+        logger.log(logger.ERROR, `Error getting releases to match`, ex);
     })
 }
 
@@ -134,42 +127,33 @@ function saveMatches(username) {
  */
 function cleanupReleases(username) {
     database.executeQuery(`DELETE FROM Releases WHERE release_date < date('now', '-180 day') AND match = 0`, username).catch(function (ex) {
-        console.error('Error cleaning up', ex);
+        logger.log(logger.ERROR, `Error cleaning up`, ex);
     });
 }
 
+
 module.exports = {
-    run: function() {
-        // Loop through all users
-        fs.readdir(database_folder, function (error, files) {
-            if (error) {
-                return console.error('Unable to scan users: ' + error);
+    run: async function () {
+        try {
+            users = await helper.getUsers();
+            for (username of users) {
+                await helper.connect(username);
+
+                spotify_helper.getValue('username', username).then(function (spotify_username) {
+                    if (spotify_username && spotify_username.length) {
+                        logger.log(logger.INFO, `Spotify - ${username} - get newest releases`);
+
+                        // Download and save the new releases
+                        updateNewReleases(username);
+                        // Remove old non-matches
+                        cleanupReleases(username);
+                        // A bit arbitrary, but wait for a bit before processing the releases
+                        setTimeout(saveMatches, 30000, username);
+                    }
+                });
             }
-
-            files.forEach(function (user_file) {
-                let username = '';
-                if (user_file.indexOf('.db') > 0) {
-                    username = user_file.replace('.db', '');
-                }
-                if (username) {
-                    database.connect(username, sqlite3.OPEN_READWRITE).then(function () {
-                        spotify_helper.getValue('username', username).then(function(spotify_username) {
-                            if (spotify_username && spotify_username.length) {
-                                // Download and save the new releases
-                                updateNewReleases(username);
-                                // Remove old non-matches
-                                cleanupReleases(username);
-                                // A bit arbitrary, but wait for a bit before processing the releases
-                                setTimeout(saveMatches, 30000, username);
-                            }
-                        });
-
-                    }).catch(function(error) {
-                        console.error(error);
-                    });
-
-                }
-            });
-        });
+        } catch (ex) {
+            logger.log(logger.ERROR, `spotify releases`, ex);
+        }
     },
 }

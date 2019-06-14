@@ -2,6 +2,7 @@ var SpotifyWebApi = require('spotify-web-api-node');
 var database = require('../db.js')
 var spotify_helper = require('./spotify_helper.js')
 var cache_helper = require('./cache_helper.js');
+var logger = require('./logger.js');
 
 /**
  * Get the spotify API with token
@@ -21,6 +22,12 @@ function getSpotifyApi(username) {
 	});
 }
 
+function encodeSpotify(str) {
+	str = str.replace(/'/g, '');
+
+	return str;
+}
+
 /**
  * Build a spotify search query
  * @param {string} artist 
@@ -30,11 +37,11 @@ function getSpotifyApi(username) {
 function getSearchQuery(artist, album, track) {
 	let query = '';
 	if (artist)
-		query += 'artist:' + artist + ' ';
+		query += 'artist:' + encodeSpotify(artist) + ' ';
 	if (album)
-		query += 'album:' + album + ' ';
+		query += 'album:' + encodeSpotify(album) + ' ';
 	if (track)
-		query += 'track:' + track + ' ';
+		query += 'track:' + encodeSpotify(track) + ' ';
 
 	return query.trim();
 }
@@ -106,6 +113,8 @@ var self = module.exports = {
 						reject(ex);
 					})
 				} else if (type == 'album') {
+					console.log('search query', getSearchQuery(artist, album))
+
 					api.searchAlbums(getSearchQuery(artist, album), { limit: 1 }).then(function (results) {
 						if ((albums = results.body.albums.items) && albums.length > 0) {
 							cache_helper.save(cache_key, albums[0], cache_expire, 'json');
@@ -113,6 +122,8 @@ var self = module.exports = {
 						} else {
 							reject('No results');
 						}
+					}).catch(function (ex) {
+						reject(ex);
 					})
 				} else if (type == 'artist') {
 					api.searchArtists(getSearchQuery(artist), { limit: 1 }).then(function (results) {
@@ -122,10 +133,33 @@ var self = module.exports = {
 						} else {
 							reject('No results');
 						}
+					}).catch(function (ex) {
+						reject(ex);
 					})
 				}
 			});
 		});
+	},
+
+	getAlbum: async function(api, id) {
+		let cache_key = 'spotify_album_' + id;
+		let cache_expire = cache_helper.getExpiresSeconds('month');
+		let data;
+
+		try {
+			data = await cache_helper.get(cache_key);
+		} catch (ex) { }
+
+		if (!data) {
+			try {
+				data = await api.getAlbum(id);
+				cache_helper.save(cache_key, data, cache_expire, 'json');
+			} catch (ex) {
+				throw ex;
+			}
+		}
+		
+		return data;
 	},
 
 	/**
@@ -159,7 +193,11 @@ var self = module.exports = {
 	 */
 	next: function (req, res) {
 		getSpotifyApi(res.locals.username).then(function (api) {
-			api.skipToNext();
+			api.skipToNext().catch(function(ex) {
+				logger.log(logger.ERROR, `Error skip to next`, ex);
+			});
+		}).catch(function (ex) {
+			logger.log(logger.ERROR, `Error getting spotify API`, ex);
 		});
 	},
 
@@ -170,7 +208,11 @@ var self = module.exports = {
 	 */
 	prev: function (req, res) {
 		getSpotifyApi(res.locals.username).then(function (api) {
-			api.skipToPrevious();
+			api.skipToPrevious().catch(function (ex) {
+				logger.log(logger.ERROR, `Error skip to previous`, ex);
+			});
+		}).catch(function (ex) {
+			logger.log(logger.ERROR, `Error getting spotify API`, ex);
 		});
 	},
 
@@ -224,6 +266,8 @@ var self = module.exports = {
 					});
 
 				}
+			}).catch(function (ex) {
+				logger.log(logger.ERROR, `Error getting spotify API`, ex);
 			});
 		});
 	},

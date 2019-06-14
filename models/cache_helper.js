@@ -1,3 +1,5 @@
+const logger = require('./logger.js');
+
 /*
 Usage:
 var cache_helper = require('../models/cache_helper.js')
@@ -11,6 +13,8 @@ router.get('/route',
 	}
 );
 */
+
+let redis;
 
 module.exports = {
     getPrefix: function() {
@@ -52,7 +56,7 @@ module.exports = {
         let seconds = this.getExpiresSeconds(duration);
         return {expire: { 200: seconds, 500: 1, xxx: 30}}
     },
-
+    
     /**
      * Get the automatic cache-key name based on request information
      * @param {Request} req 
@@ -79,6 +83,13 @@ module.exports = {
             next();
         }
     },
+
+    getRedis: function() {
+        if (!redis) {
+            redis = require('express-redis-cache')({ prefix: this.getPrefix() });
+        }
+        return redis;
+    },
     
     /**
      * Store a value in cache
@@ -88,7 +99,11 @@ module.exports = {
      * @param {string} type - see Redis Express docs for allowed types
      */
     save: function (key, value, expire = (60 * 60 * 24), type = 'String') {
-        let cache = require('express-redis-cache')({ prefix: this.getPrefix() });
+        logger.log(logger.INFO, `Saving to cache: ${key}`);
+
+        let cache = this.getRedis();
+        cache.on('error', function (error) { });
+
         cache.get(key, function (error, entries) {
             if (type == 'json') {
                 value = JSON.stringify(value);
@@ -104,16 +119,26 @@ module.exports = {
      * @returns {Promise<string|object|PromiseRejectionEvent>} The result. Reject when the key is not found.
      */
     get: function(key) {
+        logger.log(logger.INFO, `Getting from cache: ${key}`);
+
         return new Promise((resolve, reject) => {
-            let cache = require('express-redis-cache')({ prefix: this.getPrefix() });
+            let cache = this.getRedis();
+            cache.on('error', function (error) {
+                reject();
+            });
+
             cache.get(key, function (error, entries) {
-                if (entries.length && entries[0].body) {
+                if (error) {
+                    reject();
+                }
+                if (entries && entries.length && entries[0].body) {
                     if (entries[0].type === 'json') {
                         resolve(JSON.parse(entries[0].body));
                     } else {
                         resolve(entries[0].body);
                     }
                 } else {
+                    logger.log(logger.INFO, `Cache key not found: ${key}`);
                     reject('Not found');
                 }
             });

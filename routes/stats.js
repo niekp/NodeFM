@@ -4,7 +4,8 @@ var stats = require('../models/stats.js')
 var createError = require('http-errors');
 var pagination = require('../models/pagination.js')
 var cache_helper = require('../models/cache_helper.js')
-var cache = require('express-redis-cache')({ prefix: cache_helper.getPrefix() });
+var cache = cache_helper.getRedis();
+cache.on('error', function (error) { });
 
 // Only allow logged in sessions
 router.get('/*', function (req, res, next) {
@@ -15,10 +16,7 @@ router.get('/*', function (req, res, next) {
 	}
 });
 
-router.get('/', 
-	function (req, res, next) {cache_helper.setCacheName(req, res, next);}, 
-	cache.route(cache_helper.getExpires('1min')), 
-	function (req, res, next) {
+router.get('/', function (req, res, next) {
 	stats.getRecentTracks(req, res).then(function (data) {
 		data = {
 			menu: 'recent',
@@ -342,7 +340,7 @@ router.get('/blasts-from-the-past',
 
 router.get('/timeline-month', 
 	function (req, res, next) {cache_helper.setCacheName(req, res, next);}, 
-	cache.route(cache_helper.getExpires('day')), 
+	cache.route(cache_helper.getExpires('half-day')), 
 	function (req, res, next) {
 		pagination.setLimit(200);
 
@@ -363,7 +361,7 @@ router.get('/timeline-month',
 
 router.get('/timeline-week', 
 	function (req, res, next) {cache_helper.setCacheName(req, res, next);}, 
-	cache.route(cache_helper.getExpires('day')), 
+	cache.route(cache_helper.getExpires('half-day')), 
 	function (req, res, next) {
 		pagination.setLimit(53);
 

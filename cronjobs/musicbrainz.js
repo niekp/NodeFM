@@ -2,6 +2,7 @@ var database = require('../db.js')
 const sqlite3 = require('sqlite3');
 const config = require('config');
 const fs = require('fs');
+var logger = require('../models/logger.js');
 
 var NB = require('../custom_modules/nodebrainz');
 var moment = require('moment');
@@ -27,8 +28,6 @@ nb.release('52ee3840-a4a6-4d4d-9ce3-ca82453bd1f4', { inc: 'artists+recordings' }
         var title = track.title;
         title = title.replace(/\’/g, "'");
         title = title.replace(/\\'/g, "'");
-
-        console.log(title)
     })
 });
 
@@ -45,7 +44,7 @@ module.exports = {
         // Loop through all users
         fs.readdir(database_folder, function (error, files) {
             if (error) {
-                return console.error('Unable to scan users: ' + error);
+                logger.log(logger.ERROR, `Musicbrainz: Unable to scan users`);
             }
 
             var timer = 0;
@@ -85,7 +84,7 @@ module.exports = {
 
                                     nb.release(mbid, { inc: 'artists+recordings' }, function(err, response) {
                                         if (err) {
-                                            console.error(err);
+                                            logger.log(logger.ERROR, `Musicbrainz: error getting release`, err);
                                             return;
                                         }
 
@@ -98,15 +97,15 @@ module.exports = {
                                         // Update album info
                                         database.executeQuery(`UPDATE Album SET musicbrainz_last_search = CURRENT_TIMESTAMP, mbid = ?, release_date = ? WHERE id = ?`, username, [
                                             mbid, release_date, album.id
-                                        ]).catch(function(error) {
-                                            console.error(error);
+                                        ]).catch(function(ex) {
+                                            logger.log(logger.ERROR, `Musicbrainz: updating album`, ex);
                                         });
 
                                         // Update artist info
                                         database.executeQuery(`UPDATE Artist SET musicbrainz_last_search = CURRENT_TIMESTAMP, mbid = ? WHERE id = ? AND name LIKE ?`, username, [
                                             response['artist-credit'][0].artist.id, album.artist_id, response['artist-credit'][0].artist.name
-                                        ]).catch(function(error) {
-                                            console.error(error);
+                                        ]).catch(function(ex) {
+                                            logger.log(logger.ERROR, `Musicbrainz: updating artist`, ex);
                                         });
 
                                         // Search for tracks and update them
@@ -128,23 +127,23 @@ module.exports = {
                                                         database.executeQuery(`UPDATE Track SET 
                                                             musicbrainz_last_search = CURRENT_TIMESTAMP,
                                                             mbid = ?,
-                                                            milliseconds = ?,
+                                                            duration = ?,
                                                             track_number = ?
                                                             WHERE id = ?`, username,
                                                             [
                                                                 track_mb.id,
-                                                                track_mb.length,
+                                                                Math.round(track_mb.length / 1000),
                                                                 track_mb.position,
                                                                 track_result.id
-                                                            ]).catch(function(error) {
-                                                                console.error(error);
+                                                            ]).catch(function(ex) {
+                                                                logger.log(logger.ERROR, `Musicbrainz: updating track`, ex);
                                                             }
                                                         );
                                                     }
                                                     
 
-                                                }).catch(function(error) {
-                                                    console.error(error);
+                                                }).catch(function(ex) {
+                                                    logger.log(logger.ERROR, `Musicbrainz: selecting track`, ex);
                                                 });
                                             })
                                         });
@@ -154,12 +153,12 @@ module.exports = {
                                 timer += 1000;
                             });
 
-                        }).catch(function(error) {
-                            console.error(error);
+                        }).catch(function(ex) {
+                            logger.log(logger.ERROR, `Musicbrainz: selecting album`, ex);
                         });
 
-                    }).catch(function(error) {
-                        console.error(error);
+                    }).catch(function(ex) {
+                        logger.log(logger.ERROR, `Musicbrainz: connecting db`, ex);
                     });
 
                 }

@@ -1,3 +1,5 @@
+var logger = require('../models/logger.js');
+
 /**
  * A script to run all cronjobs without waiting for the schedule
  * 
@@ -7,7 +9,7 @@
 // 1. Migrations
 //require('../cronjobs/migration.js');
 process.on('unhandledRejection', (reason, p) => {
-    console.log('Unhandled Rejection at: Promise', p, 'reason:', reason);
+    logger.log(logger.ERROR, `Unhandled Rejection at: Promise\t${p}\treason:\t${reason}`);
 });
 
 // 2. Timeline

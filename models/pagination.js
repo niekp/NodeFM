@@ -48,14 +48,15 @@ module.exports = {
      */
     calculate: function(req) {
         // Set the query pagination parameters
-        if (req.query.page)
+        if (req.query && req.query.page)
             this.current = parseInt(req.query.page);
 
         // Optionally set the limit. Else the default is used
-        if (req.query.limit)
+        if (req.query && req.query.limit)
             this.limit = parseInt(req.query.limit);
 
-        this.filter = req.query.filter;
+        if (req.query && req.query.filter)
+            this.filter = req.query.filter;
 
         // Calculate the pagecount
         if (this.recordCount > 0 && this.limit > 0)

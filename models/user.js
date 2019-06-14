@@ -1,6 +1,7 @@
 const config = require('config');
 const db = require('../db.js');
-const fs = require('fs')
+var fs = require('graceful-fs')
+var logger = require('./logger.js');
 
 let database_folder = config.get('database_folder');
 
@@ -54,12 +55,15 @@ module.exports = {
 
         try {
             if (fs.existsSync(database_path)) {
-                db.connect(user);
+                db.connect(user).catch(function (ex) {
+                    logger.log(logger.ERROR, `Error connecting`, ex);
+                    return false;
+                })
 
                 return true;
             }
-        } catch(error) {
-            console.error(error);
+        } catch(ex) {
+            logger.log(logger.ERROR, `Error checking login`, ex);
         }
 
         return false;
