@@ -56,7 +56,7 @@ else
 			meta(name="description",content="")
 			meta(name="author",content="")
 			link(rel="icon",href="/favicon.ico")
-			title= title
+			title= (title ? title : 'nodefm')
 			block styles
 				link(rel='stylesheet', href='/vendor/css/bootstrap.min.css')
 			block scripts-head
