@@ -174,7 +174,7 @@ function clearTimeouts() {
 function fillSpotifyMetadata(username) {
 	return new Promise((resolve, reject) => {
 		let timeout = 1000,
-			total = 500,
+			total = 1000,
 			done = 0,
 			errors = 0,
 			canceled = false;

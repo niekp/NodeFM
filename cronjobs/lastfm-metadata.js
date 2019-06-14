@@ -111,7 +111,7 @@ async function parseAlbum(username, album) {
  * @param {string} username 
  */
 async function fillMetadata(username) {
-	let total = 500;
+	let total = 1000;
 
 	try {
 		albums = await database.executeQuery(`SELECT Album.id as album_id, 
