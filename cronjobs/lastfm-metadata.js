@@ -6,7 +6,7 @@ var helper = require('./helper.js');
 var logger = require('../models/logger.js');
 
 var lastFm = null;
-if (apikey = config.get('lastfm_apikey')) {
+if (config.has('lastfm_apikey') && config.get('lastfm_apikey')) {
     lastFm = new LastFm({
         "apiKey": config.get('lastfm_apikey')
     });
