@@ -38,6 +38,11 @@ module.exports = {
      */
     hasPassword: function(req, res) {
         return new Promise((resolve, reject) => {
+            if (!res.locals.username) {
+                resolve(false);
+                return;
+            }
+            
             database.executeQuery('SELECT password FROM Security', res.locals.username).then(function (results) {
                 if (results.length === 0) {
                     resolve(false);

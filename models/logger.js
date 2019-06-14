@@ -7,7 +7,7 @@ function getLogger() {
         const { combine, timestamp, printf } = format;
 
         const myFormat = printf(({ level, message, exception, timestamp }) => {
-            return `${dateFormat(timestamp, 'HH:MM')} ${level}: ${message} ${exception ? ' - ' + exception : ''}`;
+            return `${dateFormat(timestamp, 'dd-mm HH:MM')} ${level}: ${message} ${exception ? ' - ' + exception : ''}`;
         });
 
         logger = createLogger({
