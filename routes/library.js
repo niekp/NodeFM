@@ -24,7 +24,7 @@ router.get('/artist/:artist',
 	cache.route(cache_helper.getExpires('week')),
 	function (req, res, next) {
 		
-		library.getAlbums(req.params.artist, res, req).then(function (albums) {
+		library.getAlbums(req.params.artist, null, req, res).then(function (albums) {
 			data = {
 				menu: 'library',
 				artist: req.params.artist,
