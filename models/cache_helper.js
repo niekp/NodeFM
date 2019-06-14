@@ -123,9 +123,14 @@ module.exports = {
 
         return new Promise((resolve, reject) => {
             let cache = this.getRedis();
-            cache.on('error', function (error) { });
+            cache.on('error', function (error) {
+                reject();
+            });
 
             cache.get(key, function (error, entries) {
+                if (error) {
+                    reject();
+                }
                 if (entries && entries.length && entries[0].body) {
                     if (entries[0].type === 'json') {
                         resolve(JSON.parse(entries[0].body));

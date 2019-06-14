@@ -22,6 +22,12 @@ function getSpotifyApi(username) {
 	});
 }
 
+function encodeSpotify(str) {
+	str = str.replace(/'/g, '');
+
+	return str;
+}
+
 /**
  * Build a spotify search query
  * @param {string} artist 
@@ -31,11 +37,11 @@ function getSpotifyApi(username) {
 function getSearchQuery(artist, album, track) {
 	let query = '';
 	if (artist)
-		query += 'artist:' + artist + ' ';
+		query += 'artist:' + encodeSpotify(artist) + ' ';
 	if (album)
-		query += 'album:' + album + ' ';
+		query += 'album:' + encodeSpotify(album) + ' ';
 	if (track)
-		query += 'track:' + track + ' ';
+		query += 'track:' + encodeSpotify(track) + ' ';
 
 	return query.trim();
 }
@@ -107,6 +113,8 @@ var self = module.exports = {
 						reject(ex);
 					})
 				} else if (type == 'album') {
+					console.log('search query', getSearchQuery(artist, album))
+
 					api.searchAlbums(getSearchQuery(artist, album), { limit: 1 }).then(function (results) {
 						if ((albums = results.body.albums.items) && albums.length > 0) {
 							cache_helper.save(cache_key, albums[0], cache_expire, 'json');
