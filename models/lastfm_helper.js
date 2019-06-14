@@ -294,7 +294,7 @@ async function parsePage(username, page) {
     let changesDetected = false;
 
     try {
-        if (page['recenttracks']['@attr']['total'] == '0') {
+        if (page['error'] || page['recenttracks']['@attr']['total'] == '0') {
             return false;
         }
     } catch (ex) {}

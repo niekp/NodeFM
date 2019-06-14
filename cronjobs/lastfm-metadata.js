@@ -153,7 +153,7 @@ module.exports = {
 					running[username] = true;
 					logger.log(logger.INFO, `Lastfm metadata - ${username} - start running`);
 
-					await helper.connect(user);
+					await helper.connect(username);
 
 					fillMetadata(username).then(function () {
 						running[username] = false;
