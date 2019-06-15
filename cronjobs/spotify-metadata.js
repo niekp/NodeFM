@@ -175,6 +175,7 @@ async function getArtistSpotifyId(api, artist) {
 			return search_result.id;
 		}
 	} catch (ex) {
+		let msg = getExceptionMsg(ex);
 		if (msg.indexOf('No results') >= 0 || msg.indexOf('Bad Gateway') >= 0) {
 			return;
 		} else {

@@ -83,15 +83,15 @@ router.get('/albums',
 	}
 );
 
-router.get('/artist/:artist', 
+router.get('/artist', 
 	function (req, res, next) { cache_helper.setCacheName(req, res, next); },
 	cache.route(cache_helper.getExpires('week')),
 	function (req, res, next) {
 		
-		library.getArtistAlbums(req.params.artist, null, req, res).then(function (albums) {
+		library.getArtistAlbums(req.query['artist'], null, req, res).then(function (albums) {
 			data = {
 				menu: 'library',
-				artist: req.params.artist,
+				artist: req.query['artist'],
 				albums: data.results,
 				pagination: data.pagination,
 				topResult: data.topResult,

@@ -3,19 +3,34 @@ extends ../masterpage/layout-list
 prepend content
 	include ../navigation/tab-timeline
 
+append scripts
+	script(src='https://cdn.jsdelivr.net/npm/chart.js@2.8.0/dist/Chart.min.js', type='text/javascript')
+	script(src='/js/timeline.js', type='text/javascript')
+
+append before-table
+	canvas#chart
+
 append table-content
 	// timeline::table-content
 	thead
 		tr
-			th #{periodLabel}
+			th(data-id='period') #{periodLabel}
 			th Artist
+			th.hidden Ranking
 			th Scrobbles
 	tbody
 		each artist in artists
-			tr(data-type='artist')
-				td #{artist.period}
+			tr(
+				data-type='artist'
+				class=({'hidden': artist.rank > 1})
+			)
+				td(data-id='period') #{artist.period}
 				td(data-search='artist') #{artist.artist}
-				td(class=(topResult ? "progress-td" : undefined))
+				td.hidden(data-id='rank') #{artist.rank}
+				td(
+					class=(topResult ? "progress-td" : undefined)
+					data-scrobbles=artist.scrobbles
+				)
 					if topResult
 						- var value = artist.scrobbles
 						- var total = topResult.scrobbles

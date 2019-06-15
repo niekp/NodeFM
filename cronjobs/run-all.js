@@ -1,3 +1,5 @@
+const logger = require('../models/logger');
+
 /**
  * A script to run all cronjobs without waiting for the schedule
  * 
@@ -11,7 +13,8 @@ process.on('unhandledRejection', (reason, p) => {
 });
 
 // 2. Timeline
-require('./spotify-metadata').run();
+require('./timeline').run();
+//require('./spotify-metadata').run();
 //require('./images-helperfields').run();
 
 // 3. Musicbrainz

@@ -16,7 +16,8 @@
     function loadModal(element) {
         $('body').append('<div class="loader-bg"></div><div class="loader"></div>')
         $('.modal').remove();
-        $.get('/library/artist/' + encodeURIComponent(($(element).text())) + '?modal=1', function (data) {
+
+        $.get('/library/artist?artist=' + encodeURIComponent(($(element).text())) + '&modal=1', function (data) {
             $(".loader, .loader-bg").remove();
             $('body').append(data);
             $('.modal').modal('show')

@@ -51,7 +51,7 @@ function getPeriod(username, format = '%Y-%m') {
 	});
 }
 
-function getTopArtist(period, username, format) {
+function getTopArtists(period, username, format) {
 	return new Promise((resolve, reject) => {
 
 		return database.executeQuery(
@@ -61,11 +61,11 @@ function getTopArtist(period, username, format) {
 			WHERE STRFTIME('${format}', DATETIME(S.utc, 'unixepoch')) = '${period}'
 			GROUP BY A.name
 			ORDER BY count DESC
-			LIMIT 0, 1`,
+			LIMIT 0, 10`,
 			username
 		).then(function (data) {
 			if (data.length) {
-				resolve(data[0]);
+				resolve(data);
 			} else {
 				resolve(null);
 			}
@@ -75,23 +75,27 @@ function getTopArtist(period, username, format) {
 	});
 }
 
-function saveTopArtist(artist, period, username, format) {
-	return new Promise((resolve, reject) => {
-		if (artist) {
-			database.executeQuery(`DELETE FROM ArtistTimeline WHERE format = '${format}' AND period = '${period}'`, username).then(function () {
-				database.executeQuery(`INSERT INTO ArtistTimeline (artist, period, scrobbles, format) VALUES (?, ?, ?, ?)`, username, [artist.name, period, artist.count, format]).then(function () {
-					resolve();
-				}).catch(function (EX) {
-					logger.log(logger.ERROR, `Error inserting ArtistTimeline`, ex);
-					reject(error);
-				});
-
-			}).catch(function (ex) {
-				logger.log(logger.ERROR, `Error deleting from ArtistTimeline`, ex);
-				reject(error);
-			});
+async function saveTopArtists(artists, period, username, format) {
+	if (artists) {
+		try {
+			await database.executeQuery(`DELETE FROM ArtistTimeline WHERE format = '${format}' AND period = '${period}'`, username);
+		} catch (ex) {
+			logger.log(logger.ERROR, `Error deleting from ArtistTimeline`, ex);
+			throw 'Error deleting from ArtistTimeline'
 		}
-	});
+
+		try {
+			let rank = 1;
+			for (artist of artists) {
+				await database.executeQuery(`INSERT INTO ArtistTimeline (artist, period, scrobbles, format, rank) VALUES (?, ?, ?, ?, ?)`, username, [artist.name, period, artist.count, format, rank]);
+				rank++;
+			}
+			return;
+		} catch(ex) {
+			logger.log(logger.ERROR, `Error inserting ArtistTimeline`, ex);
+			throw 'Error inserting ArtistTimeline';
+		}
+	}
 }
 
 
@@ -123,8 +127,8 @@ module.exports = {
 						let month = current.split('-')[1];
 
 						try {
-							let artist = await getTopArtist(current, username, format[0]);
-							saveTopArtist(artist, current, username, format[0])
+							let artists = await getTopArtists(current, username, format[0]);
+							await saveTopArtists(artists, current, username, format[0])
 						} catch (ex) {
 							logger.log(logger.ERROR, `Error saving timeline period`, ex);
 						}
