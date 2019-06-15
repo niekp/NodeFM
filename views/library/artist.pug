@@ -3,6 +3,13 @@ extends ../masterpage/layout-list
 append modal-title
 	strong #{artist}
 
+append before-table
+	- var source = '/library/chart/artist?artist=' + artist
+	canvas.chart(
+		data-source=source
+		style='height:250px;width:100%'
+	)
+
 append table-content
 	// artist::table-content
 	thead

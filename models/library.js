@@ -1,6 +1,7 @@
 const { queryBuilder } = require("./queryBuilder");
 
 const stats = require('./stats');
+const database = require('../db');
 
 /**
  * Does the current user have a spotify account
@@ -159,5 +160,23 @@ module.exports = {
             count_query,
             false, null, params
         );
-    }
+    },
+
+    /**
+     * Get the amount of scrobbles per month of an artist
+     * @param {string} artist 
+     * @param {Request} req 
+     * @param {Response} res 
+     */
+    getArtistChart: function(artist, req, res) {
+        return database.executeQuery(`
+            SELECT STRFTIME('%Y-%m', DATETIME(S.utc, 'unixepoch')) AS label, COUNT(*) AS value FROM Scrobble as S
+            INNER JOIN Artist as A
+            ON A.id = S.artist_id
+            WHERE A.name LIKE ?
+            GROUP BY STRFTIME('%Y-%m', DATETIME(S.utc, 'unixepoch'))
+            ORDER BY STRFTIME('%Y-%m', DATETIME(S.utc, 'unixepoch'));
+        `, res.locals.username, [artist]);
+    },
+
 }

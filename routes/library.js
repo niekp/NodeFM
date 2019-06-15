@@ -83,9 +83,9 @@ router.get('/albums',
 	}
 );
 
-router.get('/artist', 
+router.get('/artist',
 	function (req, res, next) { cache_helper.setCacheName(req, res, next); },
-	cache.route(cache_helper.getExpires('week')),
+	cache.route(cache_helper.getExpires('day')),
 	function (req, res, next) {
 		
 		library.getArtistAlbums(req.query['artist'], null, req, res).then(function (albums) {
@@ -103,6 +103,18 @@ router.get('/artist',
 			} else {
 				res.render('library/artist', data);
 			}
+		}).catch(function (error) {
+			next(createError(500, error));
+		});
+	}
+);
+
+router.get('/chart/artist',
+	function (req, res, next) { cache_helper.setCacheName(req, res, next); },
+	cache.route(cache_helper.getExpires('day')),
+	function (req, res, next) {
+		library.getArtistChart(req.query['artist'], req, res).then(function (data) {
+			res.json(data);
 		}).catch(function (error) {
 			next(createError(500, error));
 		});
