@@ -23,7 +23,11 @@ function getSpotifyApi(username) {
 }
 
 function encodeSpotify(str) {
-	str = str.replace(/'/g, '');
+	try {
+		str = str.replace(/'/g, '');		
+	} catch (ex) {
+		logger.log(logger.WARN, `Spotify search string could not be encoded: ${str}, type: ${typeof(str)}`);
+	}
 
 	return str;
 }

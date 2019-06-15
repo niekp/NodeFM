@@ -170,7 +170,7 @@ async function getArtistSpotifyId(api, artist) {
 	}
 
 	try {
-		let search_result = await spotify.getSearchResult(api, 'artist', artist);
+		let search_result = await spotify.getSearchResult(api, 'artist', artist.name);
 		if (Object.keys(search_result).length) {
 			return search_result.id;
 		}
