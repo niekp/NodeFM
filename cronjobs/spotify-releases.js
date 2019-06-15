@@ -1,9 +1,9 @@
-var database = require('../db.js')
-const spotify = require('../models/spotify.js');
-const spotify_helper = require('../models/spotify_helper.js');
-var cache_helper = require('../models/cache_helper.js');
-var helper = require('./helper.js');
-var logger = require('../models/logger.js');
+const database = require('../db');
+const spotify = require('../models/spotify');
+const spotify_helper = require('../models/spotify_helper');
+const cache_helper = require('../models/cache_helper');
+const helper = require('./helper');
+const logger = require('../models/logger');
 
 /**
  * Get the new releases from the spotify API

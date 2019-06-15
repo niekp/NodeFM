@@ -1,10 +1,10 @@
-var express = require('express');
-var router = express.Router();
-var spotify_helper = require('../models/spotify_helper.js')
-var spotify = require('../models/spotify.js')
-var security = require('../models/security.js')
-var cache_helper = require('../models/cache_helper.js')
-var logger = require('../models/logger.js');
+const express = require('express');
+const router = express.Router();
+const spotify_helper = require('../models/spotify_helper')
+const spotify = require('../models/spotify')
+const security = require('../models/security')
+const cache_helper = require('../models/cache_helper')
+const logger = require('../models/logger');
 
 // Only allow logged in sessions
 router.get('/*', function (req, res, next) {

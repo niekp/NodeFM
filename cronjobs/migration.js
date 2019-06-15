@@ -1,9 +1,8 @@
-var fs = require('graceful-fs')
+const fs = require('graceful-fs');
 const path = require('path');
-var database = require('../db.js');
-var helper = require('./helper.js');
-var logger = require('../models/logger.js');
-var logger = require('../models/logger.js');
+const database = require('../db');
+const helper = require('./helper');
+const logger = require('../models/logger');
 
 const migrationsFolder = path.join(__dirname, '../migrations');
 

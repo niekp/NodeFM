@@ -1,11 +1,10 @@
-var database = require('../db.js')
+const database = require('../db');
 const sqlite3 = require('sqlite3');
 const config = require('config');
 const fs = require('fs');
-var logger = require('../models/logger.js');
-
-var NB = require('../custom_modules/nodebrainz');
-var moment = require('moment');
+const logger = require('../models/logger');
+const NB = require('../custom_modules/nodebrainz');
+const moment = require('moment');
 
 let database_folder = config.get('database_folder');
 

@@ -1,5 +1,3 @@
-var logger = require('../models/logger.js');
-
 /**
  * A script to run all cronjobs without waiting for the schedule
  * 

@@ -1,6 +1,6 @@
-var helper = require('./helper.js');
-var database = require('../db.js')
-var logger = require('../models/logger.js');
+const helper = require('./helper');
+const database = require('../db');
+const logger = require('../models/logger');
 
 module.exports = {
     run: async function () {

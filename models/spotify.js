@@ -1,8 +1,8 @@
-var SpotifyWebApi = require('spotify-web-api-node');
-var database = require('../db.js')
-var spotify_helper = require('./spotify_helper.js')
-var cache_helper = require('./cache_helper.js');
-var logger = require('./logger.js');
+const SpotifyWebApi = require('spotify-web-api-node');
+const database = require('../db')
+const spotify_helper = require('./spotify_helper')
+const cache_helper = require('./cache_helper');
+const logger = require('./logger');
 
 /**
  * Get the spotify API with token

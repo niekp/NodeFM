@@ -1,6 +1,6 @@
-var database = require('../db.js')
+const database = require('../db')
 const crypto = require('crypto');
-var logger = require('./logger.js');
+const logger = require('./logger');
 
 /**
  * Hash a string

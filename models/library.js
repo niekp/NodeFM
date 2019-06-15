@@ -1,5 +1,4 @@
-var database = require('../db.js')
-var stats = require('./stats.js');
+const stats = require('./stats');
 
 module.exports = {
 

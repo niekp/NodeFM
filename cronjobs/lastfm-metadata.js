@@ -1,9 +1,9 @@
-var database = require('../db.js')
+const database = require('../db');
 const config = require('config');
 const LastFm = require("lastfm-node-client");
-var cache_helper = require('../models/cache_helper.js');
-var helper = require('./helper.js');
-var logger = require('../models/logger.js');
+const cache_helper = require('../models/cache_helper');
+const helper = require('./helper');
+const logger = require('../models/logger');
 
 var lastFm = null;
 if (config.has('lastfm_apikey') && config.get('lastfm_apikey')) {
