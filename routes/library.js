@@ -20,14 +20,10 @@ router.get('/*', function (req, res, next) {
 	}
 });
 
-function getFilter(req) {
-	return (req.cookies['filter'] ? JSON.parse(req.cookies['filter']) : {})
-}
-
 router.get('/artists',
 	function (req, res, next) { 
 		// Don't cache if 'random order' is chosen.
-		if (getFilter(req)['random-order'])
+		if (library.getFilter(req)['random-order'])
 			res.use_express_redis_cache = false;
 		
 		cache_helper.setCacheName(req, res, next); 
@@ -42,7 +38,7 @@ router.get('/artists',
 				pagination: data.pagination,
 				topResult: data.topResult,
 				datefilter: true,
-				filters: getFilter(req)
+				filters: library.getFilter(req)
 			}
 
 			if (req.xhr) {
@@ -59,7 +55,7 @@ router.get('/artists',
 router.get('/albums',
 	function (req, res, next) {
 		// Don't cache if 'random order' is chosen.
-		if (getFilter(req)['random-order'])
+		if (library.getFilter(req)['random-order'])
 			res.use_express_redis_cache = false;
 
 		cache_helper.setCacheName(req, res, next);
@@ -73,7 +69,7 @@ router.get('/albums',
 				pagination: data.pagination,
 				topResult: data.topResult,
 				datefilter: true,
-				filters: getFilter(req)
+				filters: library.getFilter(req)
 			}
 
 			if (req.xhr) {
