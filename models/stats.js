@@ -1,5 +1,5 @@
-var database = require('../db.js')
-var pagination = require('./pagination.js')
+const database = require('../db')
+const pagination = require('./pagination')
 
 /**
  * Execute an select query and a count query. Return the result and a pagination object.

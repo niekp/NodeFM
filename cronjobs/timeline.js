@@ -1,6 +1,6 @@
-var database = require('../db.js');
-var helper = require('./helper.js');
-var logger = require('../models/logger.js');
+const database = require('../db');
+const helper = require('./helper');
+const logger = require('../models/logger');
 
 let CRONJOB_KEY = 'timeline';
 

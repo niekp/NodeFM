@@ -1,4 +1,4 @@
-var helper = require('./helper.js');
+const helper = require('./helper');
 
 // As far as i know interfaces aren't a thing in JS. So for future migrations.
 

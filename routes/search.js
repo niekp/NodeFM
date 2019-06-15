@@ -1,8 +1,8 @@
-var express = require('express');
-var router = express.Router();
-var library = require('../models/library.js')
-var logger = require('../models/logger.js');
-var createError = require('http-errors');
+const express = require('express');
+const router = express.Router();
+const library = require('../models/library')
+const logger = require('../models/logger');
+const createError = require('http-errors');
 
 // Only allow logged in sessions
 router.get('/*', function (req, res, next) {

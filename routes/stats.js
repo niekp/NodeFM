@@ -1,10 +1,11 @@
-var express = require('express');
-var router = express.Router();
-var stats = require('../models/stats.js')
-var createError = require('http-errors');
-var pagination = require('../models/pagination.js')
-var cache_helper = require('../models/cache_helper.js')
-var cache = cache_helper.getRedis();
+const express = require('express');
+const router = express.Router();
+const stats = require('../models/stats')
+const createError = require('http-errors');
+const pagination = require('../models/pagination')
+const cache_helper = require('../models/cache_helper')
+const cache = cache_helper.getRedis();
+
 cache.on('error', function (error) { });
 
 // Only allow logged in sessions

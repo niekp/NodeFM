@@ -1,9 +1,10 @@
-var express = require('express');
-var router = express.Router();
-var security = require('../models/security.js');
-var cache_helper = require('../models/cache_helper.js');
-var logger = require('../models/logger.js');
-var cache = cache_helper.getRedis();
+const express = require('express');
+const router = express.Router();
+const security = require('../models/security');
+const cache_helper = require('../models/cache_helper');
+const logger = require('../models/logger');
+const cache = cache_helper.getRedis();
+
 cache.on('error', function (error) {});
 
 // Only allow logged in sessions

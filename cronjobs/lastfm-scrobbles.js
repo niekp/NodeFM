@@ -1,6 +1,6 @@
-var helper = require('./helper.js');
-const lastfm_helper = require('../models/lastfm_helper.js');
-var logger = require('../models/logger.js');
+const helper = require('./helper');
+const lastfm_helper = require('../models/lastfm_helper');
+const logger = require('../models/logger');
 
 module.exports = {
 	run: async function () {

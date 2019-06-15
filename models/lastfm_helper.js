@@ -1,14 +1,8 @@
-var database = require('../db.js')
+const database = require('../db')
 const sqlite3 = require('sqlite3');
 const config = require('config');
 const LastFm = require("lastfm-node-client");
-var logger = require('./logger.js');
-
-let database_folder = config.get('database_folder');
-
-if (database_folder.substr(0, database_folder - 1) !== '/') {
-    database_folder += '/';
-}
+const logger = require('./logger');
 
 var lastFm = null;
 if (config.has('lastfm_apikey') && config.get('lastfm_apikey')) {

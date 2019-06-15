@@ -1,9 +1,9 @@
-var database = require('../db.js')
-const spotify = require('../models/spotify.js');
-const spotify_helper = require('../models/spotify_helper.js');
-var SpotifyWebApi = require('spotify-web-api-node');
-var helper = require('./helper.js');
-var logger = require('../models/logger.js');
+const database = require('../db');
+const spotify = require('../models/spotify');
+const spotify_helper = require('../models/spotify_helper');
+const SpotifyWebApi = require('spotify-web-api-node');
+const helper = require('./helper');
+const logger = require('../models/logger');
 
 function getPromiseTimeout(ms){
 	return new Promise((resolve, reject) => {
@@ -85,6 +85,16 @@ function saveArtist(data, username, artist_id) {
 	);
 }
 
+function getExceptionMsg(ex) {
+	let msg;
+	if (ex && typeof (ex) == 'object' && ex.message) {
+		msg = ex.message;
+	} else {
+		msg = ex;
+	}
+	return msg;
+}
+
 /**
  * @var {string} text
  */
@@ -128,12 +138,7 @@ function getAlbum(api, username, artist, album, artist_id, album_id) {
 			}
 			
 		}).catch(function (ex) {
-			let msg;
-			if (ex && typeof (ex) == 'object' && ex.message) {
-				msg = ex.message;
-			} else {
-				msg = ex;
-			}
+			let msg = getExceptionMsg(ex);
 
 			// Don't search for a while.
 			// Also the 'Bad Gateway' error is persistent and i can't find a good reason, so mark the album as done for now
@@ -157,6 +162,79 @@ function getAlbum(api, username, artist, album, artist_id, album_id) {
 		});
 
 	});
+}
+
+async function getArtistSpotifyId(api, artist) {
+	if (artist.spotify_id) {
+		return artist.spotify_id;
+	}
+
+	try {
+		let search_result = await spotify.getSearchResult(api, 'artist', artist.name);
+		if (Object.keys(search_result).length) {
+			return search_result.id;
+		}
+	} catch (ex) {
+		logger.log(logger.ERROR, `Error getting artist spotify ID: ${artist.name}`, ex);
+		throw 'Error getting artist spotify ID';
+	}
+
+	return;
+}
+
+async function getArtist(api, username, artist) {
+	try {
+		let id = await getArtistSpotifyId(api, artist);
+		if (!id) {
+			await database.executeQuery(`UPDATE Artist SET 
+					spotify_last_search = datetime('now')
+					WHERE id = ?`, username, [
+					artist.id
+				]
+			);
+			return;
+		}
+		
+		let artist_data = await spotify.getArtist(api, id);
+		if (!artist_data) {
+			return;
+		}
+		
+		artist_data = artist_data.body;
+		
+		await database.executeQuery(`UPDATE Artist SET 
+					spotify_uri = ?,
+					spotify_id = ?,
+					spotify_last_search = datetime('now')
+					WHERE id = ?`, username, [
+						artist_data.uri,
+						artist_data.id,
+						artist.id
+			]
+		);
+		
+		// Save the images
+		if ('images' in artist_data) {
+			await database.executeQuery(`DELETE FROM Images 
+					WHERE source = 'spotify' AND type = 'artist' AND link_id = ?`, username,
+				[artist.id]);
+
+			for (let img of artist_data.images) {
+				await database.executeQuery(`INSERT INTO Images (source, type, link_id, url, key)
+					VALUES (?, ?, ?, ?, ?)`, username, [
+						'spotify',
+						'artist',
+						artist.id,
+						img.url,
+						(img.width + 'x' + img.height)
+					]);
+			}
+		}
+
+
+	} catch (ex) {
+		logger.log(logger.ERROR, `Error getting artist: ${artist.name}`, ex);
+	}
 }
 
 var timeouts = [];
@@ -197,11 +275,19 @@ function fillSpotifyMetadata(username) {
 							getAlbum(api, username, album.artist, album.album, album.artist_id, album.album_id).catch(function (ex) {
 								errors++;
 								logger.log(logger.ERROR, `Spotify - error getting abum ${album.artist} - ${album.album}`, ex);
+								let msg = getExceptionMsg(ex);
 
+								if (msg.indexOf('Too Many Requests') >= 0) {
+									canceled = true;
+									clearTimeouts();
+									reject('Too many requests. Stopping.')
+								}
+								
 								if (errors > 3) {
 									clearTimeouts();
 									canceled = true;
-									reject('To many errors :(');
+									reject('Too many errors, stopping');
+									return;
 								}
 							});
 						}).catch(function(ex) {
@@ -212,14 +298,68 @@ function fillSpotifyMetadata(username) {
 					}
 
 					done++;
-					if (done >= total) {
+					if (done >= total || canceled) {
 						resolve();
 					}
 				}, timeout));
 				timeout += 2000;
 			})
 
-		});
+		}).then(function() {
+			clearTimeouts();
+			timeout = 1000;
+			total = 1000;
+			done = 0;
+			errors = 0;
+
+			if (canceled) {
+				resolve();
+				return;
+			}
+
+			database.executeQuery(`SELECT * FROM Artist WHERE spotify_last_search IS NULL
+									LIMIT 0, ${total}`, username
+			).then(function (artists) {
+				artists.forEach(artist => {
+					timeouts.push(setTimeout(function () {
+						if (!canceled) {
+							spotify.getApi(username).then(function (api) {
+								logger.log(logger.INFO, `Spotify - ${username} - get metadata ${artist.name}`);
+
+								getArtist(api, username, artist).catch(function (ex) {
+									errors++;
+									logger.log(logger.ERROR, `Spotify - error getting artist ${artist.name}`, ex);
+									let msg = getExceptionMsg(ex);
+
+									if (msg.indexOf('Too Many Requests') >= 0) {
+										canceled = true;
+										clearTimeouts();
+										reject('Too many requests. Stopping.')
+									}
+
+									if (errors > 3) {
+										clearTimeouts();
+										canceled = true;
+										reject('Too many errors, stopping');
+										return;
+									}
+								});
+							}).catch(function (ex) {
+								errors++;
+								canceled = true;
+								reject('Error getting spotify API. Canceling job' + ex);
+							})
+						}
+
+						done++;
+						if (done >= total || canceled) {
+							resolve();
+						}
+					}, timeout));
+					timeout += 2000;
+				})
+			});
+		})
 	});
 }
 

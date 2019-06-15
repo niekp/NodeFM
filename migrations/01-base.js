@@ -1,4 +1,4 @@
-var helper = require('./helper.js');
+const helper = require('./helper');
 
 /**
  * Add the migration table so future migrations can be automaticly run.

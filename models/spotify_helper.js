@@ -1,11 +1,11 @@
-var database = require('../db.js')
-var SpotifyWebApi = require('spotify-web-api-node');
-var config = require('config');
-var cache_helper = require('./cache_helper.js');
-var security = require('./security.js')
-var cache = cache_helper.getRedis();
-var uuid = require("uuid");
-var logger = require('./logger.js');
+const database = require('../db')
+const SpotifyWebApi = require('spotify-web-api-node');
+const config = require('config');
+const cache_helper = require('./cache_helper');
+const security = require('./security')
+const cache = cache_helper.getRedis();
+const uuid = require("uuid");
+const logger = require('./logger');
 
 cache.on('error', function (error) { });
 

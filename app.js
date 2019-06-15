@@ -1,22 +1,22 @@
 // Dependencies
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var helmet = require('helmet');
-var config = require('config');
+const createError = require('http-errors');
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const helmet = require('helmet');
+const config = require('config');
 
 // Setup express
 var app = express();
 
 // Needed for app setup
-var db = require('./db.js'),
-	user = require('./models/user.js'),
-	spotify_helper = require('./models/spotify_helper.js'),
-	logger = require('./models/logger.js');
+const db = require('./db'),
+	user = require('./models/user'),
+	spotify_helper = require('./models/spotify_helper'),
+	logger = require('./models/logger');
 
 // Routers
-var indexRouter = require('./routes/index'),
+const indexRouter = require('./routes/index'),
 	securityRouter = require('./routes/security'),
 	statsRouter = require('./routes/stats'),
 	settingsRouter = require('./routes/settings'),

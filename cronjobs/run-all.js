@@ -1,5 +1,3 @@
-var logger = require('../models/logger.js');
-
 /**
  * A script to run all cronjobs without waiting for the schedule
  * 
@@ -13,7 +11,8 @@ process.on('unhandledRejection', (reason, p) => {
 });
 
 // 2. Timeline
-require('./lastfm-scrobbles').run();
+require('./spotify-metadata').run();
+//require('./images-helperfields').run();
 
 // 3. Musicbrainz
 //require('./musicbrainz.js').run();

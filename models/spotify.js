@@ -1,8 +1,8 @@
-var SpotifyWebApi = require('spotify-web-api-node');
-var database = require('../db.js')
-var spotify_helper = require('./spotify_helper.js')
-var cache_helper = require('./cache_helper.js');
-var logger = require('./logger.js');
+const SpotifyWebApi = require('spotify-web-api-node');
+const database = require('../db')
+const spotify_helper = require('./spotify_helper')
+const cache_helper = require('./cache_helper');
+const logger = require('./logger');
 
 /**
  * Get the spotify API with token
@@ -23,7 +23,11 @@ function getSpotifyApi(username) {
 }
 
 function encodeSpotify(str) {
-	str = str.replace(/'/g, '');
+	try {
+		str = str.replace(/'/g, '');		
+	} catch (ex) {
+		logger.log(logger.WARN, `Spotify search string could not be encoded: ${str}, type: ${typeof(str)}`);
+	}
 
 	return str;
 }
@@ -141,7 +145,7 @@ var self = module.exports = {
 		});
 	},
 
-	getAlbum: async function(api, id) {
+	getAlbum: async function (api, id) {
 		let cache_key = 'spotify_album_' + id;
 		let cache_expire = cache_helper.getExpiresSeconds('month');
 		let data;
@@ -158,7 +162,28 @@ var self = module.exports = {
 				throw ex;
 			}
 		}
-		
+
+		return data;
+	},
+
+	getArtist: async function (api, id) {
+		let cache_key = 'spotify_artist_' + id;
+		let cache_expire = cache_helper.getExpiresSeconds('month');
+		let data;
+
+		try {
+			data = await cache_helper.get(cache_key);
+		} catch (ex) { }
+
+		if (!data) {
+			try {
+				data = await api.getArtist(id);
+				cache_helper.save(cache_key, data, cache_expire, 'json');
+			} catch (ex) {
+				throw ex;
+			}
+		}
+
 		return data;
 	},
 

@@ -1,6 +1,6 @@
-var fs = require('graceful-fs');
+const fs = require('graceful-fs');
 const config = require('config');
-var database = require('../db.js');
+const database = require('../db');
 const sqlite3 = require('sqlite3');
 
 let database_folder = config.get('database_folder');

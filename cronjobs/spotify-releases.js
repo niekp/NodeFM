@@ -1,9 +1,9 @@
-var database = require('../db.js')
-const spotify = require('../models/spotify.js');
-const spotify_helper = require('../models/spotify_helper.js');
-var cache_helper = require('../models/cache_helper.js');
-var helper = require('./helper.js');
-var logger = require('../models/logger.js');
+const database = require('../db');
+const spotify = require('../models/spotify');
+const spotify_helper = require('../models/spotify_helper');
+const cache_helper = require('../models/cache_helper');
+const helper = require('./helper');
+const logger = require('../models/logger');
 
 /**
  * Get the new releases from the spotify API
@@ -139,18 +139,17 @@ module.exports = {
             for (username of users) {
                 await helper.connect(username);
 
-                spotify_helper.getValue('username', username).then(function (spotify_username) {
-                    if (spotify_username && spotify_username.length) {
-                        logger.log(logger.INFO, `Spotify - ${username} - get newest releases`);
+                let spotify_username = await spotify_helper.getValue('username', username);
+                if (spotify_username && spotify_username.length) {
+                    logger.log(logger.INFO, `Spotify - ${username} - get newest releases`);
 
-                        // Download and save the new releases
-                        updateNewReleases(username);
-                        // Remove old non-matches
-                        cleanupReleases(username);
-                        // A bit arbitrary, but wait for a bit before processing the releases
-                        setTimeout(saveMatches, 30000, username);
-                    }
-                });
+                    // Download and save the new releases
+                    updateNewReleases(username);
+                    // Remove old non-matches
+                    cleanupReleases(username);
+                    // A bit arbitrary, but wait for a bit before processing the releases
+                    setTimeout(saveMatches, 30000, username);
+                }
             }
         } catch (ex) {
             logger.log(logger.ERROR, `spotify releases`, ex);

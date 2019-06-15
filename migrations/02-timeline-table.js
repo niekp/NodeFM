@@ -1,4 +1,4 @@
-var helper = require('./helper.js');
+const helper = require('./helper');
 
 /**
  * Add a ArtistTimeline table to keep caluclated data.

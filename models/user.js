@@ -1,7 +1,7 @@
 const config = require('config');
-const db = require('../db.js');
-var fs = require('graceful-fs')
-var logger = require('./logger.js');
+const db = require('../db');
+const fs = require('graceful-fs')
+const logger = require('./logger');
 
 let database_folder = config.get('database_folder');
 

@@ -47,30 +47,36 @@ let cron_lastfm_metadata = require('../cronjobs/lastfm-metadata.js');
 let cron_spotify_metadata = require('../cronjobs/spotify-metadata.js');
 let cron_image_helperfields = require('../cronjobs/images-helperfields.js');
 
-cron.schedule('* * * * *', () => {
-	lastfm_scrobbles.run();
-});
+if (process.env.NODE_ENV === 'production') {
 
-cron.schedule('0 */3 * * *', () => {
-  cron_timeline.run();
-});
+	cron.schedule('* * * * *', () => {
+		lastfm_scrobbles.run();
+	});
 
-cron.schedule('0 7 * * *', () => {
-	cron_spotify_releases.run();
-});
+	cron.schedule('0 */3 * * *', () => {
+	cron_timeline.run();
+	});
 
-cron.schedule('0 3 * * *', () => {
-	// Very heavy job at the moment.
-	cron_image_helperfields.run();
-});
+	cron.schedule('0 */6 * * *', () => {
+		cron_spotify_releases.run();
+	});
 
-cron.schedule('*/15 * * * *', () => {
-	cron_lastfm_metadata.run();
+	cron.schedule('0 3 * * *', () => {
+		// Very heavy job at the moment.
+		cron_image_helperfields.run();
+	});
 
-	if (!cron_spotify_metadata.isRunning()) {
-		cron_spotify_metadata.run();
-	}
-});
+	cron.schedule('*/15 * * * *', () => {
+		cron_lastfm_metadata.run();
+
+		if (!cron_spotify_metadata.isRunning()) {
+			cron_spotify_metadata.run();
+		}
+	});
+
+} else {
+	logger.log(logger.INFO, `Cronjobs are disabled. Run in NODE_ENV 'production' to enable them.`);
+}
 
 /**
  * Normalize a port into a number, string, or false.
