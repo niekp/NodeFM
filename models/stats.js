@@ -419,10 +419,11 @@ module.exports = {
 	getTimeline: function(req, res, format = '%Y-%m') {
 		return handleStatsRequest(
 			req, res, 
-			'SELECT period, artist, scrobbles', 
-			`FROM ArtistTimeline WHERE format = '${format}'`,
+			'SELECT period, artist, scrobbles, rank', 
+			`FROM ArtistTimeline WHERE format = '${format}'
+			AND rank <= 5`,
 			'',
-			'ORDER BY period DESC',
+			'ORDER BY period DESC, rank',
 			`SELECT COUNT(*) AS count FROM ArtistTimeline WHERE format = '${format}'`, null, 
 			'ORDER BY scrobbles DESC'
 		);

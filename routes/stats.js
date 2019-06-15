@@ -364,7 +364,7 @@ router.get('/timeline-week',
 	function (req, res, next) {cache_helper.setCacheName(req, res, next);}, 
 	cache.route(cache_helper.getExpires('half-day')), 
 	function (req, res, next) {
-		pagination.setLimit(53);
+		pagination.setLimit(209);
 
 		stats.getTimeline(req, res, '%Y-%W').then(function (data) {
 			res.render('stats/timeline', { 
