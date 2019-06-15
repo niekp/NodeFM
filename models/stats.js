@@ -225,7 +225,7 @@ module.exports = {
 			INNER JOIN Album as B on B.id = S.album_id`,
 			'GROUP by A.name, B.name',
 			'ORDER by count(*) desc',
-			'SELECT COUNT(DISTINCT(album_id)) AS count FROM scrobble'			
+			'SELECT COUNT(DISTINCT(album_id)) AS count FROM scrobble'
 		);
 	},
 

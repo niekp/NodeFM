@@ -64,10 +64,6 @@ module.exports = {
      * @returns {string} cache-key
      */
     getCacheName: function(req, res) {
-        if (req && req.app.get('env') === 'development') {
-            return 'dev:' + new Date().getTime();
-        }
-
         return res.locals.username + '/' + req.url + '/' + (req.xhr ? 'ajax/' : '') + JSON.stringify(req.params) + '/' + JSON.stringify(req.query);
     },
 
@@ -78,7 +74,12 @@ module.exports = {
      * @param {next} next 
      */
     setCacheName: function (req, res, next) {
-        res.express_redis_cache_name = this.getCacheName(req, res)
+        res.express_redis_cache_name = this.getCacheName(req, res);
+        
+        if (req && req.app.get('env') === 'development') {
+            res.use_express_redis_cache = false;
+        }
+
         if (next) {
             next();
         }

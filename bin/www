@@ -75,7 +75,7 @@ if (process.env.NODE_ENV === 'production') {
 	});
 
 } else {
-	logger.log(logger.INFO, `Cronjobs are disabled. Run in NODE_ENV 'production' to enable them.`);
+	logger.log(logger.INFO, `Cronjobs are disabled. Run in NODE_ENV 'production' if you want enable them.`);
 }
 
 /**

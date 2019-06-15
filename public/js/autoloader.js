@@ -41,8 +41,8 @@
             $("[data-id='autoloader']").text('').hide();
             no_ajax = true;
         }).then(function (json) {
+            $("[data-id='autoloader']").text('').hide();
             if (no_ajax || 'blocked' in json) {
-                $("[data-id='autoloader']").text('').hide();
                 no_ajax = true;
                 return;
             }

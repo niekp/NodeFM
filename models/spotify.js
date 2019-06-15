@@ -117,8 +117,6 @@ var self = module.exports = {
 						reject(ex);
 					})
 				} else if (type == 'album') {
-					console.log('search query', getSearchQuery(artist, album))
-
 					api.searchAlbums(getSearchQuery(artist, album), { limit: 1 }).then(function (results) {
 						if ((albums = results.body.albums.items) && albums.length > 0) {
 							cache_helper.save(cache_key, albums[0], cache_expire, 'json');
@@ -300,7 +298,7 @@ var self = module.exports = {
 	getReleases: function(req, res) {
 		return new Promise((resolve, reject) => {
 			let extra_query = '';
-			if (req.cookies['new-releases-album-only'] == '1') {
+			if (req.cookies['filter']['album-only'] == '1') {
 				extra_query = " AND type = 'album'";
 			}
 

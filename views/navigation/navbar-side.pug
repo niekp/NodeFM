@@ -6,6 +6,8 @@ if loggedIn
     ul.nav.nav-sidebar
         li(class=(active === "recent" ? "active" : undefined))
             a(href='/stats') Recent tracks 
+        li(class=(active.substr(0, 8) === 'library-' ? "active" : undefined))
+            a(href='/library/artists') Library
         li(class=(active.substr(0, 4) === 'top-' ? "active" : undefined))
             a(href='/stats/artists') Top scrobbles
         li(class=(active.indexOf('discoveries') >= 0 ? "active" : undefined))
