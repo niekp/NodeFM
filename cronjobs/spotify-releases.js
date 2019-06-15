@@ -139,18 +139,17 @@ module.exports = {
             for (username of users) {
                 await helper.connect(username);
 
-                spotify_helper.getValue('username', username).then(function (spotify_username) {
-                    if (spotify_username && spotify_username.length) {
-                        logger.log(logger.INFO, `Spotify - ${username} - get newest releases`);
+                let spotify_username = await spotify_helper.getValue('username', username);
+                if (spotify_username && spotify_username.length) {
+                    logger.log(logger.INFO, `Spotify - ${username} - get newest releases`);
 
-                        // Download and save the new releases
-                        updateNewReleases(username);
-                        // Remove old non-matches
-                        cleanupReleases(username);
-                        // A bit arbitrary, but wait for a bit before processing the releases
-                        setTimeout(saveMatches, 30000, username);
-                    }
-                });
+                    // Download and save the new releases
+                    updateNewReleases(username);
+                    // Remove old non-matches
+                    cleanupReleases(username);
+                    // A bit arbitrary, but wait for a bit before processing the releases
+                    setTimeout(saveMatches, 30000, username);
+                }
             }
         } catch (ex) {
             logger.log(logger.ERROR, `spotify releases`, ex);
