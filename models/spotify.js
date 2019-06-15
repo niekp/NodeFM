@@ -141,7 +141,7 @@ var self = module.exports = {
 		});
 	},
 
-	getAlbum: async function(api, id) {
+	getAlbum: async function (api, id) {
 		let cache_key = 'spotify_album_' + id;
 		let cache_expire = cache_helper.getExpiresSeconds('month');
 		let data;
@@ -158,7 +158,28 @@ var self = module.exports = {
 				throw ex;
 			}
 		}
-		
+
+		return data;
+	},
+
+	getArtist: async function (api, id) {
+		let cache_key = 'spotify_artist_' + id;
+		let cache_expire = cache_helper.getExpiresSeconds('month');
+		let data;
+
+		try {
+			data = await cache_helper.get(cache_key);
+		} catch (ex) { }
+
+		if (!data) {
+			try {
+				data = await api.getArtist(id);
+				cache_helper.save(cache_key, data, cache_expire, 'json');
+			} catch (ex) {
+				throw ex;
+			}
+		}
+
 		return data;
 	},
 

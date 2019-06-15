@@ -55,7 +55,7 @@ cron.schedule('0 */3 * * *', () => {
   cron_timeline.run();
 });
 
-cron.schedule('0 7 * * *', () => {
+cron.schedule('0 */6 * * *', () => {
 	cron_spotify_releases.run();
 });
 
