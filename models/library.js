@@ -2,7 +2,22 @@ const { queryBuilder } = require("./queryBuilder");
 
 const stats = require('./stats');
 
+/**
+ * Does the current user have a spotify account
+ * @param {Response} res 
+ */
+function hasSpotify(res) {
+    return (res.locals.spotify_username && res.locals.spotify_username.length);
+}
+
 module.exports = {
+
+    /**
+     * Get the filter
+     */
+    getFilter: function(req) {
+        return (req.cookies['filter'] ? JSON.parse(req.cookies['filter']) : {});
+    },
 
     /**
      * Get a filtered list of artists
@@ -11,9 +26,9 @@ module.exports = {
      */
     getArtists: function (req, res) {
         let query_builder = new queryBuilder();
-        let filters = (req.cookies['filter'] ? JSON.parse(req.cookies['filter']) : {});
+        let filters = this.getFilter(req);
 
-        if (filters['spotify-only']) {
+        if (filters['spotify-only'] && hasSpotify(res)) {
             query_builder.addWhere('A.spotify_uri IS NOT NULL');
         }
         if (filters['minimum-scrobbles'] && !isNaN(filters['minimum-scrobbles'])) {
@@ -50,9 +65,9 @@ module.exports = {
      */
     getAlbums: function (req, res) {
         let query_builder = new queryBuilder();
-        let filters = (req.cookies['filter'] ? JSON.parse(req.cookies['filter']) : {});
+        let filters = this.getFilter(req);
 
-        if (filters['spotify-only']) {
+        if (filters['spotify-only'] && hasSpotify(res)) {
             query_builder.addWhere('B.spotify_uri IS NOT NULL');
         }
         if (filters['minimum-scrobbles'] && !isNaN(filters['minimum-scrobbles'])) {
@@ -65,7 +80,7 @@ module.exports = {
         if (filters['random-order']) {
             query_builder.addOrder('RANDOM()');
         }
-
+        
         query_builder.addWhere("B.name != ''");
         query_builder.addOrder('B.name')
 

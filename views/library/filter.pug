@@ -7,7 +7,6 @@ prepend content
 	block filter
 		// library-filter::filter
 
-
 		.filter-panel
 			.panel.panel-default
 				.panel-body
@@ -19,16 +18,17 @@ prepend content
 								data-toggle='minimum-scrobbles'
 								value=((filters['minimum-scrobbles'] ? filters['minimum-scrobbles'] : '50'))
 							)
-						
-						.form-group
-							.checkbox(style='margin-left:10px; margin-right:10px;')
-							label
-								input(
-									type='checkbox'
-									data-toggle='spotify-only'
-									checked=(filters['spotify-only'] == '1' ? "checked" : undefined)
-								)
-								|  Available on spotify
+		
+						if (spotify_username && spotify_username.length)
+							.form-group
+								.checkbox(style='margin-left:10px; margin-right:10px;')
+								label
+									input(
+										type='checkbox'
+										data-toggle='spotify-only'
+										checked=(filters['spotify-only'] == '1' ? "checked" : undefined)
+									)
+									|  Available on spotify
 
 						.form-group
 							.checkbox(style='margin-left:10px; margin-right:10px;')
