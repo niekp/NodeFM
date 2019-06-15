@@ -27,10 +27,12 @@ function getLogger() {
                     filename: './logs/warn.log',
                     level: 'warn',
                     maxsize: 5242880, // 5MB
+                    maxFiles: 5,
                 }),
                 new transports.File({
                     filename: './logs/combined.log',
                     maxsize: 5242880, // 5MB
+                    maxFiles: 5,
                 }),
             ]
         });
