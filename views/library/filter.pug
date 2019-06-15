@@ -1,0 +1,41 @@
+append scripts
+	// library-filter::scripts
+	script(type='text/javascript', src='../js/filters.js')
+
+prepend content
+	// library-filter::content
+	block filter
+		// library-filter::filter
+
+
+		.filter-panel
+			.panel.panel-default
+				.panel-body
+					form.form-inline(role='form')
+						.form-group
+							label.filter-col(style='margin-right:0;', for='pref-search') Minimum scrobbles: &nbsp;
+							input#pref-search.form-control.input-sm.filter-small(
+								type='number'
+								data-toggle='minimum-scrobbles'
+								value=((filters['minimum-scrobbles'] ? filters['minimum-scrobbles'] : '50'))
+							)
+						
+						.form-group
+							.checkbox(style='margin-left:10px; margin-right:10px;')
+							label
+								input(
+									type='checkbox'
+									data-toggle='spotify-only'
+									checked=(filters['spotify-only'] == '1' ? "checked" : undefined)
+								)
+								|  Available on spotify
+
+						.form-group
+							.checkbox(style='margin-left:10px; margin-right:10px;')
+							label
+								input(
+									type='checkbox'
+									data-toggle='random-order'
+									checked=(filters['random-order'] == '1' ? "checked" : undefined)
+								)
+								|  Random order

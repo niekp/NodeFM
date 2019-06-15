@@ -1,15 +1,124 @@
+const { queryBuilder } = require("./queryBuilder");
+
 const stats = require('./stats');
 
 module.exports = {
 
-    getAlbums: function (artist, album, req, res) {
-        let where = `WHERE B.name != '' AND (A.name LIKE ? `;
-        let params = [artist]
+    /**
+     * Get a filtered list of artists
+     * @param {Request} req 
+     * @param {Response} res 
+     */
+    getArtists: function (req, res) {
+        let query_builder = new queryBuilder();
+        let filters = (req.cookies['filter'] ? JSON.parse(req.cookies['filter']) : {});
 
-        // Misuse getAlbums for the search function. If the library gets implemented more split this up
-        if (album) {
-            where += ` OR B.name LIKE ? `
-            params.push(album);
+        if (filters['spotify-only']) {
+            query_builder.addWhere('A.spotify_uri IS NOT NULL');
+        }
+        if (filters['minimum-scrobbles'] && !isNaN(filters['minimum-scrobbles'])) {
+            let amount = parseInt(filters['minimum-scrobbles']);
+            query_builder.addHaving(`scrobbles >= ${amount}`);
+        } else {
+            query_builder.addHaving(`scrobbles >= 50`);
+        }
+
+        if (filters['random-order']) {
+            query_builder.addOrder('RANDOM()');
+        }
+
+        query_builder.addOrder('a.name')
+
+        return stats.handleStatsRequest(
+            req, res,
+            'SELECT a.name as artist, count(*) as scrobbles',
+            `FROM Scrobble as S
+            INNER JOIN Artist as A on A.id = S.artist_id
+            ${query_builder.getWhere()}`,
+            `GROUP by A.name 
+            ${query_builder.getHaving()}`,
+            query_builder.getOrder(),
+            'SELECT COUNT(DISTINCT(artist_id)) AS count FROM scrobble',
+            null, 'ORDER by count(*) desc'
+        );
+    },
+
+    /**
+     * Get a filtered list of albums
+     * @param {Request} req 
+     * @param {Response} res 
+     */
+    getAlbums: function (req, res) {
+        let query_builder = new queryBuilder();
+        let filters = (req.cookies['filter'] ? JSON.parse(req.cookies['filter']) : {});
+
+        if (filters['spotify-only']) {
+            query_builder.addWhere('B.spotify_uri IS NOT NULL');
+        }
+        if (filters['minimum-scrobbles'] && !isNaN(filters['minimum-scrobbles'])) {
+            let amount = parseInt(filters['minimum-scrobbles']);
+            query_builder.addHaving(`scrobbles >= ${amount}`);
+        } else {
+            query_builder.addHaving(`scrobbles >= 50`);
+        }
+
+        if (filters['random-order']) {
+            query_builder.addOrder('RANDOM()');
+        }
+
+        query_builder.addWhere("B.name != ''");
+        query_builder.addOrder('B.name')
+
+        return stats.handleStatsRequest(
+            req, res,
+            'SELECT A.name as artist, B.name as album, count(*) as scrobbles',
+            `FROM Scrobble as S
+			INNER JOIN Artist as A on A.id = S.artist_id
+            INNER JOIN Album as B on B.id = S.album_id
+            ${query_builder.getWhere()}`,
+            `GROUP by A.name, B.name
+            ${query_builder.getHaving()}`,
+            query_builder.getOrder(),
+            'SELECT COUNT(DISTINCT(album_id)) AS count FROM scrobble',
+            null, 'ORDER by count(*) desc'
+        );
+    },
+
+    /**
+     * Get all albums of a artist (by name)
+     * @param {string} artist 
+     * @param {string} album 
+     * @param {Request} req 
+     * @param {Response} res 
+     */
+    getArtistAlbums: function (artist, album, req, res) {
+        return this.search(artist, sources = ['artists'], req, res)
+    },
+
+    /**
+     * Search for albums by artist name of album name
+     * @param {string} query 
+     * @param {array} sources 
+     * @param {Request} req 
+     * @param {Response} res 
+     */
+    search: function(query, sources = ['artists', 'albums'], req, res) {
+        if (!sources) {
+            sources = ['artists', 'albums'];
+        }
+        let where = `WHERE B.name != '' AND (`;
+        let params = []
+
+        if (sources.indexOf('artists') >= 0) {
+            where += ` A.name LIKE ? `
+            params.push(query);
+        }
+        if (sources.indexOf('albums') >= 0) {
+            if (params.length) {
+                where += ' OR';
+            }
+            where += ` B.name LIKE ? `
+            params.push(query);
         }
         where += ')'
 
@@ -35,9 +144,5 @@ module.exports = {
             count_query,
             false, null, params
         );
-    },
-
-    search: function(query, req, res) {
-        return this.getAlbums('%' + query + '%', '%' + query + '%', req, res);
     }
 }

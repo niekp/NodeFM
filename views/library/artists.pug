@@ -1,0 +1,27 @@
+extends ../masterpage/layout-list
+
+include ./filter
+
+prepend content
+	// library-artists::content
+	include ../navigation/tab-library
+
+append table-content
+	// library-artists::table-content
+
+	thead
+		tr
+			th Artist
+			th Scrobbles
+	tbody
+		each artist in artists
+			tr(data-type='artist')
+				td(data-search='artist') #{artist.artist}
+				td(class=(topResult ? "progress-td" : undefined))
+					if topResult
+						- var value = artist.scrobbles
+						- var total = topResult.scrobbles
+						include ../shared/progress
+
+					else
+						| #{artist.scrobbles}

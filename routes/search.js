@@ -17,7 +17,7 @@ router.get('/*', function (req, res, next) {
  * Search route
  */
 router.get('/', function (req, res, next) {
-	library.search(req.query['q'], req, res).then(function (data) {
+	library.search('%' + req.query['q'] + '%', null, req, res).then(function (data) {
 		data = {
 			menu: 'search',
 			q: req.query.q,

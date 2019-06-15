@@ -1,10 +1,13 @@
 extends ../masterpage/layout-list
 
 append scripts
+	// releases::scripts
 	script(type='text/javascript', src='../js/filters.js')
 
 prepend content
+	// releases::content
 	block filter
+		// releases::filter
 		label 
 			input(
 				type='checkbox'
