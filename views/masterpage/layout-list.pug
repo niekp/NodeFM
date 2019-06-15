@@ -10,8 +10,10 @@ append scripts-head
 append content
 	// layout-list::content
 
-	if title
-		h1 #{title}
+	//-
+		Don't render the title, maybe use it in the redesign.
+		if title
+			h3 #{title}
 
 	block before-table
 		//layout-list::before-table
