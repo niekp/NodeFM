@@ -80,7 +80,6 @@
 				responsive: true,
 				title: {
 					display: false,
-					text: 'Chart.js Line Chart'
 				},
 				tooltips: {
 					mode: 'index',

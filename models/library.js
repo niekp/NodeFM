@@ -1,6 +1,7 @@
 const { queryBuilder } = require("./queryBuilder");
 
 const stats = require('./stats');
+const database = require('../db');
 
 /**
  * Does the current user have a spotify account
@@ -159,5 +160,77 @@ module.exports = {
             count_query,
             false, null, params
         );
-    }
+    },
+
+    /**
+     * Get the amount of scrobbles per month of an artist
+     * @param {string} artist 
+     * @param {Request} req 
+     * @param {Response} res 
+     */
+    getArtistChart: async function(artist, req, res) {
+        data = await database.executeQuery(`
+            SELECT STRFTIME('%Y-%m', DATETIME(S.utc, 'unixepoch')) AS label, COUNT(*) AS value FROM Scrobble as S
+            INNER JOIN Artist as A
+            ON A.id = S.artist_id
+            WHERE A.name LIKE ?
+            GROUP BY STRFTIME('%Y-%m', DATETIME(S.utc, 'unixepoch'))
+            ORDER BY STRFTIME('%Y-%m', DATETIME(S.utc, 'unixepoch'));
+        `, res.locals.username, [artist]);
+
+        if (!data.length) {
+            return data;
+        }
+
+        // The data only has the months with scrobbles. Fill out the array with empty months
+        let start = data[0].label;
+        let end = data[data.length-1].label;
+        let year_start = parseInt(start.split('-')[0]);
+        let year_end = parseInt(end.split('-')[0]);
+
+        // Flatten the data for easier checking
+        let new_data = [];
+        data.forEach(function (row) {
+            new_data[row.label] = row.value;
+        });
+        data = new_data;
+
+        for (year = year_start; year <= year_end; year++) {
+            let month_start = 1;
+            let month_end = 12;
+            if (year == year_start)
+                month_start = parseInt(start.split('-')[1]);
+            if (year == year_end)
+                month_end = parseInt(end.split('-')[1]);
+
+            for (month = month_start; month <= month_end; month++) {
+                let period = year + '-' + month.toString().padStart(2, '0');
+                if (!data[period]) {
+                    data[period] = 0;
+                }
+            }
+        }
+
+        // Unflatten the data back.. bit of duplicate code but watcha gonna do
+        new_data = [];
+
+        for (year = year_start; year <= year_end; year++) {
+            let month_start = 1;
+            let month_end = 12;
+            if (year == year_start)
+                month_start = parseInt(start.split('-')[1]);
+            if (year == year_end)
+                month_end = parseInt(end.split('-')[1]);
+
+            for (month = month_start; month <= month_end; month++) {
+                let period = year + '-' + month.toString().padStart(2, '0');
+                new_data.push({label: period, value: data[period]});
+            }
+        }
+
+        data = new_data;
+
+        return data;
+    },
+
 }
