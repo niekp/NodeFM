@@ -175,8 +175,12 @@ async function getArtistSpotifyId(api, artist) {
 			return search_result.id;
 		}
 	} catch (ex) {
-		logger.log(logger.ERROR, `Error getting artist spotify ID: ${artist.name}`, ex);
-		throw 'Error getting artist spotify ID';
+		if (msg.indexOf('No results') >= 0 || msg.indexOf('Bad Gateway') >= 0) {
+			return;
+		} else {
+			logger.log(logger.ERROR, `Error getting artist spotify ID: ${artist.name}`, ex);
+			throw 'Error getting artist spotify ID';	
+		}
 	}
 
 	return;
