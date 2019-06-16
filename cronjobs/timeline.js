@@ -61,7 +61,7 @@ function getTopArtists(period, username, format) {
 			WHERE STRFTIME('${format}', DATETIME(S.utc, 'unixepoch')) = '${period}'
 			GROUP BY A.name
 			ORDER BY count DESC
-			LIMIT 0, 10`,
+			LIMIT 0, 50`,
 			username
 		).then(function (data) {
 			if (data.length) {

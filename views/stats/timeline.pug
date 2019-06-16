@@ -4,11 +4,11 @@ prepend content
 	include ../navigation/tab-timeline
 
 append scripts
-	script(src='/vendor/js/chart.min.js', type='text/javascript')
 	script(src='/js/timeline.js', type='text/javascript')
 
 append before-table
-	canvas#chart
+	- var source = '/stats/chart/timeline?format=' + format
+	canvas#timeline-chart(data-source=source)
 
 append table-content
 	// timeline::table-content

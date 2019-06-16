@@ -1,6 +1,9 @@
 (function ($) {
 	$(document).ready(function () {
-		drawChart();
+		let url = $('#timeline-chart[data-source]').data('source');
+		$.get(url, function (data) {
+			drawChart(data);
+		});
 	});
 
 	var dynamicColors = function () {
@@ -10,17 +13,15 @@
 		return "rgb(" + r + "," + g + "," + b + ")";
 	};
 
-	function drawChart() {
-
+	function drawChart(json) {
 		let labels = [];
 		let data = [];
 
 		// Build array of the table data
-		$("table tbody tr").each(function () {
-			let $tr = $(this);
-			let period = $tr.find("[data-id='period']").html();
-			let artist = $tr.find("[data-search='artist']").html();
-			let scrobbles = $tr.find("[data-scrobbles]").data('scrobbles');
+		json.forEach(function (row) {
+			let period = row.period;
+			let artist = row.artist;
+			let scrobbles = row.scrobbles;
 
 			if (labels.indexOf(period) < 0)
 				labels.push(period);
@@ -63,9 +64,8 @@
 			});
 		}
 		
-		var ctx = document.getElementById('chart').getContext('2d');
-		var chart = new Chart(ctx, {
-			// The type of chart we want to create
+		var ctx = document.getElementById('timeline-chart').getContext('2d');
+		new Chart(ctx, {
 			type: 'line',
 
 			data: {
@@ -83,7 +83,16 @@
 				},
 				tooltips: {
 					mode: 'index',
+					position: 'nearest',
 					intersect: false,
+					callbacks: {
+						label: function (tooltipItem, data) {
+							const tooltip = data.datasets[tooltipItem.datasetIndex];
+							const value = tooltip.data[tooltipItem.index];
+							return value === 0 ? null : tooltip.label + ': ' + value;
+						}
+					},
+					itemSort: (a, b, data) => b.yLabel - a.yLabel
 				},
 				hover: {
 					mode: 'nearest',
@@ -104,7 +113,12 @@
 							labelString: 'Scrobbles'
 						}
 					}]
-				}
+				},
+				elements: {
+					point: {
+						radius: 0
+					}
+				},
 			}
 
 		});

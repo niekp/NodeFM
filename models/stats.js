@@ -421,12 +421,35 @@ module.exports = {
 			req, res, 
 			'SELECT period, artist, scrobbles, rank', 
 			`FROM ArtistTimeline WHERE format = '${format}'
-			AND rank <= 5`,
+			AND rank = 1`,
 			'',
 			'ORDER BY period DESC, rank',
 			`SELECT COUNT(*) AS count FROM ArtistTimeline WHERE format = '${format}'`, null, 
 			'ORDER BY scrobbles DESC'
 		);
+	},
+
+	getTimelineChart: function (req, res, format = '%Y-%m') {
+		return new Promise((resolve, reject) => {
+			database.executeQuery(
+				`SELECT period, artist, scrobbles
+				FROM ArtistTimeline WHERE format = '${format}'
+				AND Artist IN (
+					SELECT DISTINCT(artist)
+					FROM ArtistTimeline
+					WHERE format = '${format}'
+					AND rank <= 5
+				)
+				AND (scrobbles > 15 or rank = 1)
+				AND SUBSTR(period, 0, 5) in ('${new Date().getFullYear()-1}', '${new Date().getFullYear()}')
+				ORDER BY period DESC, rank`, res.locals.username
+			).then(function(result) {
+				resolve(result);
+			}).catch(function(ex) {
+				logger.log(logger.ERROR, `Error getting timeline chart`, ex);
+				reject(ex);
+			})
+		})
 	},
 
 }
