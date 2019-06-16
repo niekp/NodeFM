@@ -38,7 +38,7 @@
 		for (artist in data) {
 			for (period of labels) {
 				if (!data[artist][period]) {
-					data[artist][period] = null;
+					data[artist][period] = 0;
 				}
 			}
 
