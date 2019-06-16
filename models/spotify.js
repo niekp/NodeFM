@@ -85,6 +85,12 @@ function getNowPlaying(now_playing, username) {
 }
 
 var self = module.exports = {
+	/**
+	 * Get the filter
+	 */
+	getFilter: function (req) {
+		return (req.cookies['filter'] ? JSON.parse(req.cookies['filter']) : {});
+	},
 
 	/**
 	 * Get the first search result
@@ -298,7 +304,8 @@ var self = module.exports = {
 	getReleases: function(req, res) {
 		return new Promise((resolve, reject) => {
 			let extra_query = '';
-			if (req.cookies['filter'] && req.cookies['filter']['album-only'] == '1') {
+			console.log(this.getFilter(req)['album-only'])
+			if (this.getFilter(req)['album-only'] == true) {
 				extra_query = " AND type = 'album'";
 			}
 
