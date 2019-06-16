@@ -298,7 +298,7 @@ var self = module.exports = {
 	getReleases: function(req, res) {
 		return new Promise((resolve, reject) => {
 			let extra_query = '';
-			if (req.cookies['filter']['album-only'] == '1') {
+			if (req.cookies['filter'] && req.cookies['filter']['album-only'] == '1') {
 				extra_query = " AND type = 'album'";
 			}
 

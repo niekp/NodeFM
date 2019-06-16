@@ -68,7 +68,7 @@ router.get('/authenticate/unlink', function (req, res, next) {
 			 menu: 'releases',
 			 title: 'New releases',
 			 releases: releases,
-			 album_only: req.cookies['filter']['album-only']
+			 album_only: (req.cookies['filter'] ? req.cookies['filter']['album-only'] : false)
 		 });
 	 });
  });
