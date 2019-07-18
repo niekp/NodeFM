@@ -4,3 +4,4 @@ config/production.json
 .DS_Store
 db/*
 logs/*
+ideas/*
