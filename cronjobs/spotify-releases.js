@@ -34,7 +34,11 @@ function getReleasePage(api, limit, offset) {
  */
 function saveReleases(items, username) {
     items.forEach(function(release) {
-        database.executeQuery(`SELECT id FROM Releases WHERE uri = ?`, username, [release.uri]).then(function (results) {
+        database.executeQuery(`SELECT id FROM Releases WHERE uri = ? OR (artist = ? AND album = ?)`, username, [
+                release.uri, 
+                release.artists[0].name, 
+                release.name
+            ]).then(function (results) {
             if (results.length) {
                 database.executeQuery(`UPDATE Releases SET artist = ?, album = ?, image = ?, type = ?, release_date= ? WHERE id = ?`, username, [
                     release.artists[0].name,
