@@ -33,12 +33,16 @@ function getReleasePage(api, limit, offset) {
  * @param {string} username 
  */
 async function saveReleases(items, username) {
-    items.forEach(function(release) {
-        database.executeQuery(`SELECT id FROM Releases WHERE uri = ? OR (artist = ? AND album = ?)`, username, [
+    for (let i = 0; i < items.length; i++) {
+        let release = items[i];
+    
+        try {
+            var results = await database.executeQuery(`SELECT id FROM Releases WHERE uri = ? OR (artist = ? AND album = ?)`, username, [
                 release.uri, 
                 release.artists[0].name, 
                 release.name
-            ]).then(function (results) {
+            ]);
+
             if (results.length) {
                 await database.executeQuery(`UPDATE Releases SET artist = ?, album = ?, image = ?, type = ?, release_date= ? WHERE id = ?`, username, [
                     release.artists[0].name,
@@ -47,9 +51,7 @@ async function saveReleases(items, username) {
                     release.album_type,
                     release.release_date,
                     results[0].id
-                ]).catch(function(ex) {
-                    logger.log(logger.ERROR, `Error updating releases`, ex);
-                })
+                ]);
             } else {
                 await database.executeQuery(`INSERT INTO Releases (artist, album, image, type, uri, release_date) VALUES (?, ?, ?, ?, ?, ?)`, username, [
                     release.artists[0].name,
@@ -58,14 +60,13 @@ async function saveReleases(items, username) {
                     release.album_type,
                     release.uri,
                     release.release_date,
-                ]).catch(function (ex) {
-                    logger.log(logger.ERROR, `Error inserting releases`, ex);
-                })
+                ]);
             }
-        }).catch(function (ex) {
+        }
+        catch(ex) {
             logger.log(logger.ERROR, `Error looking up releases`, ex);
-        })
-    });
+        }
+    }
 }
 
 /**
@@ -75,54 +76,49 @@ async function saveReleases(items, username) {
 async function updateNewReleases(username) {
     let limit = 20;
     let offset = 0;
-    spotify.getApi(username).then(function (api) {
-        
-        getReleasePage(api, limit, offset).then(function (releases) {
-            total = releases.albums.total;
-            pages = Math.ceil(total / limit);
+    var api = await spotify.getApi(username);
+    var releases = await getReleasePage(api, limit, offset);
 
-            await saveReleases(releases.albums.items, username);
-            for (i = 2; i <= pages; i++) {
-                offset += limit;
+    total = releases.albums.total;
+    pages = Math.ceil(total / limit);
 
-                getReleasePage(api, limit, offset).then(function (releases) {
-                    await saveReleases(releases.albums.items, username);
-                });
-            }
-        });
+    await saveReleases(releases.albums.items, username);
 
-    });
+    for (i = 2; i <= pages; i++) {
+        offset += limit;
+
+        releases = await getReleasePage(api, limit, offset);
+        await saveReleases(releases.albums.items, username);
+    }
 }
 
 /**
  * Match the releases against the last.fm data
  * @param {string} username 
  */
-function saveMatches(username) {
-    // Get all unmatched releases and the releases of the past 30 days
-    database.executeQuery(`SELECT * FROM Releases WHERE release_date >= date('now', '-30 day') OR match IS NULL`, username)
-    .then(function(releases) {
-        releases.forEach(release => {
+async function saveMatches(username) {
+    try {
+        // Get all unmatched releases and the releases of the past 30 days
+        var releases = await database.executeQuery(`SELECT * FROM Releases WHERE release_date >= date('now', '-30 day') OR match IS NULL`, username);
+        
+        for (let i = 0; i < releases.length; i++) {
+            let release = releases[i];
 
             // Use like to select case insensitive
-            database.executeQuery(`select * from artist where name LIKE ?  AND id in (
+            let result = await database.executeQuery(`select * from artist where name LIKE ? AND id in (
                                 select artist_id from Scrobble
                                 group by artist_id
                                 HAVING count(*) > 50
-                                )`, username, [release.artist]).then(function (result) {
-                database.executeQuery(`UPDATE Releases SET Match = ? WHERE id = ?`, username, [
-                    (result.length ? 1 : 0),
-                    release.id
-                ]).catch(function (ex) {
-                    logger.log(logger.ERROR, `Error saving match`, ex);
-                })
-            }).catch(function (ex) {
-                logger.log(logger.ERROR, `Error trying to match`, ex);
-            })
-        });
-    }).catch(function (ex) {
+                                )`, username, [release.artist])
+                                
+            await database.executeQuery(`UPDATE Releases SET Match = ? WHERE id = ?`, username, [
+                (result.length ? 1 : 0),
+                release.id
+            ]);
+        }
+    } catch (ex) {
         logger.log(logger.ERROR, `Error getting releases to match`, ex);
-    })
+    }
 }
 
 /**

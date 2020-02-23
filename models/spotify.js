@@ -304,7 +304,6 @@ var self = module.exports = {
 	getReleases: function(req, res) {
 		return new Promise((resolve, reject) => {
 			let extra_query = '';
-			console.log(this.getFilter(req)['album-only'])
 			if (this.getFilter(req)['album-only'] == true) {
 				extra_query = " AND type = 'album'";
 			}
