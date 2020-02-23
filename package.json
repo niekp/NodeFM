@@ -4,7 +4,7 @@
   "description": "",
   "main": "main.js",
   "dependencies": {
-    "config": "^3.2.4",
+    "config": "^3.2.6",
     "cookie-parser": "~1.4.3",
     "dateformat": "^3.0.3",
     "debug": "~2.6.9",
@@ -22,7 +22,7 @@
     "pug": "^2.0.4",
     "shelljs": "^0.8.3",
     "spotify-web-api-node": "^4.0.0",
-    "sqlite3": "^4.1.0",
+    "sqlite3": "^4.1.1",
     "winston": "^3.2.1"
   },
   "devDependencies": {},
