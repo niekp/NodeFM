@@ -32,7 +32,7 @@ function getReleasePage(api, limit, offset) {
  * @param {JSON} items The API result with the albums
  * @param {string} username 
  */
-function saveReleases(items, username) {
+async function saveReleases(items, username) {
     items.forEach(function(release) {
         database.executeQuery(`SELECT id FROM Releases WHERE uri = ? OR (artist = ? AND album = ?)`, username, [
                 release.uri, 
@@ -72,7 +72,7 @@ function saveReleases(items, username) {
  * Call the get and save release functions for all pages
  * @param {string} username 
  */
-function updateNewReleases(username) {
+async function updateNewReleases(username) {
     let limit = 20;
     let offset = 0;
     spotify.getApi(username).then(function (api) {
@@ -81,12 +81,12 @@ function updateNewReleases(username) {
             total = releases.albums.total;
             pages = Math.ceil(total / limit);
 
-            saveReleases(releases.albums.items, username);
+            await saveReleases(releases.albums.items, username);
             for (i = 2; i <= pages; i++) {
                 offset += limit;
 
                 getReleasePage(api, limit, offset).then(function (releases) {
-                    saveReleases(releases.albums.items, username);
+                    await saveReleases(releases.albums.items, username);
                 });
             }
         });
@@ -148,7 +148,7 @@ module.exports = {
                     logger.log(logger.INFO, `Spotify - ${username} - get newest releases`);
 
                     // Download and save the new releases
-                    updateNewReleases(username);
+                    await updateNewReleases(username);
                     // Remove old non-matches
                     cleanupReleases(username);
                     // A bit arbitrary, but wait for a bit before processing the releases
