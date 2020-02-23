@@ -40,7 +40,7 @@ function saveReleases(items, username) {
                 release.name
             ]).then(function (results) {
             if (results.length) {
-                database.executeQuery(`UPDATE Releases SET artist = ?, album = ?, image = ?, type = ?, release_date= ? WHERE id = ?`, username, [
+                await database.executeQuery(`UPDATE Releases SET artist = ?, album = ?, image = ?, type = ?, release_date= ? WHERE id = ?`, username, [
                     release.artists[0].name,
                     release.name,
                     (release.images[1] ? release.images[1].url : ''),
@@ -51,7 +51,7 @@ function saveReleases(items, username) {
                     logger.log(logger.ERROR, `Error updating releases`, ex);
                 })
             } else {
-                database.executeQuery(`INSERT INTO Releases (artist, album, image, type, uri, release_date) VALUES (?, ?, ?, ?, ?, ?)`, username, [
+                await database.executeQuery(`INSERT INTO Releases (artist, album, image, type, uri, release_date) VALUES (?, ?, ?, ?, ?, ?)`, username, [
                     release.artists[0].name,
                     release.name,
                     (release.images[1] ? release.images[1].url : ''),

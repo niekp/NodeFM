@@ -309,7 +309,7 @@ var self = module.exports = {
 				extra_query = " AND type = 'album'";
 			}
 
-			database.executeQuery(`SELECT * FROM Releases WHERE match = 1 ${extra_query} ORDER BY release_date DESC`, res.locals.username).then(function (releases) {
+			database.executeQuery(`SELECT artist, album, type, release_date FROM Releases WHERE match = 1 ${extra_query} GROUP BY artist, album, type, release_date ORDER BY release_date DESC`, res.locals.username).then(function (releases) {
 				resolve(releases);
 			}).catch(function(ex) {
 				reject(ex);
