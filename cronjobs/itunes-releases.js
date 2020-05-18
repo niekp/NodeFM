@@ -1,27 +1,29 @@
 const database = require('../db');
-const spotify = require('../models/spotify');
-const spotify_helper = require('../models/spotify_helper');
 const cache_helper = require('../models/cache_helper');
 const helper = require('./helper');
 const logger = require('../models/logger');
+const request = require("request");
 
 /**
- * Get the new releases from the spotify API
- * @param {SpotifyWebApi} api
- * @param {int} limit 
- * @param {int} offset 
+ * Get the new releases from the itunes API
+ * @param {string} country 
  */
-function getReleasePage(api, limit, offset) {
+function getReleasePage(country) {
     return new Promise((resolve, reject) => {
-        let cache_key = 'new_releases_' + limit + '_' + offset;
+        let cache_key = 'new_releases_' + country;
         let cache_expire = cache_helper.getExpiresSeconds('hour');
 
         cache_helper.get(cache_key).then(function (result) {
             resolve(result);
         }).catch(function() {
-            api.getNewReleases({ limit: limit, offset: offset }).then(function (releases) {
-                resolve(releases.body);
-                cache_helper.save(cache_key, releases.body, cache_expire, 'json');
+            if (!country) {
+                country = 'us';
+            }
+
+            request.get('https://rss.itunes.apple.com/api/v1/' + country + '/apple-music/new-releases/all/100/explicit.json', (error, response, body) => {
+                let json = JSON.parse(body);
+                cache_helper.save(cache_key, json.feed.results, cache_expire, 'json');
+                resolve(json.feed.results);
             });
         });
     });
@@ -37,29 +39,29 @@ async function saveReleases(items, username) {
         let release = items[i];
     
         try {
-            var results = await database.executeQuery(`SELECT id FROM Releases WHERE uri = ? OR (artist = ? AND album = ?)`, username, [
-                release.uri, 
-                release.artists[0].name, 
+            var results = await database.executeQuery(`SELECT id FROM Releases WHERE uri = ? OR (artist LIKE ? AND album LIKE ?)`, username, [
+                release.id, 
+                release.artistName, 
                 release.name
             ]);
 
             if (results.length) {
                 await database.executeQuery(`UPDATE Releases SET artist = ?, album = ?, image = ?, type = ?, release_date= ? WHERE id = ?`, username, [
-                    release.artists[0].name,
+                    release.artistName,
                     release.name,
-                    (release.images[1] ? release.images[1].url : ''),
-                    release.album_type,
-                    release.release_date,
+                    release.artworkUrl100,
+                    release.kind,
+                    release.releaseDate,
                     results[0].id
                 ]);
             } else {
-                await database.executeQuery(`INSERT INTO Releases (artist, album, image, type, uri, release_date) VALUES (?, ?, ?, ?, ?, ?)`, username, [
-                    release.artists[0].name,
+                await database.executeQuery(`INSERT INTO Releases (artist, album, image, type, release_date, uri) VALUES (?, ?, ?, ?, ?, ?)`, username, [
+                    release.artistName,
                     release.name,
-                    (release.images[1] ? release.images[1].url : ''),
-                    release.album_type,
-                    release.uri,
-                    release.release_date,
+                    release.artworkUrl100,
+                    release.kind,
+                    release.releaseDate,
+                    release.id
                 ]);
             }
         }
@@ -74,22 +76,11 @@ async function saveReleases(items, username) {
  * @param {string} username 
  */
 async function updateNewReleases(username) {
-    let limit = 20;
-    let offset = 0;
-    var api = await spotify.getApi(username);
-    var releases = await getReleasePage(api, limit, offset);
+    var releases = await getReleasePage('nl');
+    await saveReleases(releases, username);
 
-    total = releases.albums.total;
-    pages = Math.ceil(total / limit);
-
-    await saveReleases(releases.albums.items, username);
-
-    for (i = 2; i <= pages; i++) {
-        offset += limit;
-
-        releases = await getReleasePage(api, limit, offset);
-        await saveReleases(releases.albums.items, username);
-    }
+    releases = await getReleasePage('us');
+    await saveReleases(releases, username);
 }
 
 /**
@@ -138,21 +129,16 @@ module.exports = {
             users = await helper.getUsers();
             for (username of users) {
                 await helper.connect(username);
-
-                let spotify_username = await spotify_helper.getValue('username', username);
-                if (spotify_username && spotify_username.length) {
-                    logger.log(logger.INFO, `Spotify - ${username} - get newest releases`);
-
-                    // Download and save the new releases
-                    await updateNewReleases(username);
-                    // Remove old non-matches
-                    cleanupReleases(username);
-                    // A bit arbitrary, but wait for a bit before processing the releases
-                    setTimeout(saveMatches, 30000, username);
-                }
+                    
+                // Download and save the new releases
+                await updateNewReleases(username);
+                // Remove old non-matches
+                cleanupReleases(username);
+                // A bit arbitrary, but wait for a bit before processing the releases
+                setTimeout(saveMatches, 30000, username);
             }
         } catch (ex) {
-            logger.log(logger.ERROR, `spotify releases`, ex);
+            logger.log(logger.ERROR, `itunes releases`, ex);
         }
     },
 }

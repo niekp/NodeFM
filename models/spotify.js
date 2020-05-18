@@ -1,5 +1,4 @@
 const SpotifyWebApi = require('spotify-web-api-node');
-const database = require('../db')
 const spotify_helper = require('./spotify_helper')
 const cache_helper = require('./cache_helper');
 const logger = require('./logger');
@@ -301,18 +300,4 @@ var self = module.exports = {
 		});
 	},
 
-	getReleases: function(req, res) {
-		return new Promise((resolve, reject) => {
-			let extra_query = '';
-			if (this.getFilter(req)['album-only'] == true) {
-				extra_query = " AND type = 'album'";
-			}
-
-			database.executeQuery(`SELECT artist, album, type, release_date FROM Releases WHERE match = 1 ${extra_query} GROUP BY artist, album, type, release_date ORDER BY release_date DESC`, res.locals.username).then(function (releases) {
-				resolve(releases);
-			}).catch(function(ex) {
-				reject(ex);
-			})
-		});
-	}
 }

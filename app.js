@@ -21,6 +21,7 @@ const indexRouter = require('./routes/index'),
 	statsRouter = require('./routes/stats'),
 	settingsRouter = require('./routes/settings'),
 	spotifyRouter = require('./routes/spotify'),
+	releasesRouter = require('./routes/releases'),
 	libraryRouter = require('./routes/library'),
 	searchRouter = require('./routes/search')
 
@@ -84,6 +85,7 @@ app.use('/security', securityRouter);
 app.use('/settings', settingsRouter);
 app.use('/stats', statsRouter);
 app.use('/spotify', spotifyRouter);
+app.use('/releases', releasesRouter);
 app.use('/library', libraryRouter);
 app.use('/search', searchRouter);
 
