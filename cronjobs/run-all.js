@@ -13,7 +13,7 @@ process.on('unhandledRejection', (reason, p) => {
 });
 
 // 2. Timeline
-require('./timeline').run();
+require('./itunes-releases').run();
 //require('./spotify-metadata').run();
 //require('./images-helperfields').run();
 
