@@ -6,21 +6,17 @@ const request = require("request");
 
 /**
  * Get the new releases from the itunes API
- * @param {string} country 
+ * @param {string} url 
  */
-function getReleasePage(country) {
+function getReleasePage(url) {
     return new Promise((resolve, reject) => {
-        let cache_key = 'new_releases_' + country;
+        let cache_key = 'new_releases_' + url;
         let cache_expire = cache_helper.getExpiresSeconds('hour');
 
         cache_helper.get(cache_key).then(function (result) {
             resolve(result);
         }).catch(function() {
-            if (!country) {
-                country = 'us';
-            }
-
-            request.get('https://rss.itunes.apple.com/api/v1/' + country + '/apple-music/new-releases/all/100/explicit.json', (error, response, body) => {
+            request.get(url, (error, response, body) => {
                 let json = JSON.parse(body);
                 cache_helper.save(cache_key, json.feed.results, cache_expire, 'json');
                 resolve(json.feed.results);
@@ -76,11 +72,18 @@ async function saveReleases(items, username) {
  * @param {string} username 
  */
 async function updateNewReleases(username) {
-    var releases = await getReleasePage('nl');
+    var releases = await getReleasePage('https://rss.itunes.apple.com/api/v1/nl/apple-music/coming-soon/all/100/explicit.json');
     await saveReleases(releases, username);
 
-    releases = await getReleasePage('us');
+    releases = await getReleasePage('https://rss.itunes.apple.com/api/v1/us/apple-music/coming-soon/all/100/explicit.json');
     await saveReleases(releases, username);
+
+    releases = await getReleasePage('https://rss.itunes.apple.com/api/v1/nl/itunes-music/new-music/all/100/explicit.json');
+    await saveReleases(releases, username);
+
+    releases = await getReleasePage('https://rss.itunes.apple.com/api/v1/us/itunes-music/new-music/all/100/explicit.json');
+    await saveReleases(releases, username);
+//
 }
 
 /**
