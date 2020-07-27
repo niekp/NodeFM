@@ -64,7 +64,7 @@ module.exports = {
      * @returns {string} cache-key
      */
     getCacheName: function(req, res) {
-        return res.locals.username + '/' + req.url + '/' + (req.xhr ? 'ajax/' : '') + JSON.stringify(req.params) + '/' + JSON.stringify(req.query) + JSON.stringify(req.cookies['filter']);
+        return res.locals.username + '/' + req.path + '/' + (req.xhr ? 'ajax/' : '') + JSON.stringify(req.params) + '/' + JSON.stringify(req.query) + JSON.stringify(req.cookies['filter']);
     },
 
     /**
