@@ -113,15 +113,13 @@ module.exports = {
 
 					let start, end, current;
 
-					if (!period[0]['start'] || !period[0]['end']) {
-						done = true;
-					} else {
+					if (period[0]['start'] && period[0]['end']) {
 						start = period[0]['start'];
 						end = period[0]['end'];
 						current = start;
 					}
 
-					while (true) {
+					while (true && current) {
 						// Setup this period
 						let year = current.split('-')[0];
 						let month = current.split('-')[1];
