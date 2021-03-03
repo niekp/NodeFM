@@ -19,7 +19,7 @@
     "moment": "^2.24.0",
     "node-cron": "^2.0.3",
     "nodebrainz": "2.1.1",
-    "pug": "^2.0.4",
+    "pug": "^3.0.1",
     "shelljs": "^0.8.3",
     "spotify-web-api-node": "^4.0.0",
     "sqlite3": "^4.1.1",
